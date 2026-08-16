@@ -526,14 +526,6 @@ services:
     networks:
       ailab:
         ipv4_address: 172.30.0.82
-  evasion-hub:
-    build: ./apps/evasion-hub
-    container_name: nimble-evasion-hub
-    ports:
-      - "5043:5043"
-    networks:
-      ailab:
-        ipv4_address: 172.30.0.83
   # ============ EMBEDDING ATTACKS — VECTOR DB ============
   weaviate-db:
     image: cr.weaviate.io/semitechnologies/weaviate:1.24.10
@@ -660,62 +652,6 @@ services:
     networks:
       ailab:
         ipv4_address: 172.30.0.191
-  cloud-iam-escalation:
-    build: ./apps/cloud-iam-escalation
-    container_name: nimble-cloud-iam
-    ports:
-      - "5027:5027"
-    networks:
-      ailab:
-        ipv4_address: 172.30.0.81
-  cloud-credential-hunt:
-    build: ./apps/cloud-credential-hunt
-    container_name: nimble-cred-hunt
-    ports:
-      - "5028:5028"
-    networks:
-      ailab:
-        ipv4_address: 172.30.0.195
-  cloud-exposed-endpoints:
-    build: ./apps/cloud-exposed-endpoints
-    container_name: nimble-exposed-ep
-    ports:
-      - "5029:5029"
-    networks:
-      ailab:
-        ipv4_address: 172.30.0.197
-  k8s-recon-lab:
-    build: ./apps/k8s-recon-lab
-    container_name: nimble-k8s-recon
-    ports:
-      - "5030:5030"
-    networks:
-      ailab:
-        ipv4_address: 172.30.0.199
-  k8s-sa-token-lab:
-    build: ./apps/k8s-sa-token-lab
-    container_name: nimble-k8s-sa
-    ports:
-      - "5031:5031"
-    networks:
-      ailab:
-        ipv4_address: 172.30.0.201
-  k8s-sidecar-lab:
-    build: ./apps/k8s-sidecar-lab
-    container_name: nimble-k8s-sidecar
-    ports:
-      - "5032:5032"
-    networks:
-      ailab:
-        ipv4_address: 172.30.0.203
-  gpu-escape-lab:
-    build: ./apps/gpu-escape-lab
-    container_name: nimble-gpu-escape
-    ports:
-      - "5033:5033"
-    networks:
-      ailab:
-        ipv4_address: 172.30.0.205
   # ============ THREAT MODELING ============
   threat-modeling:
     build: ./apps/threat-modeling
