@@ -27,7 +27,7 @@ then build and start everything. Once done, open: **http://localhost:8080**
 
 ## Scripts
 
-### Linux / macOS (bash)
+### Linux (bash)
 
 | Script | What it does |
 |---|---|
