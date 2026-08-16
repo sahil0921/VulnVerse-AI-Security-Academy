@@ -91,4 +91,4 @@ full wizard.
 
 ## License
 
-MIT (or whichever license you choose)
+MIT License — Copyright (c) 2026 Sahil
