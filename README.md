@@ -1,15 +1,17 @@
 # VulnVerse AI Security Academy
 
 A structured, hands-on AI security learning platform — Prompt Injection, RAG Security,
-AI Agent Security, MCP Security, AI Evasion, and 13 modules from beginner to advanced.
+AI Agent Security, MCP Security, AI Evasion, and 14 modules from beginner to advanced.
 
-> ⚠️ **Educational/research use only.** The vulnerable labs included here (RAG chatbot,
-> recon targets, etc.) should not be exposed to the public internet.
+
+
+
+
 
 ## Requirements
 
 - Docker Engine + Docker Compose v2 (check with `docker compose version`)
-- [Ollama](https://ollama.com) if using local models, OR an API key from a cloud LLM provider
+- https://ollama.com if using local models, OR an API key from a cloud LLM provider
 - A few GB of free disk space (images + models)
 
 ## Quick Start
@@ -85,54 +87,7 @@ DATA_PATH=./data                                                # where lab data
 Use `./change.sh` (or `.\change.ps1`) any time to update these without re-running the
 full wizard.
 
-**Never commit `.env`** — it contains your API key.
-Only `.env.example` (placeholder values) belongs in the repo.
 
-## Moving the lab to another drive (low on C: / system drive space)
-
-There are two different things that take up space, and each is moved differently:
-
-### 1. Lab data (DB, uploaded files, logs) — per-project, easy to move
-
-Use option 7 in `./change.sh` / `.\change.ps1` to set `DATA_PATH` to any folder on
-any drive (e.g. `D:\vulnverse-data`). For this to actually take effect, the volume
-sections in `docker-compose.yml` need to reference `${DATA_PATH}` instead of a
-hardcoded relative path, e.g.:
-
-```yaml
-volumes:
-  - ${DATA_PATH}/db:/var/lib/postgresql/data
-  - ${DATA_PATH}/uploads:/app/uploads
-```
-
-After changing `DATA_PATH`, copy any existing data over manually, then run
-`./resume.sh` (or `.\resume.ps1`) to recreate containers pointing at the new path.
-
-### 2. Docker images / build cache — this is the big one, and it's global
-
-The Docker images themselves (base images, model layers, build cache) are usually
-the largest chunk of space for an AI lab like this, and Docker does **not** support
-storing a single project's images separately — all images/containers across every
-project on your machine share one storage location.
-
-To move that (frees up the most space) on **Windows (Docker Desktop with WSL2 — the default)**:
-
-1. Quit Docker Desktop.
-2. Open PowerShell and check your WSL distro name: `wsl --list -v` (usually `docker-desktop-data`).
-3. Export it: `wsl --export docker-desktop-data D:\wsl-backup\docker-data.tar`
-4. Unregister the old one: `wsl --unregister docker-desktop-data`
-5. Re-import it to the new drive: `wsl --import docker-desktop-data D:\wsl\docker-desktop-data D:\wsl-backup\docker-data.tar --version 2`
-6. Restart Docker Desktop — it will now use the new location.
-
-**Or, simpler:** Docker Desktop → Settings → Resources → Advanced → change the
-"Disk image location" field directly (Docker Desktop handles the move for you).
-
-⚠ Back up before doing this — moving Docker's storage incorrectly can lose existing
-images/containers from other projects too.
-
-> If you're running this on Kali/Linux inside a VM instead, just assign the VM's
-> virtual disk to a larger drive at the hypervisor level (VirtualBox/VMware settings) —
-> no in-VM storage move needed.
 
 ## License
 
