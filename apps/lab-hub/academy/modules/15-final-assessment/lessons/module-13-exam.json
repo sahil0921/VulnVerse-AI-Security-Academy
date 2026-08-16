@@ -1,0 +1,1107 @@
+{
+  "slug": "module-13-exam",
+  "title": "Exam: Threat Modeling",
+  "type": "quiz",
+  "questions": [
+    {
+      "q": "What is threat modeling, in the simplest possible terms?",
+      "options": [
+        "A compliance checkbox completed once before a product ships",
+        "A technique for building AI models that are resistant to adversarial input",
+        "Organized worrying turned into an action plan — structured, proactive thinking about what can go wrong in a system",
+        "A synonym for penetration testing, where you actively attack a running system"
+      ],
+      "answer": 2,
+      "explanation": "Threat modeling is structured, proactive thinking — you imagine the attack before it happens so you can prevent it, turning organized worrying into an actionable plan."
+    },
+    {
+      "q": "Which of the four core threat modeling questions asks you to find threats by thinking like an attacker?",
+      "options": [
+        "Did we do a good job?",
+        "What are we building?",
+        "What can go wrong?",
+        "What are we going to do about it?"
+      ],
+      "answer": 2,
+      "explanation": "The second of the four core questions — 'What can go wrong?' — is where you put on the attacker's mindset and enumerate potential threats."
+    },
+    {
+      "q": "Why is threat modeling considered 'far cheaper' than discovering flaws after a product launches?",
+      "options": [
+        "A design flaw caught in a whiteboard session costs an hour of discussion; the same flaw found after launch can cost a data breach, legal fees, and lost customer trust",
+        "Because post-launch fixes only require updating a configuration file",
+        "Because regulatory fines for discovered flaws are always small and predictable",
+        "Because developers are paid hourly and whiteboard time is unpaid"
+      ],
+      "answer": 0,
+      "explanation": "The cost curve is the module's central economic argument — fixing on paper is almost free, while fixing in production is expensive in time, money, and reputation."
+    },
+    {
+      "q": "What is the 'attacker's mindset,' as applied during threat modeling?",
+      "options": [
+        "Asking how a feature could be made to work against its own owner, rather than just asking how to make it work for its users",
+        "Thinking like a defender who wants to block every possible input",
+        "Assuming every user is malicious and logging all requests permanently",
+        "Focusing exclusively on cryptographic weaknesses in network protocols"
+      ],
+      "answer": 0,
+      "explanation": "The attacker's mindset flips the engineer's question — instead of 'how does this feature work?', you ask 'how can I make this feature work against its owner?'"
+    },
+    {
+      "q": "Why is the phrase 'you cannot defend what you have not mapped' central to threat modeling?",
+      "options": [
+        "You can only protect what you know exists and understand — without a map of the system, you have no way to place controls where they're actually needed",
+        "Because regulators require a physical diagram before approving any security audit",
+        "This is a figurative phrase with no practical meaning for security work",
+        "Because defense requires a physical map of the data center printed on paper"
+      ],
+      "answer": 0,
+      "explanation": "This captures the fundamental dependency: threat modeling provides the map that makes all downstream defensive work possible."
+    },
+    {
+      "q": "What is target reconstruction?",
+      "options": [
+        "Building an accurate picture of a system from scattered fragments of intelligence, rather than being given a finished blueprint",
+        "The process of restoring a deleted backup to its original state",
+        "A technique for rebuilding a model's training dataset after it has been corrupted",
+        "Reverting a system to a previous known-good configuration after a breach"
+      ],
+      "answer": 0,
+      "explanation": "Target reconstruction is detective work — assembling a map of the target from fragments (scoping docs, OSINT, recon) rather than receiving a finished architecture diagram."
+    },
+    {
+      "q": "What is the difference between passive and active intelligence in target reconstruction?",
+      "options": [
+        "Passive intelligence only includes publicly available job postings and nothing else",
+        "Passive is collected without touching the target (quiet); active requires interacting with the target (richer but noisier and detectable)",
+        "Active intelligence requires physical access to the target's server room",
+        "Passive intelligence is always less accurate than active intelligence regardless of the source"
+      ],
+      "answer": 1,
+      "explanation": "The key distinction is touch — passive gathers information without interaction (OSINT, job posts, DNS), while active involves directly probing the target and risking detection."
+    },
+    {
+      "q": "In the Sentri reconstruction example, what does the job posting mentioning 'vector databases, model registry, and container orchestration' represent?",
+      "options": [
+        "An active reconnaissance finding that required direct interaction with the target's network",
+        "A scope constraint set by the client limiting what tools may be used",
+        "A passive intelligence clue that produces a hypothesis about the platform's technology stack, which must still be validated",
+        "A confirmed fact about the system's exact architecture that needs no further verification"
+      ],
+      "answer": 2,
+      "explanation": "A job posting is passive OSINT that generates a hypothesis — it hints at the technology stack without confirming it. Active probing later turns these hints into validated facts."
+    },
+    {
+      "q": "What important discovery came from probing the vector database with a simple unauthenticated curl request during Sentri reconstruction?",
+      "options": [
+        "The request was blocked with a 401 error, confirming authentication was properly configured",
+        "The database responded with collection names and no credentials — confirming it was completely unauthenticated, which is a major finding not previously known",
+        "The database revealed the complete source code of the orchestrator component",
+        "The database confirmed it was using military-grade encryption for all stored data"
+      ],
+      "answer": 1,
+      "explanation": "This probe turned assumption A-07 (LOW confidence, UNVALIDATED) directly into VALIDATED — the database answered with full collection names without requiring any authentication."
+    },
+    {
+      "q": "What is the 'reconstruction loop' and when do you stop?",
+      "options": [
+        "A single linear process that ends the moment all questions have been answered with certainty",
+        "A process that automatically terminates after exactly 10 iterations by protocol",
+        "A repeating cycle of collect, update, question, repeat — you stop when the picture is good enough to act on, not when it's perfect",
+        "A loop that continues indefinitely regardless of how much information has been gathered"
+      ],
+      "answer": 2,
+      "explanation": "The loop is iterative by design — you never achieve perfect knowledge, but you stop when your map is clear enough to plan an attack or defense and keep refining as you go."
+    },
+    {
+      "q": "What is the single most common mistake in target reconstruction?",
+      "options": [
+        "Accepting a hypothesis as confirmed truth before you've tested it, building attacks on quicksand instead of validated knowledge",
+        "Including too many details in the assumption register, making it hard to read",
+        "Labeling every finding with LOW confidence regardless of the actual source quality",
+        "Skipping the active reconnaissance phase entirely to avoid being detected"
+      ],
+      "answer": 0,
+      "explanation": "This is called the single most common error in reconstruction — confusing an untested hypothesis with confirmed knowledge leads to wasted effort on paths that don't actually exist."
+    },
+    {
+      "q": "What is an assumption register?",
+      "options": [
+        "A legal document listing the terms and conditions of a penetration test engagement",
+        "A database of known vulnerabilities cross-referenced with their CVSS scores",
+        "A list of tools the tester is authorized to use during an assessment",
+        "A structured table that tracks every guess with its observation, hypothesis, confidence level, source, and validation status"
+      ],
+      "answer": 3,
+      "explanation": "An assumption register is the threat modeler's lab notebook — it tracks every hypothesis so you never confuse a guess with a fact."
+    },
+    {
+      "q": "What do the two most important columns in an assumption register represent?",
+      "options": [
+        "Priority (how urgently it needs testing) and Severity (how bad it would be if true)",
+        "Date (when the assumption was first recorded) and Owner (who is responsible for verifying it)",
+        "Tool (which tool to use for verification) and Timeline (when testing is scheduled)",
+        "Confidence (how sure you are about the source) and Status (whether the assumption has been tested and what the result was)"
+      ],
+      "answer": 3,
+      "explanation": "Confidence and Status together tell you at a glance what you actually know versus what you merely suspect — they are the core of the register's purpose."
+    },
+    {
+      "q": "Why is assumption A-07 ('vector DB may be unauthenticated') rated LOW confidence with source 'absence of evidence'?",
+      "options": [
+        "Because the assumption turned out to be wrong when later tested",
+        "Because absence of evidence is always stronger evidence than a positive sighting would be",
+        "Because LOW confidence is automatically assigned to all assumptions before any reconnaissance begins",
+        "Because the documents never said the database WAS unauthenticated — it was assumed from the absence of any mention of authentication, which is not the same as proof of weakness"
+      ],
+      "answer": 3,
+      "explanation": "The module makes a critical point: 'I haven't seen a lock' is not proof of 'there is no lock.' Absence of information earns only LOW confidence, not confirmation of a vulnerability."
+    },
+    {
+      "q": "What determines an assumption's confidence rating?",
+      "options": [
+        "The length of time the assumption has been in the register without being verified",
+        "The number of other assumptions that depend on this one being true",
+        "The reliability of the source it comes from, rated coldly without regard to how exciting the vulnerability would be if true",
+        "How much the tester wants the assumption to be correct based on its potential impact"
+      ],
+      "answer": 2,
+      "explanation": "Confidence reflects source quality, not wishful thinking — a note from the client's own documentation earns HIGH confidence regardless of whether its implications are exciting."
+    },
+    {
+      "q": "What does it mean when an assumption is marked INVALIDATED, and is that a failure?",
+      "options": [
+        "The assumption was confirmed to be true but decided not to pursue for scoping reasons",
+        "The assumption was removed from the register because it was judged to be unimportant",
+        "The assumption cannot be tested within the current engagement's rules of engagement",
+        "The assumption was tested and disproven — and this is not a failure, since a disproven assumption often teaches something new and may spawn a revised hypothesis"
+      ],
+      "answer": 3,
+      "explanation": "INVALIDATED is a valuable outcome — it corrects your map and often reveals new information that spawns a better hypothesis, which is exactly what reconstruction is for."
+    },
+    {
+      "q": "What are 'chained assumptions' and why do they matter?",
+      "options": [
+        "One assumption that depends on another being true — they build the skeleton of attack paths, and if a foundational assumption fails, all downstream assumptions collapse too",
+        "Assumptions that have been verified in sequence, one after another",
+        "Assumptions added by different team members during the same work session",
+        "Assumptions that reference the same piece of evidence from multiple angles"
+      ],
+      "answer": 0,
+      "explanation": "Chained assumptions model how attack steps build on each other — they're the skeleton of escalation paths, making it crucial to test foundational assumptions first."
+    },
+    {
+      "q": "What are crown jewels, in the context of threat modeling?",
+      "options": [
+        "Any asset that is publicly known to exist within the target organization",
+        "The first three assets found during the initial reconnaissance phase",
+        "The assets whose loss causes the most harm or grants an attacker the most power — the top of a sorted asset list",
+        "The most technically complex components of an AI system's architecture"
+      ],
+      "answer": 2,
+      "explanation": "Crown jewels are the masterpieces in the museum analogy — the few irreplaceable, highest-value assets that security effort should cluster around."
+    },
+    {
+      "q": "What AI-specific asset type is described as being 'easy to overlook' but extremely valuable to attackers?",
+      "options": [
+        "Tool schemas — because they are documented publicly by every AI platform",
+        "System prompts — because they are always visible to end users and easily extracted",
+        "Detection rules — because they reveal exactly what is monitored, teaching an attacker precisely how to move without triggering alarms",
+        "Model weights — because they are the largest files and therefore most valuable by size"
+      ],
+      "answer": 2,
+      "explanation": "Detection rules are counterintuitive crown jewels — defensive information that, once known to an attacker, tells them exactly how to operate stealthily."
+    },
+    {
+      "q": "What is the key question for ranking crown jewels by offensive value?",
+      "options": [
+        "How long ago was this asset last accessed by a legitimate user?",
+        "How many defenses currently protect this specific asset?",
+        "How large is the file or database containing this asset?",
+        "How much power does this asset give an attacker, and how reachable is it right now?"
+      ],
+      "answer": 3,
+      "explanation": "The two ranking dimensions are power (what does access enable?) and reachability (is the path clear now or blocked by many barriers?) — both must be considered together."
+    },
+    {
+      "q": "In the Sentri crown jewels ranking, why does the detection rules collection (#2) get grabbed BEFORE the cloud credentials (#1), even though credentials are ranked higher?",
+      "options": [
+        "Because detection rules are listed first alphabetically in the vector database",
+        "Because detection rules are always more valuable than cloud credentials in any scenario",
+        "Detection rules are reachable immediately (unauthenticated DB) and knowing them helps reach the credentials more quietly — accessible assets that provide intelligence serve the deeper target",
+        "Because the engagement rules prohibit accessing credentials before other assets"
+      ],
+      "answer": 2,
+      "explanation": "This illustrates the reachability dimension — a lower-ranked but immediately accessible asset that provides intelligence to reach the top-ranked asset becomes the first practical move."
+    },
+    {
+      "q": "How does business context change crown jewels ranking, beyond technical power alone?",
+      "options": [
+        "The business's specific risk — what would hurt them most — can elevate an asset's effective rank even if its technical power is moderate",
+        "Only technical power matters; business concerns are for executives, not security engineers",
+        "Business context never changes technical rankings and the two should always be kept completely separate",
+        "Business context only matters for assets containing personal data subject to GDPR"
+      ],
+      "answer": 0,
+      "explanation": "Technical power alone is half the ranking — a patient's medical record at a healthcare company may rank higher than a more technically powerful credential because of the catastrophic business impact of its exposure."
+    },
+    {
+      "q": "What is a trust boundary?",
+      "options": [
+        "The encryption used to protect data at rest in a database",
+        "A contractual agreement between two organizations about data handling",
+        "Any line in a system where one component accepts input or instructions from another without independently verifying them",
+        "A physical network firewall rule blocking traffic between subnets"
+      ],
+      "answer": 2,
+      "explanation": "Trust boundaries are where trust was assumed rather than verified — and wherever trust is assumed, an attacker can abuse it."
+    },
+    {
+      "q": "What is the fundamental difference between a policy-based boundary and an inference-based boundary?",
+      "options": [
+        "A policy-based boundary is enforced by a fixed rule (like a login check); an inference-based boundary is enforced by the AI's judgment, which can be changed with words",
+        "Inference-based boundaries are always stronger than policy-based ones because they use AI",
+        "Policy-based boundaries only exist at network perimeters, while inference-based ones exist inside applications",
+        "There is no meaningful difference — both types provide equivalent security guarantees"
+      ],
+      "answer": 0,
+      "explanation": "This is the heart of AI threat modeling — policy boundaries are bypassed by stolen tokens, while inference boundaries are bypassed by clever language (prompt injection)."
+    },
+    {
+      "q": "In the Sentri trust boundary table, TB-3 (Agents → Vector DB) has 'None — unauthenticated' as its enforcement. What real risk does this create?",
+      "options": [
+        "This means the vector database is encrypted and inaccessible to any component",
+        "This means only the Triage Agent can read from the vector database",
+        "Every agent blindly trusts whatever the knowledge base says is true, so any attacker who can write to it makes every agent repeat the lie",
+        "This is a normal, expected configuration for all knowledge retrieval systems"
+      ],
+      "answer": 2,
+      "explanation": "An unauthenticated trust boundary means the model's poison enters the reasoning pipeline unrestricted — any agent will retrieve and act on adversarial content planted there."
+    },
+    {
+      "q": "Why does the nightclub analogy help explain trust zones?",
+      "options": [
+        "Because nightclubs are the most common place for data breaches to occur",
+        "Because the analogy shows that physical security is always more important than network security",
+        "Because nightclub bouncers use the same credential-checking technology as enterprise IAM systems",
+        "Outside the door, everyone is checked; once inside, people move freely — an attacker who slips past the bouncer (the boundary) gets all the freedom of the inside"
+      ],
+      "answer": 3,
+      "explanation": "The analogy captures how trust zones work — once inside the zone, internal components trust each other, making the boundary checkpoint the critical security moment."
+    },
+    {
+      "q": "What is TB-6 in the Sentri boundary table (Triage Agent → Orchestrator), and why is it dangerous?",
+      "options": [
+        "It's a firewall rule that blocks all traffic from external sources to the orchestrator",
+        "It's a strongly authenticated TLS-encrypted channel that represents the most secure link in the system",
+        "It's the boundary where user authentication first occurs, serving as the system's main entry point",
+        "It's an inference-based boundary with no fixed enforcement — if a crafted alert fools the Triage Agent into calling something 'critical,' the whole downstream workflow reacts with no policy check stopping it"
+      ],
+      "answer": 3,
+      "explanation": "TB-6 is a classic inference-based boundary — the AI's classification judgment drives a real operational decision, and that judgment can be manipulated with crafted input."
+    },
+    {
+      "q": "What is an 'entry point' in the context of trust boundary mapping?",
+      "options": [
+        "Any network port that is open on a server within the target environment",
+        "The first component built when an AI system is initially developed",
+        "The main login page of a web application used to authenticate users",
+        "A specific place where untrusted input first crosses into the system from the outside"
+      ],
+      "answer": 3,
+      "explanation": "Entry points mark where untrusted external data first enters the system — in Sentri, TB-1 (user input to orchestrator) is the primary entry point."
+    },
+    {
+      "q": "Where do the most dangerous attack paths flow — through strong, well-enforced boundaries or through gaps where trust was never enforced?",
+      "options": [
+        "The most dangerous attack paths flow through gaps where trust was never enforced, not through strong walls that were beaten",
+        "Trust boundaries should only be mapped after all crown jewels have been fully identified and ranked",
+        "The strongest possible wall is always an authentication layer backed by hardware security modules",
+        "Every trust boundary should be protected by a minimum of three independent controls"
+      ],
+      "answer": 0,
+      "explanation": "This is the unifying insight of the trust boundaries lesson — attackers don't crack strong walls, they flow through unenforced assumptions like water through gaps."
+    },
+    {
+      "q": "What is an escalation path?",
+      "options": [
+        "A career advancement plan for security professionals seeking promotion",
+        "A step-by-step chain of trust-boundary crossings that moves an attacker from an initial foothold to a crown jewel",
+        "A network routing path between two components that has been optimized for speed",
+        "The process by which a security incident is escalated to senior management"
+      ],
+      "answer": 1,
+      "explanation": "An escalation path is the burglar's sequence — each step builds on the last, crossing one trust boundary at a time, from foothold to objective."
+    },
+    {
+      "q": "What are the five standard parts of an escalation path?",
+      "options": [
+        "Starting point, steps, dependencies, objective, and detection risk",
+        "Attacker, victim, tool, timeline, and impact",
+        "Asset, boundary, control, monitoring, and residual risk",
+        "Reconnaissance, access, escalation, exfiltration, and cleanup"
+      ],
+      "answer": 0,
+      "explanation": "These five components make an escalation path fully specified — omitting any one leaves you either without a starting point, without understanding blockers, or without knowing the risk of being caught."
+    },
+    {
+      "q": "Why is Path 2 (knowledge poisoning) in the Sentri example described as having 'a clever advantage' over Path 1 (direct tool abuse)?",
+      "options": [
+        "Path 2 is completely undetectable by any monitoring system under all circumstances",
+        "Path 2 works without needing any agent identity token whatsoever",
+        "Path 2 requires fewer total boundary crossings than Path 1",
+        "In Path 2 the agent itself generates the tool request based on poisoned context, making it look like normal activity rather than an attacker crafting a suspicious malicious request directly"
+      ],
+      "answer": 3,
+      "explanation": "Poisoning the agent's context means the final malicious tool call looks like a normal, agent-generated request — it hides in legitimate activity rather than standing out as attacker-crafted."
+    },
+    {
+      "q": "What is a 'support path' and why is Path 3 (intelligence extraction) executed first in the Sentri example?",
+      "options": [
+        "A path reserved for use only when all primary paths have already been exhausted",
+        "A path that only an AI model can execute autonomously without human guidance",
+        "A path that provides technical support to other team members during the engagement",
+        "A path that gathers intelligence making other paths safer and more likely to succeed — Path 3 runs first because it's immediately executable and provides detection-rule knowledge that helps Paths 1 and 2 operate quietly"
+      ],
+      "answer": 3,
+      "explanation": "Support paths don't win engagements alone but enable other paths to succeed more reliably — knowing detection rules tells you exactly how to move quietly toward the real objective."
+    },
+    {
+      "q": "What is an attack tree, and how does it benefit defenders?",
+      "options": [
+        "A log file that records the sequence of an attacker's actual steps during a breach",
+        "A penetration testing tool that automatically discovers network vulnerabilities",
+        "A diagram showing multiple paths to one goal — defenders benefit because cutting a shared node that multiple paths depend on can block several attacks simultaneously",
+        "A hierarchical catalog of all possible cyberattacks sorted by technical difficulty"
+      ],
+      "answer": 2,
+      "explanation": "Attack trees visualize alternative attack routes — defenders can identify shared dependencies (nodes) and disable them, blocking multiple paths with a single control."
+    },
+    {
+      "q": "What is a dependency gate, and why might learning that an escalation path is blocked still be valuable?",
+      "options": [
+        "A testing requirement that must be satisfied before a finding can be formally reported",
+        "A dependency that must be true for a path to work, tested before committing to the path — learning a path is closed is a win because it saves wasted effort and often reveals new intelligence",
+        "A dependency that automatically closes a path when detected by the monitoring system",
+        "A firewall rule that must be bypassed before any escalation path can proceed"
+      ],
+      "answer": 1,
+      "explanation": "Testing dependencies before committing to a path avoids wasting days on approaches that won't work — and a failed gate usually teaches something useful about the target's architecture."
+    },
+    {
+      "q": "What is a kill chain, and how does it relate to escalation paths?",
+      "options": [
+        "A list of vulnerabilities ranked from most to least exploitable in a target environment",
+        "A defensive framework for eliminating threats before they reach production systems",
+        "A synonym for escalation path used when presenting findings to non-technical executives",
+        "A zoomed-out view of the full attack from first contact to final objective — escalation paths provide the detailed technical steps within the kill chain's middle stages"
+      ],
+      "answer": 3,
+      "explanation": "Kill chains give the narrative story (Recon → Access → Escalation → Lateral → Objective); escalation paths give the technical detail of individual stages."
+    },
+    {
+      "q": "What is MITRE ATLAS?",
+      "options": [
+        "A cloud-based platform for deploying large language models at enterprise scale",
+        "A shared taxonomy of AI and machine-learning-specific attack techniques, each with a unique AML.T#### identifier",
+        "A scoring system for rating the severity of AI-related security vulnerabilities",
+        "The official regulatory framework for AI data privacy in the European Union"
+      ],
+      "answer": 1,
+      "explanation": "ATLAS is a shared dictionary of AI attack techniques with standardized IDs, allowing precise communication across teams and organizations."
+    },
+    {
+      "q": "What is the key structural difference between MITRE ATT&CK and MITRE ATLAS?",
+      "options": [
+        "ATT&CK contains AI-specific techniques while ATLAS covers only network infrastructure attacks",
+        "ATT&CK covers traditional IT attacks; ATLAS covers AI and ML-specific attacks — a complete AI attack chain often requires both catalogs",
+        "ATLAS completely replaces ATT&CK for any organization deploying AI systems",
+        "ATT&CK is maintained by the US government; ATLAS is maintained by private industry"
+      ],
+      "answer": 1,
+      "explanation": "The catalogs are complementary — ATLAS handles the AI-specific stages of an attack, while ATT&CK covers what happens to the surrounding traditional infrastructure during the same attack chain."
+    },
+    {
+      "q": "In ATLAS terminology, what is the difference between a tactic and a technique?",
+      "options": [
+        "There is no meaningful distinction — the two terms are used interchangeably throughout ATLAS",
+        "A tactic is the attacker's goal at a stage (the why); a technique is a specific method used to achieve that goal (the how)",
+        "A tactic applies only to AI model attacks; a technique applies only to infrastructure attacks",
+        "A tactic is an advanced, high-sophistication attack; a technique is a simpler, low-sophistication variation"
+      ],
+      "answer": 1,
+      "explanation": "Tactics describe what the attacker is trying to accomplish at a given stage; techniques describe the specific means used to accomplish it — this goal/method pairing organizes the entire taxonomy."
+    },
+    {
+      "q": "Why does the ATLAS mapping table include 'if applicable' tags on several entries for Sentri?",
+      "options": [
+        "Because ATLAS requires a probationary period before any technique can be marked as definitively applicable",
+        "Several techniques depend on assumptions that haven't been validated yet — an 'if applicable' tag stays until the precondition is confirmed with high confidence",
+        "Because 'if applicable' is ATLAS's standard notation for techniques that have never been observed in the wild",
+        "Because these techniques are only applicable when the attacker has physical access to the data center"
+      ],
+      "answer": 1,
+      "explanation": "The 'if' tag maintains honesty — a technique only enters the active plan when its preconditions are validated, just like assumptions in the register."
+    },
+    {
+      "q": "How does ATLAS mapping evolve as an engagement progresses?",
+      "options": [
+        "The mapping automatically updates by querying the MITRE website at fixed intervals",
+        "When assumptions are validated, 'potentially applicable' techniques become 'confirmed applicable'; when assumptions are invalidated, techniques may drop off; new components bring new techniques",
+        "Techniques are only added to the map after a full breach of the target system has been completed",
+        "The mapping is completed once during pre-engagement planning and never revised after that"
+      ],
+      "answer": 1,
+      "explanation": "ATLAS mapping is a living document, parallel to the assumption register — it tracks the same evolution from hypothesis to confirmed finding."
+    },
+    {
+      "q": "How do defenders use ATLAS mapping, as opposed to attackers?",
+      "options": [
+        "Defenders don't use ATLAS — it is exclusively an attacker-focused taxonomy with no defensive applications",
+        "Defenders use ATLAS to automatically generate security patches for discovered vulnerabilities",
+        "Defenders use ATLAS only to communicate findings to regulatory bodies after an incident",
+        "Defenders map applicable techniques to their existing controls and detections, building a matrix that reveals which techniques are covered and which represent gaps requiring new controls"
+      ],
+      "answer": 3,
+      "explanation": "The same ATLAS mapping serves both sides — attackers plan with it, defenders build detection matrices from it, finding which technique-and-control pairs are covered and which represent holes."
+    },
+    {
+      "q": "What is an intelligence brief?",
+      "options": [
+        "A technical specification document listing all components of a target AI system",
+        "A structured, versioned snapshot of everything currently known, assumed, constrained, and planned for an engagement — the document that ties all threat modeling artifacts together",
+        "A summary report written exclusively for executive audiences after an engagement concludes",
+        "A legal document authorizing a penetration test to proceed within defined boundaries"
+      ],
+      "answer": 1,
+      "explanation": "The intelligence brief is the living operational document that combines all prior skills — reconstruction, assumptions, crown jewels, boundaries, paths — into one shared, actionable view."
+    },
+    {
+      "q": "What three things does a strong intelligence brief clearly separate?",
+      "options": [
+        "What you know (validated facts), what you assume (unvalidated hypotheses), and what blocks you (scope constraints)",
+        "What the attacker did, what the defender missed, and what was stolen",
+        "What you found, what it cost, and what you recommend as the single best fix",
+        "What tools were used, what findings were produced, and what the timeline was"
+      ],
+      "answer": 0,
+      "explanation": "This tripartite separation is the brief's fundamental value — it makes the team's current state of knowledge completely unambiguous to every reader."
+    },
+    {
+      "q": "In the Sentri intelligence brief sample, what do the labels [OBTAINED] and [BEHIND 3 BOUNDARIES] next to crown jewels communicate?",
+      "options": [
+        "Whether the assets are encrypted or stored in plaintext in their respective locations",
+        "The alphabetical position of those assets in the overall crown jewels ranking system",
+        "The current access status — whether those assets are already in hand or still require crossing additional trust boundaries to reach",
+        "How many team members are currently working on obtaining those specific assets"
+      ],
+      "answer": 2,
+      "explanation": "These status labels give the entire team instant situational awareness — two crown jewels are already secured, while the primary target still requires overcoming three boundaries."
+    },
+    {
+      "q": "What value does version history provide in an intelligence brief?",
+      "options": [
+        "Version history is purely cosmetic, serving only to prevent conflicting edits between team members",
+        "It becomes a decision log showing how understanding evolved, documenting every assumption formed, tested, and resolved — valuable evidence of how the team reasoned under uncertainty",
+        "Version history satisfies the legal documentation requirement for authorized assessments",
+        "Version history helps the brief load faster by allowing only the latest version to be rendered"
+      ],
+      "answer": 1,
+      "explanation": "The decision log created by version history shows not just what was found, but how the team navigated ambiguity — this reasoning under uncertainty is itself a valuable deliverable to sophisticated clients."
+    },
+    {
+      "q": "Why is honesty about unknowns considered a core strength of a well-written intelligence brief?",
+      "options": [
+        "Because honesty makes briefs easier to write, saving time compared to researching every detail fully",
+        "Because brief honesty is a legal requirement under data protection regulations in most jurisdictions",
+        "Because honest briefs are required by professional certification standards for security assessors",
+        "A brief that pretends certainty where uncertainty exists actively misleads the team and creates dangerous false confidence; labeling unknowns lets the whole team make smart decisions"
+      ],
+      "answer": 3,
+      "explanation": "This is the brief's core principle — hidden uncertainty is worse than acknowledged uncertainty because it causes teams to act on false assumptions about their readiness."
+    },
+    {
+      "q": "What is 'secure design' or 'security by design'?",
+      "options": [
+        "Building security in from the start of a project rather than adding it after launch, when it is far more expensive and less effective",
+        "Designing a system so complex that attackers cannot understand it without access to documentation",
+        "A specific design pattern used exclusively for zero-trust network architectures",
+        "A compliance standard requiring security controls to be approved by an external auditor"
+      ],
+      "answer": 0,
+      "explanation": "Security by design is the architectural philosophy that security controls are cheapest and most effective when built into the initial design rather than retrofitted afterward."
+    },
+    {
+      "q": "What does 'shift-left security' mean, and what does threat modeling have to do with it?",
+      "options": [
+        "Shifting security team members from right-hand to left-hand offices for better collaboration",
+        "A technique for moving security alerts from low-priority to high-priority queues faster",
+        "Moving security work earlier in the development timeline — threat modeling is the ultimate shift-left activity because it happens on the whiteboard before any code exists",
+        "Replacing traditional firewalls with application-layer controls further inside the network"
+      ],
+      "answer": 2,
+      "explanation": "Shift-left means catching problems earlier in the development lifecycle, and threat modeling is the earliest possible security intervention — it happens on paper before coding begins."
+    },
+    {
+      "q": "In the STRIDE framework, what does the letter 'T' represent, and what is an AI-specific example?",
+      "options": [
+        "Trust — assuming a component is safe without verifying its identity or integrity",
+        "Transfer — moving data across a trust boundary without authorization from either side",
+        "Tampering — changing data or code, with a specific AI example being poisoning the vector database",
+        "Targeting — selecting a specific crown jewel as the primary objective for an attack"
+      ],
+      "answer": 2,
+      "explanation": "Tampering (T) in STRIDE covers integrity violations — for AI systems, poisoning the vector database is a direct example of tampering with the data the model relies on."
+    },
+    {
+      "q": "What does the letter 'E' stand for in STRIDE, and what is a specific AI example of this threat?",
+      "options": [
+        "Elevation of Privilege — gaining more access than allowed, with a specific example being a low-privilege agent token invoking an admin-only tool like rotate_secret",
+        "Enumeration — systematically listing components to build a complete picture of attack surface",
+        "Exposure — making sensitive configuration details visible to unauthorized components or users",
+        "Exfiltration — secretly transmitting stolen data to an external attacker-controlled location"
+      ],
+      "answer": 0,
+      "explanation": "Elevation of Privilege (E) in STRIDE is exactly what the vulnerable invoke_tool function enables — a stolen low-privilege token could invoke any tool, including privileged ones like rotate_secret."
+    },
+    {
+      "q": "What happens when all six STRIDE letters are applied to Sentri's unauthenticated vector database?",
+      "options": [
+        "Only information disclosure and tampering apply, since the other categories require network-level authentication to be relevant",
+        "Only one STRIDE category applies at a time — you cannot have multiple threats against a single component",
+        "None of the STRIDE categories apply to a vector database since STRIDE was designed for web applications",
+        "Almost every STRIDE category is triggered — spoofing (no auth), tampering (writable), repudiation (no logging), information disclosure (readable), DoS (floodable), and elevation of privilege (poisoned content steers agents)"
+      ],
+      "answer": 3,
+      "explanation": "This is the module's demonstration of why the unauthenticated database is a top-priority finding — a single component lighting up across almost every STRIDE category is a strong signal of its risk level."
+    },
+    {
+      "q": "What is PASTA, and when would you choose it over STRIDE?",
+      "options": [
+        "An automated tool that replaces manual threat modeling for systems with fewer than 10 components",
+        "A framework specifically designed for privacy threat analysis, chosen whenever personal data is involved",
+        "A lightweight 4-step checklist for quick threat enumeration, chosen for its speed over STRIDE's depth",
+        "Process for Attack Simulation and Threat Analysis — a heavyweight, business-driven 7-stage process chosen when business impact and objectives must drive the threat model from the top down"
+      ],
+      "answer": 3,
+      "explanation": "PASTA starts from business objectives and works down to technical threats, making it appropriate when business context must explicitly drive every stage of the analysis."
+    },
+    {
+      "q": "What is LINDDUN, and what type of system is it best suited for?",
+      "options": [
+        "A privacy-focused threat framework, best suited for systems that primarily handle personal data and where data privacy is the main security concern",
+        "A network-layer scanning tool for identifying open ports on target infrastructure",
+        "A logging framework for recording every system event in a structured audit-ready format",
+        "A vulnerability scoring system maintained by NIST for rating critical infrastructure weaknesses"
+      ],
+      "answer": 0,
+      "explanation": "LINDDUN is STRIDE's privacy-focused counterpart, specifically designed to enumerate privacy threats — ideal for healthcare, financial, or consumer-data systems where privacy is the primary concern."
+    },
+    {
+      "q": "What is the difference between a misuse case and an abuse case?",
+      "options": [
+        "Misuse cases only apply to AI systems; abuse cases only apply to traditional software systems",
+        "A misuse case uses a legitimate feature in a harmful way; an abuse case is a deliberate attack scenario designed purely to cause damage",
+        "There is no meaningful difference — the two terms are used interchangeably throughout the security industry",
+        "A misuse case is an unintentional user error; an abuse case is a legal violation requiring law enforcement involvement"
+      ],
+      "answer": 1,
+      "explanation": "Misuse cases represent legitimate features turned against their purpose, while abuse cases represent deliberate attacks — both help threat modelers systematically think about how systems can be exploited."
+    },
+    {
+      "q": "What is the core threat prioritization formula?",
+      "options": [
+        "Risk = CVSS Base Score + Temporal Score — using the standardized vulnerability scoring system directly",
+        "Risk = Attack Complexity ÷ Business Value — threats with simple attacks against high-value targets score highest",
+        "Risk = Severity + Exploitability + Age — a weighted sum of technical factors about the vulnerability",
+        "Risk = Likelihood × Impact — combining how probable a threat is with how badly it would hurt if realized"
+      ],
+      "answer": 3,
+      "explanation": "The fundamental prioritization formula combines probability (how likely is this?) with consequence (how bad if it happens?) to rank which threats deserve immediate attention."
+    },
+    {
+      "q": "In the risk matrix, where does the unauthenticated Sentri vector database land, and why?",
+      "options": [
+        "In the 'High' cell but not 'Critical' — because its impact is limited to information disclosure only",
+        "In the 'Low' cell — because unauthenticated databases are a well-known vulnerability with many available mitigations",
+        "In the 'Critical' cell — because it is both high likelihood (trivially exploited with no credentials required) and high impact (it leaks multiple crown jewels including detection rules)",
+        "In the 'Medium' cell — because the database only affects the agents and not the final objective of cloud credentials"
+      ],
+      "answer": 2,
+      "explanation": "Trivially exploited (no credentials) combined with leaking high-ranked crown jewels places this squarely in the Critical cell — the highest-priority finding in the engagement."
+    },
+    {
+      "q": "What is a risk register?",
+      "options": [
+        "A log of all security tools used during a penetration testing engagement",
+        "A database maintained by MITRE cataloging all publicly known vulnerabilities",
+        "A regulatory document listing all data breaches an organization has experienced",
+        "A professional deliverable that tracks each identified threat with its likelihood, impact, risk level, planned mitigation, and current handling status"
+      ],
+      "answer": 3,
+      "explanation": "The risk register is a core client deliverable — it translates threat model findings into an actionable, trackable list of risks with associated mitigations and statuses."
+    },
+    {
+      "q": "What is defense in depth, and why does it beat any single control?",
+      "options": [
+        "The practice of placing all security controls as deep inside the network as possible, away from external entry points",
+        "Using multiple independent layers of protection so that if one fails another still holds — an attacker must defeat every layer, which is dramatically harder than defeating just one",
+        "A compliance framework requiring a minimum number of security controls per data category",
+        "A budgeting strategy that allocates the largest portion of security spending to the most critical assets"
+      ],
+      "answer": 1,
+      "explanation": "Defense in depth assumes any individual control can eventually fail and compensates by requiring attackers to defeat multiple independent layers simultaneously."
+    },
+    {
+      "q": "What is a compensating control, and what does 'residual risk' mean?",
+      "options": [
+        "A compensating control is an alternative measure used when the ideal fix isn't immediately possible; residual risk is the remaining danger after all controls are applied, which the business must consciously accept",
+        "A compensating control is required whenever any finding is rated above the 'Medium' threshold in a risk matrix",
+        "Residual risk is the portion of risk that has been fully eliminated by current controls",
+        "A compensating control is a backup system that activates when the primary defense fails automatically"
+      ],
+      "answer": 0,
+      "explanation": "Compensating controls address constraints (can't do the ideal fix now) while residual risk acknowledges that zero risk is unreachable — documenting it honestly is a professional responsibility."
+    },
+    {
+      "q": "A function checks only that an agent's token is valid, but not which specific tools that agent is authorized to use. Which STRIDE letter does this demonstrate?",
+      "options": [
+        "The function fails to encrypt the token before transmitting it, demonstrating Information Disclosure (I)",
+        "The function has a buffer overflow in the params handling, demonstrating Tampering (T)",
+        "The function allows the same token to be reused multiple times, demonstrating Repudiation (R)",
+        "The function checks only that the token is valid, not what that specific agent is allowed to do — any valid token can invoke any tool, demonstrating Elevation of Privilege (E)"
+      ],
+      "answer": 3,
+      "explanation": "The vulnerable function confuses authentication ('is this a real token?') with authorization ('is this token allowed to use this specific tool?'), a classic Elevation of Privilege pattern."
+    },
+    {
+      "q": "What specific code change closes the Elevation of Privilege vulnerability in an invoke_tool function that checks only token validity?",
+      "options": [
+        "Encrypting the token using AES-256 before passing it to the function",
+        "Adding a rate limit that prevents any single token from making more than 10 calls per minute",
+        "Requiring a human administrator to manually approve each tool invocation before it executes",
+        "Adding a check that verifies tool_name is in claims['allowed_tools'], so each agent can only use the tools it was specifically scoped to access"
+      ],
+      "answer": 3,
+      "explanation": "Per-agent tool scoping means a stolen Triage Agent token can only use Triage-authorized tools — it cannot invoke privileged tools like rotate_secret regardless of how it was obtained."
+    },
+    {
+      "q": "What do the 'Golden Best Practices' say about updating the threat model over time?",
+      "options": [
+        "Make it living — update the model as the system and your knowledge change, treating it like a notebook rather than a stone tablet",
+        "Update it only when a new security incident reveals a previously unknown vulnerability",
+        "Complete the threat model once before deployment and archive it permanently as a compliance record",
+        "The threat model should be rebuilt from scratch quarterly using only freshly gathered intelligence"
+      ],
+      "answer": 0,
+      "explanation": "A threat model that isn't updated becomes dangerously stale — it should evolve continuously with the system, not sit as a one-time artifact."
+    },
+    {
+      "q": "What is the practical advice for using threat modeling frameworks like STRIDE, PASTA, and DREAD?",
+      "options": [
+        "Every professional engagement should apply all available frameworks simultaneously for maximum coverage",
+        "Don't collect frameworks like trophies — pick the one that fits your specific need, since a framework is a tool and not a religion",
+        "STRIDE and PASTA are equivalent and interchangeable, so choosing between them is purely a matter of personal preference",
+        "DREAD is the most reliable modern framework and should always be chosen first over all alternatives"
+      ],
+      "answer": 1,
+      "explanation": "Framework selection should be practical and need-driven — STRIDE for a broad pass, PASTA for business-impact-driven work, LINDDUN for privacy — not a reflexive application of every available methodology."
+    },
+    {
+      "q": "Why is 'working alone' described as a common mistake in threat modeling best practices?",
+      "options": [
+        "Different people spot different threats — developers know the code's weak spots, security engineers know attacker tricks, and product owners know what data really matters",
+        "Because threat modeling tools require multiple simultaneous users to function correctly",
+        "Because individual threat modelers are legally liable for findings they miss when working alone",
+        "Because security regulations require a minimum team size for any authorized assessment"
+      ],
+      "answer": 0,
+      "explanation": "The team perspective is irreplaceable — each role brings different knowledge that, when combined, catches threats none of them would have spotted alone."
+    },
+    {
+      "q": "In the Sentri example, assumption A-08 says the tool server has a `rotate_secret` tool and hypothesizes this means it can WRITE to the secrets manager, not just read. Why is write access more dangerous than read access?",
+      "options": [
+        "Write access only affects future sessions, not the current one being monitored",
+        "Write access is always less dangerous than read access since it doesn't expose existing data",
+        "Write and read access to a secrets manager carry identical risk in all practical scenarios",
+        "Reading a secret lets you use a credential; rotating a secret lets you overwrite it with a value you control, meaning you could set the production secret to your own chosen value"
+      ],
+      "answer": 3,
+      "explanation": "This is a subtle but critical distinction — a reader can steal credentials, but a writer can replace them, potentially locking the legitimate system out while giving the attacker full control."
+    },
+    {
+      "q": "Path 1 in the Sentri escalation paths (direct tool abuse) has two unvalidated assumptions blocking it. What are they?",
+      "options": [
+        "A-08 (whether the Action token authorizes the cloud tool) and A-11 (whether tool requests are monitored by content)",
+        "A-01 (whether the orchestrator exists) and A-02 (whether multiple agents exist)",
+        "A-07 (whether the vector DB is unauthenticated) and A-04 (whether a secrets manager exists)",
+        "A-05 (whether the tool server has at least 3 tools) and A-06 (whether a retrieval pipeline exists)"
+      ],
+      "answer": 0,
+      "explanation": "These two gates must be validated before committing to Path 1 — if the token lacks authorization or requests are monitored, the path either fails or triggers detection."
+    },
+    {
+      "q": "A threat modeler notes that an internal AI assistant allows users to paste a URL, and the assistant fetches the page to summarize it. What is the attacker's mindset view of this feature?",
+      "options": [
+        "'This is a useful summary feature with no meaningful attacker-relevant surface'",
+        "'This feature is safe because the page content is rendered in a sandbox before reaching the model'",
+        "'This feature is only risky if the user is an administrator with elevated privileges'",
+        "'I'll host a page with hidden instructions and make the assistant follow them' — this is indirect prompt injection via an SSRF-like fetch capability"
+      ],
+      "answer": 3,
+      "explanation": "This directly applies the attacker's mindset from the introduction — every convenient feature is a potential doorway, and URL-fetching is a classic indirect injection delivery mechanism."
+    },
+    {
+      "q": "A security team discovers that their AI knowledge base is writable by any internal user. Using the risk matrix, where would 'knowledge base poisoning' likely land, assuming internal users can act maliciously and the knowledge base feeds a customer-facing assistant?",
+      "options": [
+        "Low — because knowledge base poisoning requires nation-state-level sophistication to execute",
+        "Medium — because the vector database can automatically detect and reject poisoned content",
+        "Low — because internal users are always trusted and corporate policies prevent intentional misuse",
+        "High to Critical — medium-to-high likelihood (any internal user can write) combined with high impact (every customer query may repeat the planted lie)"
+      ],
+      "answer": 3,
+      "explanation": "The insider-threat likelihood combined with the customer-facing impact (scale and reputational harm of every answer being compromised) places this in the high-to-critical range of the risk matrix."
+    },
+    {
+      "q": "An assumption is labeled MEDIUM confidence with source 'OSINT — two independent hints.' A separate assumption for the same fact is labeled HIGH confidence with source 'client documentation.' Which should be treated as more reliable, and why?",
+      "options": [
+        "Neither should be trusted until a third, completely independent source confirms the same information",
+        "Both should be treated as equally reliable since they reach the same conclusion about the same fact",
+        "The HIGH confidence from client documentation — because direct documentation is a more authoritative source than inferred OSINT, regardless of how many OSINT hints exist",
+        "The MEDIUM confidence OSINT — because multiple independent hints combine to be more reliable than any single document"
+      ],
+      "answer": 2,
+      "explanation": "This tests the module's core principle about confidence — source quality determines confidence level, and first-party client documentation is inherently more authoritative than inferred OSINT."
+    },
+    {
+      "q": "A defender wants to block as many escalation paths to the cloud credentials as possible with a single control. Looking at the attack tree for Sentri, what single node do both Path 1 and Path 2 share?",
+      "options": [
+        "The step where the vector database is first queried for knowledge retrieval",
+        "The step where the tool server is called to pull credentials from the secrets manager — blocking or monitoring this specific step would force both paths to fail before reaching the crown jewel",
+        "The step where the Action Agent token is initially obtained from Kubernetes secrets",
+        "The step where the orchestrator routes a request to the Action Agent"
+      ],
+      "answer": 1,
+      "explanation": "Both paths must ultimately cross the Tool Server → Secrets Manager boundary to obtain credentials — this shared node, if broken, simultaneously blocks both approaches regardless of which path an attacker is using."
+    },
+    {
+      "q": "A company's AI agent can send emails on behalf of users. Applying abuse and misuse case thinking, what should be documented alongside the legitimate 'send summary email' use case?",
+      "options": [
+        "A misuse case where a user asks the agent to send emails impersonating someone else, and an abuse case where an attacker uses prompt injection to redirect the agent to exfiltrate data via email to an external address",
+        "Only the technical API specification of how the email-sending capability is implemented",
+        "A use case document confirming that email sending is a desirable feature for productivity enhancement",
+        "A compliance record showing the feature was approved by the legal team before launch"
+      ],
+      "answer": 0,
+      "explanation": "This applies the module's abuse/misuse case discipline — every feature that does something with real-world consequences (like sending email) needs matching threat cases that imagine it turned against its owner."
+    },
+    {
+      "q": "A tester has the Sentri brief at version 1.2 and sees 'PATH-01: Status HOLD — pending A-08 + A-11.' What is the correct interpretation of this status?",
+      "options": [
+        "Path 1 exists and has been planned but cannot be executed yet because two specific assumptions (A-08 and A-11) remain unvalidated — it will become GO if both validate successfully",
+        "Path 1 is currently being executed by another team member and is on hold pending their results",
+        "A-08 and A-11 have already been validated, confirming Path 1 should proceed immediately",
+        "Path 1 has been permanently abandoned and will not be pursued in this engagement"
+      ],
+      "answer": 0,
+      "explanation": "HOLD with named assumptions means the path is designed and ready but blocked by specific, testable gates — it's a waiting state, not an abandoned one, and the named assumptions are the explicit to-do items."
+    },
+    {
+      "q": "During a STRIDE analysis of an AI orchestrator, you find that agents send classification results back to the orchestrator with no message authentication. Which STRIDE letter most directly applies?",
+      "options": [
+        "Spoofing — the attacker is pretending to be a different agent entirely",
+        "Elevation of Privilege — the classification result determines which downstream tools are invoked",
+        "Tampering — an attacker who can intercept or inject messages between the agent and orchestrator could alter the classification result without detection",
+        "Repudiation — the orchestrator has no proof which specific agent sent a given result"
+      ],
+      "answer": 2,
+      "explanation": "Lack of message authentication is a Tampering vulnerability — the integrity of the message cannot be verified, so an attacker (or a compromised component) could alter it undetected."
+    },
+    {
+      "q": "An AI system's STRIDE analysis shows both Spoofing (stolen agent tokens) and Elevation of Privilege (overly broad token scope) threats for the same tool server. A defender can only implement one control today. Which addresses both threats simultaneously?",
+      "options": [
+        "Adding rate limiting to tool calls, which addresses neither threat directly but slows down attackers",
+        "Per-agent tool scoping (ensuring each token only allows specific tools) — it reduces the Elevation of Privilege impact and simultaneously limits what a spoofed identity can achieve even with a stolen token",
+        "Requiring two-factor authentication for human users, which doesn't apply to agent-to-agent authentication at all",
+        "Encrypting all tokens in transit, which addresses Spoofing without touching the Elevation of Privilege threat"
+      ],
+      "answer": 1,
+      "explanation": "Per-agent scoping simultaneously limits both — it makes stolen tokens (Spoofing) less valuable and removes the over-broad access (Elevation of Privilege) that made them dangerous in the first place."
+    },
+    {
+      "q": "A threat model was completed 18 months ago. Since then, the AI system added a browsing agent and integrated a new third-party tool API. What is the correct action?",
+      "options": [
+        "Archive the old threat model and commission an entirely new one from scratch with no reference to prior work",
+        "Update the threat model — the browsing agent introduces new trust boundaries and attack surface (like indirect prompt injection via fetched pages), and the third-party API is an external dependency requiring its own boundary analysis",
+        "Notify the client that their AI system is no longer covered by the original threat model without any further action",
+        "The existing threat model remains valid since the core architecture (orchestrator, agents, vector DB) hasn't changed"
+      ],
+      "answer": 1,
+      "explanation": "This tests the 'living artifact' principle — major additions (a browsing agent, a new external API) introduce new trust boundaries, entry points, and attack surface that must be captured in an updated model."
+    },
+    {
+      "q": "What is the core skill that makes all other threat modeling techniques work?",
+      "options": [
+        "The attacker's mindset — the habit of asking 'how could this feature be turned against its owner' rather than just asking how to make it work correctly",
+        "Proficiency with the STRIDE framework applied to every component in a system",
+        "Mastery of the MITRE ATLAS taxonomy and its complete catalog of AI attack techniques",
+        "The ability to write clean, structured assumption registers with correct confidence ratings"
+      ],
+      "answer": 0,
+      "explanation": "Every technique and framework in the module is a tool for applying the attacker's mindset — it is the foundational skill that makes threat modeling valuable in the first place."
+    },
+    {
+      "q": "Why is it useful to apply every threat modeling technique to the same running example system rather than switching examples between topics?",
+      "options": [
+        "Because Sentri is the simplest possible AI system, making all examples shorter to write",
+        "Because each lesson's examples must all use the same proprietary simulation environment",
+        "Because real-world AI companies gave permission to use their systems as documented examples",
+        "So that every technique lands on a concrete, familiar system where the reader can see how each tool (assumption register, crown jewels, trust boundaries, paths) builds on the others and produces connected insights"
+      ],
+      "answer": 3,
+      "explanation": "A consistent running example lets readers watch the same map grow in detail across lessons — each new technique adds to the same picture, demonstrating how the disciplines compound rather than sitting in isolation."
+    },
+    {
+      "q": "What insight about the threat modeling cycle does the phrase 'a dead path often reveals new intelligence' capture?",
+      "options": [
+        "This phrase describes what happens when the attacker's equipment fails during the assessment",
+        "Dead paths are discarded and never revisited under any professional threat modeling methodology",
+        "Once a path is found to be non-viable, the intelligence gathered pursuing it is also discarded",
+        "Even when an escalation path fails because one of its dependencies doesn't hold, the test that killed it teaches something new about the target that may open a different path"
+      ],
+      "answer": 3,
+      "explanation": "This captures why threat modeling loops rather than terminates — a failed dependency test provides new information that often either reshapes an existing path or generates a new hypothesis worth pursuing."
+    },
+    {
+      "q": "A threat modeler finds that trust boundary TB-5 (Tool Server → Secrets Manager) is marked as INFERRED rather than VALIDATED. What does this status mean, and what should happen next?",
+      "options": [
+        "INFERRED means the boundary was confirmed by a third-party audit and requires no further testing",
+        "INFERRED means the boundary definitely does not exist and should be removed from the trust boundary map",
+        "It means the boundary is believed to exist based on the architecture but has not been directly tested — the next step is to probe this boundary to confirm how it's actually enforced (or whether it's enforced at all)",
+        "INFERRED boundaries are always marked as validated automatically in the next version of the brief"
+      ],
+      "answer": 2,
+      "explanation": "INFERRED is the middle state — the boundary is logically expected but unconfirmed. Every INFERRED boundary is a specific to-do item: test whether its assumed enforcement actually holds in practice."
+    },
+    {
+      "q": "Which combination of factors makes the Sentri orchestrator a higher-priority hardening target than the model registry, from a threat modeling perspective?",
+      "options": [
+        "The model registry has already been identified as out of scope for the current engagement",
+        "The orchestrator sits at multiple trust boundaries (it receives user input and dispatches to agents) and is the sole routing point for all requests — compromising it gives broader access than the registry, which serves only a model-versioning function",
+        "The model registry is harder to access physically, making the orchestrator technically simpler to attack",
+        "The orchestrator is written in a programming language with fewer known security vulnerabilities than the registry"
+      ],
+      "answer": 1,
+      "explanation": "Crown jewel and trust boundary analysis combine here — the orchestrator's position at the intersection of multiple trust zones (user input, agent dispatch, all downstream paths) makes it a choke point worth hardening more than a specialized component like the registry."
+    },
+    {
+      "q": "What does the four-question threat modeling cycle — 'What are we building? What can go wrong? What are we going to do about it? Did we do a good job?' — produce as outputs?",
+      "options": [
+        "A system model, a threat list, prioritized mitigations, and a retrospective — together forming a complete threat model",
+        "Four separate documents stored in different team folders with no connection to each other",
+        "A single vulnerability scan report replacing all manual analysis work",
+        "Only a report for regulators and no internal security work product"
+      ],
+      "answer": 0,
+      "explanation": "The four questions map to four outputs — model, threats, mitigations, validation — together producing everything needed for a complete, actionable threat model."
+    },
+    {
+      "q": "Why is threat modeling often described as 'a conversation, not a document'?",
+      "options": [
+        "Because the most valuable output is the shared understanding the team builds together, not just the written artifact left behind",
+        "Because security tools automatically generate all written documentation without human input",
+        "Because written documents are legally inadmissible as security evidence in most jurisdictions",
+        "Because threat modeling conversations are always recorded and transcribed rather than written"
+      ],
+      "answer": 0,
+      "explanation": "The shared understanding created when a cross-functional team discusses threats together is often more valuable than any formal document — the document captures conclusions, but the conversation drives insight."
+    },
+    {
+      "q": "What is the difference between an assumption with HIGH confidence and one with LOW confidence, practically speaking?",
+      "options": [
+        "The confidence rating has no practical effect on how assumptions are treated during planning",
+        "HIGH confidence assumptions should be trusted completely without further testing; LOW confidence ones should be abandoned immediately",
+        "HIGH confidence only applies to assumptions provided directly by the client; LOW applies to all other sources",
+        "HIGH confidence assumptions (backed by direct documentation or confirmed probing) can be planned against with reasonable certainty; LOW confidence ones (based on hints or absence of evidence) must still be tested before acting on them"
+      ],
+      "answer": 3,
+      "explanation": "In practice, HIGH confidence assumptions inform planning while LOW confidence ones flag explicit to-do items — treating a LOW confidence assumption as confirmed is the 'guesses as facts' mistake the module warns against."
+    },
+    {
+      "q": "What is OSINT in the context of target reconstruction, and what are two examples?",
+      "options": [
+        "Offensive Security Integration Test — an automated tool that combines scanning and exploitation",
+        "Open Source Intelligence — information gathered without touching the target, such as job postings revealing tech stack and public DNS records revealing infrastructure",
+        "On-Site Inspection Technique — physically visiting the target's office to observe their systems",
+        "Operational Security Internal Toolkit — a private set of scripts used during authorized assessments"
+      ],
+      "answer": 1,
+      "explanation": "OSINT is any intelligence gathered from public, open sources without directly interacting with the target — job posts, public DNS, GitHub repos, and blog posts are all classic examples."
+    },
+    {
+      "q": "In the Sentri example, what do the labels 'HIGH / VALIDATED' and 'LOW / UNVALIDATED' next to an assumption communicate in a single glance?",
+      "options": [
+        "HIGH/VALIDATED means the assumption is about a high-priority asset; LOW/UNVALIDATED means it's about a lower-priority one",
+        "The labels have no standardized meaning and are interpreted differently by each team member",
+        "These labels indicate network topology — HIGH for external-facing components and LOW for internal ones",
+        "HIGH/VALIDATED means it's confirmed from a reliable source and safe to plan against; LOW/UNVALIDATED means it's a weak hypothesis that still needs testing"
+      ],
+      "answer": 3,
+      "explanation": "This is the register's core operational value — at a glance, every team member knows exactly which assumptions are solid and which are to-do items that still require testing."
+    },
+    {
+      "q": "Why is the museums analogy useful for explaining crown jewels prioritization?",
+      "options": [
+        "Because the analogy shows that all assets in a collection deserve identical protection regardless of value",
+        "A museum's security clusters around the Mona Lisa and Hope Diamond, not every painting equally — crown jewels analysis clusters security effort around the highest-value assets rather than spreading it equally across everything",
+        "Because museums are the most common targets for cyber attacks in the modern era",
+        "Because museum security relies exclusively on perimeter defenses with no internal controls"
+      ],
+      "answer": 1,
+      "explanation": "The museum analogy captures the key insight — not all assets deserve equal protection, and identifying which assets are 'masterpieces' lets security effort concentrate where it matters most."
+    },
+    {
+      "q": "In Sentri, why is the production API key ranked #1 in crown jewels even though it's behind the most boundaries?",
+      "options": [
+        "Because API keys are always ranked first by default in any AI system threat model",
+        "Because the client specifically instructed the team to rank it first regardless of other factors",
+        "Because it grants full AWS account access — the power of what it enables (everything in the cloud) makes it the ultimate target despite the barriers, which is why the entire engagement is structured around ultimately reaching it",
+        "Because it is the easiest asset to obtain once the orchestrator is compromised"
+      ],
+      "answer": 2,
+      "explanation": "The ranking combines power and reachability — the cloud credential wins on power (full account access) even though reachability is low, making it the ultimate objective the rest of the plan works toward."
+    },
+    {
+      "q": "What is a 'data flow diagram' in threat modeling, and what does it show?",
+      "options": [
+        "A flowchart showing the step-by-step logic of a specific business process",
+        "A network topology diagram showing physical cable connections between servers",
+        "A visual map of how data moves through a system — components, data stores, external entities, and the paths data travels between them, where trust boundaries can be clearly marked",
+        "A bar chart showing how much data each system component processes per day"
+      ],
+      "answer": 2,
+      "explanation": "Data flow diagrams are a core visual tool in threat modeling — they make trust boundaries, entry points, and data paths visible so the team can systematically analyze each trust relationship."
+    },
+    {
+      "q": "In the Sentri trust boundary table, TB-1 represents the most common entry point for all user-initiated attacks. What does this imply for defense prioritization?",
+      "options": [
+        "TB-1 is the least important boundary since attacks mostly originate from inside the system",
+        "Controls at TB-1 catch attacks before they propagate downstream — it is where monitoring, input validation, and rate limiting have the greatest leverage",
+        "Defense should only be applied at the final boundary before a crown jewel, not at entry points",
+        "TB-1 controls are too expensive to implement and should be deferred until other boundaries are secured first"
+      ],
+      "answer": 1,
+      "explanation": "The entry point is where you catch the widest range of attacks earliest — controls here stop threats before they reach any downstream trust boundary, making it the highest-leverage defensive position."
+    },
+    {
+      "q": "Why does Path 3 (intelligence extraction) start as soon as the vector database is confirmed unauthenticated, before any other escalation paths are attempted?",
+      "options": [
+        "Because Path 3 is always the longest path and must start earliest to complete on time",
+        "Because Paths 1 and 2 cannot begin until Path 3 produces a specific credential",
+        "Because the engagement rules of engagement require intelligence extraction before any other action",
+        "Because it's immediately executable with zero additional prerequisites, produces intelligence that benefits Paths 1 and 2, and is the lowest-risk starting move — making it the optimal first action"
+      ],
+      "answer": 3,
+      "explanation": "Path 3 is the perfect first move — no dependencies to validate, immediate payoff (detection rules), and the intelligence it produces directly improves the safety and stealth of subsequent paths."
+    },
+    {
+      "q": "What is the 'security posture snapshot' in an intelligence brief, and why is it a useful reference?",
+      "options": [
+        "A table or summary showing which controls exist and which threat categories they address — letting the reader quickly see where there's coverage and where there are gaps",
+        "A list of all team members' security clearance levels for the current engagement",
+        "A compliance checklist confirming which regulatory requirements have been met",
+        "A photograph of the data center taken during the physical reconnaissance phase"
+      ],
+      "answer": 0,
+      "explanation": "The posture snapshot turns qualitative security discussion into a scannable matrix — readers see coverage and gaps at a glance without reading through every control's full description."
+    },
+    {
+      "q": "What are the 'next actions' section of an intelligence brief meant to communicate?",
+      "options": [
+        "The immediately executable to-do list — which assumptions to validate next, which paths to attempt, which new components to investigate — turning the brief into a daily work plan",
+        "A list of invoices and billing codes associated with the current engagement",
+        "A long-term strategic roadmap for improving the organization's security over the next three to five years",
+        "A list of vulnerabilities that the client must patch before the engagement can proceed"
+      ],
+      "answer": 0,
+      "explanation": "The next actions section bridges the brief's analysis to concrete, immediate work — it answers 'what do we actually do today?' based on the current state of the model."
+    },
+    {
+      "q": "What is DREAD, and how does it differ from the Likelihood × Impact formula?",
+      "options": [
+        "DREAD is a simplified, less detailed framework that provides less precision than the Likelihood × Impact formula",
+        "DREAD is a risk scoring model using five factors (Damage, Reproducibility, Exploitability, Affected users, Discoverability) — it provides more granular decomposition of risk than the simple two-axis formula",
+        "DREAD was specifically created to replace STRIDE as the primary threat identification methodology",
+        "DREAD and Likelihood × Impact are mathematically identical frameworks with different names"
+      ],
+      "answer": 1,
+      "explanation": "DREAD decomposes risk into five measured factors rather than two, providing more granular scoring — useful when the team needs to compare many threats with precision rather than just place them in a 3×3 matrix."
+    },
+    {
+      "q": "In STRIDE applied to an AI inference endpoint that returns model confidence scores, which letter most directly applies to the risk that these scores reveal internal model architecture details?",
+      "options": [
+        "Repudiation (R) — the model refuses to acknowledge which training data influenced its prediction",
+        "Spoofing (S) — the endpoint is pretending to be a different AI model than it actually is",
+        "Information Disclosure (I) — confidence scores can reveal decision boundary characteristics that help an attacker perform model extraction attacks",
+        "Tampering (T) — the attacker is modifying the confidence scores before they reach the user"
+      ],
+      "answer": 2,
+      "explanation": "Returning confidence scores is an information disclosure risk — each score is a probe response that helps an attacker systematically map the model's decision boundaries, a step toward model extraction."
+    },
+    {
+      "q": "A team completes a threat model and finds 23 threats. They need to pick the top 5 for immediate action. Which combination of factors correctly applies the prioritization formula?",
+      "options": [
+        "Choose the 5 threats with the simplest recommended fixes, regardless of their risk level",
+        "Choose the 5 threats with the highest combined Likelihood × Impact score, considering both technical exploitability and business consequence of impact",
+        "Choose the 5 threats affecting the most users, regardless of exploitability or severity",
+        "Choose the 5 threats most recently discovered, since newer findings are always more critical"
+      ],
+      "answer": 1,
+      "explanation": "The prioritization formula requires both dimensions — a high-impact but very-unlikely threat may rank below a medium-impact but certain threat; similarly, business context (regulatory exposure, customer trust) must inform the impact dimension."
+    },
+    {
+      "q": "When the STRIDE letter 'R' (Repudiation) applies to an AI agent system, what specific scenario does it describe?",
+      "options": [
+        "An agent takes a consequential action (like sending an email or approving a payment) and there is no audit trail proving which agent, with which token, made that request",
+        "An agent denies being based on a specific model architecture when asked by a user",
+        "An agent refuses to process a request, returning an error message instead of completing the task",
+        "An agent's response is delayed so long that the requesting component times out and retries"
+      ],
+      "answer": 0,
+      "explanation": "Repudiation means a party can deny having done something — in an AI agent system, the risk is that consequential automated actions leave no verifiable audit trail tying them to a specific, accountable identity."
+    },
+    {
+      "q": "A defender asks: 'What is the minimum viable threat model for a small team shipping an AI feature in two weeks?' What is a practical answer?",
+      "options": [
+        "A threat model cannot be meaningfully completed in less than three months for any AI feature",
+        "Only security engineers should perform threat modeling — a small product team cannot do it meaningfully",
+        "A 60-minute whiteboard session covering: what data does it touch, what can an attacker do with the AI's output, what trust boundaries exist, and what's the top 3 risks — a short focused session beats a perfect model never completed",
+        "The team should delay the feature launch until a full six-week threat modeling exercise is completed"
+      ],
+      "answer": 2,
+      "explanation": "The module's pragmatic advice is clear — a short, focused threat model consistently beats a perfect model that's never completed. A whiteboard session with the four core questions produces real value even under time pressure."
+    },
+    {
+      "q": "What is the relationship between assumption validation and escalation path planning in a well-run threat modeling engagement?",
+      "options": [
+        "Assumptions and escalation paths are tracked in completely separate documents with no connection between them",
+        "Once escalation paths are planned, assumptions are no longer relevant and can be archived",
+        "Assumptions act as gates that must be tested before committing to escalation paths — validated assumptions make paths 'GO'; invalidated ones close paths and generate new hypotheses; both improve the map",
+        "Escalation paths are planned first and assumptions are only filled in afterward as documentation"
+      ],
+      "answer": 2,
+      "explanation": "The two artifacts are tightly coupled — each assumption is a gate on one or more escalation paths, and assumption validation directly updates path status (HOLD, GO, ABANDONED), keeping the plan current and reliable."
+    },
+    {
+      "q": "A system has three escalation paths to a crown jewel. Paths A and B share one dependency; Path C is completely independent. If the shared dependency is blocked, what is the defender's residual risk?",
+      "options": [
+        "Path C becomes significantly harder to execute because disrupting Paths A and B always indirectly harms all other paths",
+        "Path C still fully exists — blocking Paths A and B's shared dependency does not reduce Path C's viability at all, so the crown jewel remains reachable through Path C",
+        "The defender has eliminated all risk to the crown jewel since two of the three paths have been blocked",
+        "All three paths are blocked, since disabling any shared node automatically disables all paths to the same objective"
+      ],
+      "answer": 1,
+      "explanation": "This tests the attack tree insight — blocking shared nodes blocks multiple paths, but an independent path (Path C) is unaffected. Effective defense must account for all viable paths, not just the ones sharing dependencies."
+    }
+  ]
+}
