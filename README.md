@@ -3,9 +3,9 @@
 A structured, hands-on AI security learning platform — Prompt Injection, RAG Security,
 AI Agent Security, MCP Security, AI Evasion, and 14 modules from beginner to advanced.
 
+## Demo
 
-
-
+https://github.com/user-attachments/assets/d45cdfe9-569e-4779-8d7d-0d758a7ce0f5
 
 
 ## Requirements
