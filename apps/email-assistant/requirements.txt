@@ -1,0 +1,6 @@
+flask==3.0.0
+requests==2.31.0
+aiosmtpd==1.4.4
+anthropic
+openai
+google-generativeai

@@ -1,0 +1,53 @@
+{
+  "slug": "10-defenses",
+  "title": "Defenses & Mitigations",
+  "type": "content",
+  "readingtime": "11 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Defenses & Mitigations\n\nYou have learned how to attack AI infrastructure. Now let's learn how to defend it. A great security professional can do both. This lesson pulls together all the defenses into one clear playbook.\n\n## The Core Principle: Defense in Depth\n\n**Defense in depth** means using *many layers* of protection, so that if one fails, others still hold.\n\n**Analogy:** A castle does not rely on one wall. It has a moat, an outer wall, an inner wall, guards, and a locked keep. An attacker who crosses the moat still faces the walls. Each layer buys time and stops different attacks.\n\nFor AI infrastructure, our layers are:\n\n- **Identity** — who can do what (IAM, RBAC)\n- **Network** — what can talk to what\n- **Secrets** — how credentials are stored\n- **Containers** — how workloads are isolated\n- **Monitoring** — how we detect attacks"
+    },
+    {
+      "type": "content",
+      "body": "## The Most Important Principle: Least Privilege\n\n**Least privilege** means giving every identity *only* the permissions it truly needs — nothing more.\n\n**Analogy:** A janitor needs keys to the supply closet, not the CEO's safe. Give each person the smallest keyring that lets them do their job.\n\nThis single principle stops most of the attacks in this module:\n\n| Attack | Least privilege stops it by... |\n|---|---|\n| IAM escalation | No wildcard permissions, no AssumeRole chains |\n| Secret theft | Roles scoped to specific named secrets |\n| Pod creation abuse | Not granting `create pods` |\n| Cross-namespace reads | Roles, not ClusterRoles |"
+    },
+    {
+      "type": "content",
+      "body": "## Defense Layer 1: Fix the Cloud\n\nThese defenses stop the SSRF, IAM, and credential attacks.\n\n- **Enforce IMDSv2** — makes SSRF-to-credential theft much harder.\n- **Scope every IAM policy** — no `*` in actions or resources; use conditions like tags.\n- **Remove broad managed policies** — avoid `*FullAccess` roles.\n- **Block SSRF** — allowlist outbound URLs, block internal IP ranges.\n- **Separate accounts per project** — so one breach cannot reach another project's data."
+    },
+    {
+      "type": "content",
+      "body": "## Defense Layer 2: Manage Secrets Properly\n\nStop credential hunting from succeeding.\n\n- **Use a secrets manager** — never hardcode secrets in code or images.\n- **Never log secrets** — turn off DEBUG logging in production.\n- **Encrypt at rest** — use `SecureString`, not plain `String`.\n- **Rotate regularly** — so an old leaked secret becomes useless.\n- **Scan for secrets** — use automated tools in CI to catch hardcoded keys before they ship.\n- **Clean up old versions** — disable or purge old file/parameter versions."
+    },
+    {
+      "type": "content",
+      "body": "## Defense Layer 3: Secure the Network\n\nStop exposed endpoints and lateral movement.\n\n- **Restrict security groups** — never use `0.0.0.0/0` for model ports.\n- **Put auth in front of models** — API gateways or reverse proxies requiring keys.\n- **Use TLS everywhere** — encrypt traffic so it cannot be read or tampered.\n- **Use mTLS for internal services** — both sides prove their identity.\n- **Apply Kubernetes Network Policies** — control which pods can talk to which.\n\n### Quick Word on TLS and mTLS\n\n**TLS** encrypts traffic and proves the *server's* identity (like HTTPS). **mTLS** (mutual TLS) goes further — *both* the client and server prove their identity. This stops an attacker from impersonating an internal service."
+    },
+    {
+      "type": "content",
+      "body": "## Defense Layer 4: Harden Kubernetes\n\nStop RBAC abuse, token theft, and container attacks.\n\n- **Least-privilege RBAC** — Roles over ClusterRoles; scope to named resources.\n- **Disable token auto-mount** — `automountServiceAccountToken: false` where not needed.\n- **Use bound tokens** — short-lived, audience-restricted.\n- **Apply Pod Security Standards** — block privileged pods, host mounts, root users.\n- **Run as non-root** — `runAsNonRoot: true`.\n- **Read-only root filesystem** — `readOnlyRootFilesystem: true`.\n- **Never grant `create pods`** to workload identities."
+    },
+    {
+      "type": "content",
+      "body": "## Defense Layer 5: Protect GPUs and Images\n\nStop container escapes and supply chain attacks.\n\n- **Patch the GPU runtime stack** — keep the toolkit and runc updated.\n- **Use hardware isolation** — MIG for shared GPUs.\n- **Scan container images** — check for vulnerabilities and hidden secrets.\n- **Sign and verify images** — only run images you trust.\n- **Use an SBOM** — a Software Bill of Materials lists everything inside an image, so you know what you are running.\n\n### What Is an SBOM?\n\nAn **SBOM** (Software Bill of Materials) is like an ingredients label on food. It lists every library and component inside your container. If a vulnerable library is later discovered, you can instantly check whether you use it."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[Attacker] --> L1[Layer 1: Network<br/>firewalls, TLS]\n    L1 --> L2[Layer 2: Identity<br/>IAM, RBAC, least privilege]\n    L2 --> L3[Layer 3: Secrets<br/>vault, no logging]\n    L3 --> L4[Layer 4: Containers<br/>non-root, no token]\n    L4 --> L5[Layer 5: Monitoring<br/>logs, alerts, SIEM]\n    L5 --> X[Attack detected & blocked]\n    style A fill:#ef4444,color:#fff\n    style X fill:#22c55e,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Defense Layer 6: Detect and Respond\n\nEven with all the walls, you must watch for attackers who slip through.\n\n- **Enable audit logs** — CloudTrail (cloud) and Kubernetes audit logs.\n- **Feed logs into a SIEM** — a central system that analyzes logs and raises alerts.\n- **Alert on suspicious patterns** — like `AssumeRole` chains, bulk secret listing, or `SelfSubjectRulesReview` calls.\n- **Have an incident response plan** — know who does what when an alert fires.\n\n### What Is a SIEM?\n\n**SIEM** stands for **Security Information and Event Management**. It collects logs from everywhere, looks for signs of attack, and alerts your team. Think of it as a central security control room watching every camera at once."
+    },
+    {
+      "type": "note",
+      "body": "**The one-sentence summary of defense:** *give every identity the least access it needs, store secrets in a vault, restrict the network, harden containers, and watch everything.* Master that sentence and you have mastered AI infrastructure defense."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **Defense in depth**: many layers, so one failure is not fatal.\n- **Least privilege** is the single most powerful defense.\n- Fix the **cloud** (IMDSv2, scoped IAM), manage **secrets** (vault, no logging), secure the **network** (no `0.0.0.0/0`, TLS/mTLS).\n- Harden **Kubernetes** (least RBAC, no auto-mount tokens, non-root) and **GPUs/images** (patch, MIG, scan, sign, SBOM).\n- **Detect and respond** with audit logs, a SIEM, and an incident plan.\n\nNext, we distill everything into a practical checklist in **Best Practices.**"
+    }
+  ]
+}

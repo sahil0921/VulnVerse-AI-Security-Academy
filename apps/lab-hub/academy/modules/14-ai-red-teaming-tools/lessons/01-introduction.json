@@ -1,0 +1,13 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to AI Red Teaming Tools",
+  "type": "content",
+  "difficulty": "Advanced",
+  "reading_time": "7 min read",
+  "sections": [
+    {"type": "content", "body": "## Why Tooling Matters\n\nEvery module before this one taught you *how* an attack works: prompt injection, RAG poisoning, agent exploitation, embedding inversion, evasion. That knowledge is the foundation. But in a real engagement, you rarely craft every payload by hand — you use tools that automate scanning, probe libraries, and chained attack strategies so you can cover far more surface area in far less time.\n\nThis module is a practical tool reference. For each tool you'll get: what it does, when to reach for it, exact install commands, and real usage examples with the kind of output you should expect to see."},
+    {"type": "content", "body": "## Two Categories of Tools\n\n**Purpose-built AI red teaming frameworks** — tools written specifically to attack LLMs and AI systems: PyRIT, Garak, Giskard, DeepTeam, Promptfoo.\n\n**Adversarial ML toolkits** — tools focused on classic ML attack surfaces (evasion, poisoning, extraction) that predate the LLM boom but are still directly relevant: ART (IBM), CleverHans.\n\nAlongside these, you'll need general-purpose security tooling adapted for AI targets — Burp Suite for intercepting API calls to LLM endpoints, CyberChef for payload encoding, and curated payload repositories like PayloadsAllTheThings."},
+    {"type": "note", "body": "Every tool in this module should only ever be pointed at systems you are authorized to test — your own labs, a client engagement with signed scope, or a CTF/training environment like this one. Running these against production systems without authorization is illegal in most jurisdictions."},
+    {"type": "content", "body": "## What You'll Cover\n\n1. **PyRIT** — Microsoft's enterprise-grade, multi-modal red teaming framework\n2. **Garak** — NVIDIA's LLM vulnerability scanner with a massive probe library\n3. **Giskard** — dynamic multi-turn stress testing for RAG and agents\n4. **DeepTeam** — 40+ vulnerability classes, 10+ attack strategies\n5. **Promptfoo** — LLM eval + red teaming with CI/CD integration\n6. **ART & CleverHans** — classic adversarial ML attack toolkits\n7. **Supporting tools** — Burp Suite, CyberChef, PayloadsAllTheThings, Nmap\n8. **Hidden & lesser-known tools** — the tools most practitioners never hear about\n9. **Choosing the right tool** — a decision guide mapped to what you're testing"}
+  ]
+}

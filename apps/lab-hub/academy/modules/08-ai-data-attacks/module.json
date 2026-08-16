@@ -1,0 +1,66 @@
+{
+  "slug": "08-ai-data-attacks",
+  "name": "AI Data Attacks",
+  "lessons": [
+    {
+      "slug": "01-introduction",
+      "title": "Introduction to Data Attacks",
+      "type": "content"
+    },
+    {
+      "slug": "02-data-poisoning",
+      "title": "Data Poisoning",
+      "type": "content"
+    },
+    {
+      "slug": "03-label-flipping",
+      "title": "Label Flipping",
+      "type": "content"
+    },
+    {
+      "slug": "04-clean-label",
+      "title": "Clean-Label Attacks",
+      "type": "content"
+    },
+    {
+      "slug": "05-trojan-backdoors",
+      "title": "Trojan Backdoors",
+      "type": "content"
+    },
+    {
+      "slug": "06-steganography",
+      "title": "Pickle & Tensor Steganography",
+      "type": "content"
+    },
+    {
+      "slug": "07-hallucination",
+      "title": "Hallucination Surface",
+      "type": "content"
+    },
+    {
+      "slug": "08-abuse-detection",
+      "title": "Abuse Detection Evasion",
+      "type": "content"
+    },
+    {
+      "slug": "09-safeguards",
+      "title": "Safeguards & Guardrails",
+      "type": "content"
+    },
+    {
+      "slug": "10-best-practices",
+      "title": "Best Practices",
+      "type": "content"
+    },
+    {
+      "slug": "11-quiz",
+      "title": "Knowledge Check",
+      "type": "quiz"
+    },
+    {
+      "slug": "12-hands-on-labs",
+      "title": "Hands-on Labs",
+      "type": "labs"
+    }
+  ]
+}

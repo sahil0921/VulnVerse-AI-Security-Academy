@@ -1,0 +1,1107 @@
+{
+  "slug": "module-10-exam",
+  "title": "Exam: AI Evasion",
+  "type": "quiz",
+  "questions": [
+    {
+      "q": "What is AI evasion, at its core?",
+      "options": [
+        "A method for poisoning a model's training data before it is deployed",
+        "A technique for stealing a model's training data through repeated queries",
+        "A defense mechanism that automatically blocks malicious input",
+        "The art of tricking a trained AI model at the exact moment it makes a decision, without ever touching the model itself"
+      ],
+      "answer": 3,
+      "explanation": "Evasion targets inference time — the moment a model makes a decision — leaving the model itself completely unmodified."
+    },
+    {
+      "q": "What is 'inference time,' as distinguished from training time?",
+      "options": [
+        "The exact moment a model's weights are initialized before any training begins",
+        "The moment a model is actually being used to make a prediction, as opposed to while it's being trained",
+        "The scheduled maintenance window during which a model is taken offline",
+        "The time it takes to download a pre-trained model from a public repository"
+      ],
+      "answer": 1,
+      "explanation": "Inference time is when a trained model is actively used to generate a prediction, in contrast to training time when the model is learning from data."
+    },
+    {
+      "q": "Why does evasion exist as a viable attack against machine learning classifiers?",
+      "options": [
+        "Because all AI models contain deliberate backdoors placed by their developers",
+        "Every AI model draws an invisible decision boundary separating classes, and evasion works by nudging input just far enough that it lands on the wrong side of that line",
+        "Because AI models are incapable of processing any adversarially crafted input",
+        "Because evasion exploits a specific bug present in every trained model"
+      ],
+      "answer": 1,
+      "explanation": "Evasion exploits the existence of a decision boundary — the model isn't broken, it's simply presented with an input crafted to land on the wrong side of that boundary."
+    },
+    {
+      "q": "Why is evasion considered attractive to attackers compared to other attack types?",
+      "options": [
+        "It requires stolen administrator credentials to execute successfully",
+        "It always requires physical access to the server hosting the model",
+        "It's quiet, needs no special access, scales well, and often survives filters since the model still appears to be working normally",
+        "It only works against models that have already been compromised through data poisoning"
+      ],
+      "answer": 2,
+      "explanation": "Evasion uses the same public interface as legitimate users, requires no special access, and can be reused at scale, all while appearing to defenders as normal traffic."
+    },
+    {
+      "q": "What is the key difference between a training-time attack and an inference-time (evasion) attack?",
+      "options": [
+        "Training-time attacks change the model's memory and affect all future inputs; evasion attacks leave the model untouched and only change the current input",
+        "Training-time attacks require no access to the model at all, unlike evasion attacks",
+        "There is no meaningful difference between the two attack types",
+        "Training-time attacks only affect image models, while evasion only affects text models"
+      ],
+      "answer": 0,
+      "explanation": "Training-time attacks (like data poisoning) permanently alter what the model learned, with global effect; evasion is local and temporary, changing only the current input."
+    },
+    {
+      "q": "What is transferability, in the context of evasion attacks?",
+      "options": [
+        "The process of moving training data between different cloud storage providers",
+        "An attack built against one model often fools a completely different model too, letting attackers prepare offline and strike a black-box system they've never directly inspected",
+        "A technique for converting a classifier from one programming language to another",
+        "The ability to transfer a model's weights from one server to another without loss of accuracy"
+      ],
+      "answer": 1,
+      "explanation": "Transferability means an evasion technique developed against a surrogate model can often successfully fool a real, unseen target model as well."
+    },
+    {
+      "q": "What is a surrogate model, and how does it relate to transferability?",
+      "options": [
+        "A model that has been specifically trained to detect and block evasion attacks",
+        "A model owned and operated exclusively by the defender for testing purposes",
+        "An attacker's own copy of a model they build and test attacks against offline, which then often transfers successfully to fool the real target system",
+        "A backup model automatically deployed if the primary model fails"
+      ],
+      "answer": 2,
+      "explanation": "A surrogate model is the attacker's own stand-in they test against privately, exploiting transferability to prepare attacks that work against the real target."
+    },
+    {
+      "q": "How does evasion against classic ML differ from evasion against large language models, in terms of the main leverage point?",
+      "options": [
+        "Classic ML evasion requires physical hardware access, while LLM evasion does not",
+        "There is no meaningful difference between evading classic ML and evading LLMs",
+        "Classic ML evasion only works on image data, while LLM evasion only works on video data",
+        "Classic ML evasion nudges numeric features like word counts; LLM evasion injects or reframes natural-language instructions"
+      ],
+      "answer": 3,
+      "explanation": "Classic ML models read numeric feature vectors, so evasion manipulates those statistics, while LLMs process natural language, so evasion targets instruction-following behavior instead."
+    },
+    {
+      "q": "What is a classifier, in machine learning terms?",
+      "options": [
+        "A model exclusively used for translating between human languages",
+        "A model that generates entirely new text based on a given prompt",
+        "A model that compresses large files to reduce their storage footprint",
+        "A model that sorts an input into one of several buckets, called classes, by crossing a decision boundary"
+      ],
+      "answer": 3,
+      "explanation": "A classifier assigns inputs to discrete categories (classes) based on a learned decision boundary separating those categories."
+    },
+    {
+      "q": "Why can't a model read words directly, and what solves this problem?",
+      "options": [
+        "Text is converted into images before being processed by any classifier",
+        "Models only read numbers, so text must first be turned into features, measurable pieces of information the model can actually work with",
+        "Models can read words directly but choose not to for performance reasons",
+        "This limitation only applies to models trained before 2020"
+      ],
+      "answer": 1,
+      "explanation": "Since models fundamentally operate on numeric input, raw text must be transformed into numeric features (like word counts) before a classifier can process it."
+    },
+    {
+      "q": "What is the bag-of-words method, and what critical piece of information does it discard?",
+      "options": [
+        "It converts text into images before counting individual pixels",
+        "It builds a vocabulary and preserves the exact word order and sentence structure",
+        "It only counts the very first and last word of each message",
+        "It builds a vocabulary and counts how often each word appears in a message, completely discarding word order"
+      ],
+      "answer": 3,
+      "explanation": "Bag-of-words counts word occurrences while completely ignoring the sequence they appeared in, which is exactly the weakness evasion attacks exploit."
+    },
+    {
+      "q": "What does TF-IDF add on top of simple word counting?",
+      "options": [
+        "It asks how rare a word is across all messages, giving common words like 'the' low weight and rare words higher weight since rare words better distinguish classes",
+        "It removes all punctuation before any word counting occurs",
+        "It converts words into their exact opposite meaning before counting them",
+        "It translates every word into a single, standardized base language"
+      ],
+      "answer": 0,
+      "explanation": "TF-IDF weights words by their rarity across the entire corpus, giving distinctive rare words more influence than common, low-information words."
+    },
+    {
+      "q": "What do n-grams recover that plain bag-of-words throws away, and what is their limitation?",
+      "options": [
+        "They convert text into audio waveforms for more accurate classification",
+        "They eliminate the need for any feature extraction whatsoever",
+        "They recover some word-order information by counting pairs or triples of consecutive words, though this can still be defeated by inserting words in between",
+        "They recover the exact timestamp each word was typed, with no known limitation"
+      ],
+      "answer": 2,
+      "explanation": "N-grams capture local word sequences (like word pairs), partially restoring order sensitivity, though an attacker can still insert words between the flagged pair to break the pattern."
+    },
+    {
+      "q": "Why are non-text features, such as message length, number of links, or ratio of capital letters, useful additions to a spam filter?",
+      "options": [
+        "They require significantly more computing power than any word-based feature",
+        "They completely eliminate the need for any word-based features at all",
+        "They only work on messages written in languages other than English",
+        "They are harder to disguise just by rewording a sentence, unlike purely word-based features"
+      ],
+      "answer": 3,
+      "explanation": "Structural signals like message length or capitalization ratio are more resistant to simple word-substitution evasion than purely lexical features."
+    },
+    {
+      "q": "Which classifier type is commonly used as the foundational example for learning evasion fundamentals, and why?",
+      "options": [
+        "Naive Bayes, because its math is transparent enough to watch each word push the decision one way or the other",
+        "Support Vector Machines, because they have no known evasion weaknesses",
+        "Logistic Regression, because it requires no training data whatsoever",
+        "Neural Networks, because they are the most commonly deployed spam filter in production"
+      ],
+      "answer": 0,
+      "explanation": "Naive Bayes was chosen specifically because its transparent, additive scoring makes it the clearest classifier for learning the fundamentals of evasion before tackling harder models."
+    },
+    {
+      "q": "What is the key practical difference between white-box and black-box attacker knowledge?",
+      "options": [
+        "There is no meaningful practical difference between the two settings",
+        "White-box means model internals (weights, probabilities, features) are fully visible; black-box means only the final label or score is visible",
+        "White-box only applies to image classifiers, while black-box only applies to text classifiers",
+        "White-box means the attacker has no access at all, while black-box means full access"
+      ],
+      "answer": 1,
+      "explanation": "White-box grants full visibility into a model's internal calculations, while black-box restricts the attacker to observing only the final output for a given input."
+    },
+    {
+      "q": "In the guessing-game analogy for white-box vs black-box access, what does black-box access resemble?",
+      "options": [
+        "Being given unlimited time with no feedback of any kind after each attempt",
+        "Physically breaking into the room where the exam answers are stored",
+        "Guessing answers but being told 'warmer' or 'colder' after each guess, learning only from the outcome",
+        "Having the complete answer key available before the test even begins"
+      ],
+      "answer": 2,
+      "explanation": "Black-box access provides only outcome-based feedback (like a label or score) without any insight into the reasoning behind that outcome, similar to a 'warmer/colder' guessing game."
+    },
+    {
+      "q": "Why is Naive Bayes considered particularly vulnerable to evasion?",
+      "options": [
+        "It always achieves 100% accuracy, making its predictions impossible to influence",
+        "It cannot be trained on text data of any kind, only numeric data",
+        "It requires an enormous amount of training data compared to any other classifier type",
+        "It assumes words are independent, ignoring whether the combination of words actually makes sense together"
+      ],
+      "answer": 3,
+      "explanation": "Naive Bayes' core weakness is its independence assumption, which allows an attacker to add unrelated words without the model ever questioning whether the overall message makes coherent sense."
+    },
+    {
+      "q": "Where does a classifier's decision boundary for spam/ham typically sit, in terms of probability?",
+      "options": [
+        "There is no fixed numeric threshold used by any classifier",
+        "0.5, meaning the classifier only cares which side of 0.5 the probability lands on",
+        "0.0, meaning any positive probability whatsoever triggers blocking",
+        "1.0, meaning the message must be judged as absolutely certain spam to be blocked"
+      ],
+      "answer": 1,
+      "explanation": "The decision boundary sits at 0.5 — crossing that threshold, even by a small margin, is sufficient to flip the classifier's decision."
+    },
+    {
+      "q": "Why does a message scoring [0.501 ham, 0.499 spam] evade successfully, just as one scoring [0.99 ham, 0.01 spam] would?",
+      "options": [
+        "Because this only applies to classifiers trained on fewer than 100 examples",
+        "Because the classifier always rounds scores to the nearest whole number before deciding",
+        "Because you only need to cross the decision line, not shatter it — the classifier doesn't distinguish between a narrow win and an overwhelming one",
+        "Because both scores actually represent identical probability values internally"
+      ],
+      "answer": 2,
+      "explanation": "The classifier's decision is binary based purely on which side of 0.5 a score lands — margin of victory is irrelevant to whether evasion succeeded."
+    },
+    {
+      "q": "What core question does Naive Bayes attempt to answer?",
+      "options": [
+        "Given the words in this message, what is the probability it is spam versus ham?",
+        "How many total words appear in the entire training dataset?",
+        "How quickly can a message be transmitted across a network connection?",
+        "What is the exact author of a given message, based on writing style alone?"
+      ],
+      "answer": 0,
+      "explanation": "Naive Bayes computes and compares the probability of each class given the observed words, then selects whichever class has the higher probability."
+    },
+    {
+      "q": "In Bayes' theorem as applied to spam classification, what does P(D | C) represent?",
+      "options": [
+        "How common spam is overall across the entire training dataset",
+        "How likely these exact words are, if the message were actually spam",
+        "A fixed constant that never changes regardless of the message",
+        "The probability the message is spam, given the words observed"
+      ],
+      "answer": 1,
+      "explanation": "P(D|C) is the likelihood of observing this specific document D given that the class C (e.g. spam) is true — the 'easier' quantity Bayes' theorem lets us work with."
+    },
+    {
+      "q": "What is the 'naive' independence assumption at the heart of Naive Bayes?",
+      "options": [
+        "Every word is treated as completely independent of every other word, given the class — the model never asks whether words make sense together",
+        "Every message must contain exactly the same number of words to be classified",
+        "Words appearing earlier in a message are assumed to be more important than later ones",
+        "The classifier assumes all training examples were labeled by the exact same person"
+      ],
+      "answer": 0,
+      "explanation": "The independence assumption means the model evaluates each word's contribution separately, with zero consideration for coherence or relationships between words."
+    },
+    {
+      "q": "Why does Naive Bayes perform its calculations in 'log space' rather than directly multiplying raw probabilities?",
+      "options": [
+        "Working in log space eliminates the need for any training data whatsoever",
+        "Log space calculations are required by law for any classifier deployed commercially",
+        "Log space is only used for classifiers processing images, never text",
+        "Multiplying many small probabilities together quickly produces a number so tiny the computer rounds it down to zero, so logarithms turn multiplication into addition instead"
+      ],
+      "answer": 3,
+      "explanation": "Logarithms convert the product of many small probabilities into a sum, avoiding numerical underflow while preserving the same relative ranking between classes."
+    },
+    {
+      "q": "What is the single most important fact for an attacker to understand about Naive Bayes' additive log-space scoring?",
+      "options": [
+        "Adding more words to a message always decreases the model's confidence in any prediction",
+        "The model recalculates its entire vocabulary from scratch for every single message it processes",
+        "Because scores are added together, every extra word simply shifts the running total by a fixed amount",
+        "The model ignores any word that has appeared in more than one training example"
+      ],
+      "answer": 2,
+      "explanation": "This additive property means each appended word contributes a predictable, cumulative push toward one class or the other — the mathematical foundation the GoodWords attack exploits."
+    },
+    {
+      "q": "What is a 'goodness score,' as defined for ranking words for the GoodWords attack?",
+      "options": [
+        "A score representing how grammatically correct a word is within a sentence",
+        "A ranking of words based purely on their frequency in the English dictionary",
+        "A ratio comparing how strongly a word signals ham over spam, calculated as P(word|ham) divided by P(word|spam) plus a small epsilon",
+        "A measurement of how many total characters a word contains"
+      ],
+      "answer": 2,
+      "explanation": "The goodness score specifically measures a word's ham-to-spam probability ratio, identifying which words most strongly push a message's classification toward ham."
+    },
+    {
+      "q": "Why does the goodness score formula include a small epsilon value in the denominator?",
+      "options": [
+        "It ensures every word receives exactly the same goodness score regardless of its actual usage",
+        "It converts the goodness score into a percentage automatically",
+        "It prevents a division-by-zero error for cases where a word never once appeared in any spam message during training",
+        "It removes the need for the model to have ever seen the word during training"
+      ],
+      "answer": 2,
+      "explanation": "Epsilon avoids a mathematical division-by-zero error when a word's spam probability is exactly zero, keeping the calculation stable and finite."
+    },
+    {
+      "q": "What does Laplace smoothing do, and why does it make evasion attacks easier?",
+      "options": [
+        "It only applies to classifiers trained on fewer than 10 total messages",
+        "It guarantees the model achieves perfect accuracy on all future test data",
+        "It gives every word a small non-zero probability even for words never seen during training, meaning the model never fully rejects a strange mix of words outright",
+        "It removes all rare words from the training vocabulary entirely before training begins"
+      ],
+      "answer": 2,
+      "explanation": "Smoothing's leniency toward unusual word combinations is exactly what lets an attacker pile unrelated ham words onto spam content without triggering a hard rejection."
+    },
+    {
+      "q": "What are the four design choices that combine to make Naive Bayes a near-perfect evasion target?",
+      "options": [
+        "Random weight initialization, use of GPU acceleration, support for multiple languages, and cloud deployment",
+        "Requirement for internet access, dependency on external APIs, need for user authentication, and rate limiting",
+        "High computational cost, requirement for labeled data, need for feature engineering, and slow inference speed",
+        "Independence assumption, additive log scoring, static learned probabilities, and smoothing"
+      ],
+      "answer": 3,
+      "explanation": "These four properties together create the exact conditions the GoodWords attack exploits: no penalty for nonsensical combinations, predictable additive scoring, a fixed unmoving target, and no hard rejection of unusual input."
+    },
+    {
+      "q": "What is the GoodWords attack, as first described by Lowd and Meek in 2005?",
+      "options": [
+        "Encrypting the spam message so the classifier cannot process it at all",
+        "Leaving the spam text completely untouched and appending harmless, legitimate-looking words to the end of the message",
+        "Removing all suspicious words from a spam message before sending it",
+        "Rewriting the entire spam message from scratch using only conversational language"
+      ],
+      "answer": 1,
+      "explanation": "The GoodWords attack specifically leaves original spam content intact and appends ham-associated words, exploiting Naive Bayes' additive scoring to push the total score toward ham."
+    },
+    {
+      "q": "In white-box GoodWords, what does having full model access let an attacker do that a black-box attacker cannot?",
+      "options": [
+        "Automatically retrain the model to always classify messages as ham",
+        "Bypass the need to send any queries to the classifier whatsoever",
+        "Physically access the server hosting the model to modify its files",
+        "Read internal probabilities directly and select the most powerful words mathematically, instead of guessing"
+      ],
+      "answer": 3,
+      "explanation": "White-box access allows direct computation of goodness scores from the model's actual learned probabilities, rather than having to infer them through trial-and-error querying."
+    },
+    {
+      "q": "In a typical white-box GoodWords effectiveness curve, roughly what evasion rate is achieved with around 15 good words added?",
+      "options": [
+        "Approximately 41%, still well below the majority",
+        "Approximately 6%, barely above the natural baseline",
+        "Approximately 25%, only a modest improvement",
+        "Approximately 96%, near-total success"
+      ],
+      "answer": 3,
+      "explanation": "The module's illustrative curve shows evasion rate climbing dramatically to around 96% at 15 added words, following a sigmoid-shaped success curve."
+    },
+    {
+      "q": "Why is a word's theoretical goodness score not always the same as its practical, real-world impact on a specific message?",
+      "options": [
+        "Because goodness scores are always exactly double the practical impact value",
+        "Because practical impact only applies to messages longer than 500 words",
+        "Goodness score measures a word's ham-likelihood in isolation, while practical impact measures how much that word actually shifts a specific real message's score once genuinely added",
+        "Because goodness scores are recalculated randomly every time the model is queried"
+      ],
+      "answer": 2,
+      "explanation": "A word that scores well in isolation may still only produce a modest shift on any given real message, since the total evasion effect depends on how all appended words interact with that specific message's existing content."
+    },
+    {
+      "q": "Why is it useful to check a message's baseline spam score first before deciding how many good words to add?",
+      "options": [
+        "Because baseline scores determine which programming language the attack script should be written in",
+        "Because checking the baseline score is required by the classifier's API before any query is accepted",
+        "Messages with weaker spam signals may evade with just 5-10 words, while heavily spam-marked messages may need 15-20, so tailoring the count avoids unnecessary length",
+        "Because every message requires exactly the same fixed number of words regardless of its content"
+      ],
+      "answer": 2,
+      "explanation": "Efficient attackers calibrate their word count to the message's specific starting spam strength, adding only as many good words as actually needed to cross the boundary."
+    },
+    {
+      "q": "Since Naive Bayes ignores word order entirely, why might an attacker still choose to spread good words throughout a message rather than appending them all at the end?",
+      "options": [
+        "Spreading words throughout the message reduces the total character count required for evasion",
+        "Spreading words throughout the message produces a mathematically higher evasion score than appending them",
+        "The classifier physically cannot process words placed anywhere except the very end of a message",
+        "A long list of unrelated words at the very end can look visually suspicious to a human reviewer, even though it produces the identical classifier score"
+      ],
+      "answer": 3,
+      "explanation": "While the classifier's score is identical either way (since order doesn't matter to Naive Bayes), spreading words naturally can help the message pass a human's manual read-through."
+    },
+    {
+      "q": "In the black-box GoodWords setting, what is the core tension an attacker must balance across their limited queries?",
+      "options": [
+        "Speed versus accuracy, since faster queries always produce less reliable results",
+        "Exploration (trying new, untested words) versus exploitation (repeatedly using words already known to work well)",
+        "Encryption versus plaintext, since queries must always be sent in one specific format",
+        "Cost versus legality, since black-box attacks are inherently illegal regardless of authorization"
+      ],
+      "answer": 1,
+      "explanation": "Every query costs something, so attackers must balance discovering new candidate words against reliably confirming and reusing words already known to be effective."
+    },
+    {
+      "q": "What is the multi-armed bandit problem, and how does it map onto black-box GoodWords?",
+      "options": [
+        "A networking problem about routing packets across several unreliable connections",
+        "A physical security problem involving multiple simultaneous armed intrusions",
+        "A cryptographic problem related to key exchange between two untrusted parties",
+        "A problem about choosing which of several unknown-payout slot machines to play with limited coins — each candidate word is treated as its own slot machine with an unknown 'payout' (evasion impact)"
+      ],
+      "answer": 3,
+      "explanation": "The bandit framing treats each candidate word as a slot machine whose true payout (evasion effectiveness) is unknown until tested, directly mirroring the exploration/exploitation challenge."
+    },
+    {
+      "q": "In the black-box word-reward formula, what does a positive reward for a given word indicate?",
+      "options": [
+        "The word has never appeared in any training example seen by the classifier",
+        "The word caused the classifier's API to return an error message",
+        "Adding the word made the message look less like spam, since reward equals the spam score before minus the spam score after",
+        "The word is grammatically incorrect according to the model's internal parser"
+      ],
+      "answer": 2,
+      "explanation": "A positive reward specifically means the spam probability decreased after adding the word, indicating a helpful, ham-pushing word."
+    },
+    {
+      "q": "What are the two sources used to build a black-box candidate vocabulary?",
+      "options": [
+        "Randomly generated strings and words scraped from unrelated foreign-language websites",
+        "Numbers and symbols only, since word-based candidates are ineffective in black-box settings",
+        "Words extracted exclusively from the target model's own error messages",
+        "Mined words (frequent terms from legitimate messages the attacker has access to) and curated words (hand-picked, everyday conversational terms)"
+      ],
+      "answer": 3,
+      "explanation": "Combining mined ham-message vocabulary with hand-curated conversational terms protects against a candidate pool that's too small or narrowly biased."
+    },
+    {
+      "q": "What is epsilon-greedy selection, as a strategy for choosing which word to test next?",
+      "options": [
+        "With a small probability (epsilon), explore a new or rarely-tested word; the rest of the time, exploit the best-performing word found so far",
+        "Randomly selecting a word with absolutely no consideration of past performance whatsoever",
+        "Testing every single candidate word exactly once before ever repeating any word",
+        "Always choosing the word that comes first alphabetically in the candidate vocabulary"
+      ],
+      "answer": 0,
+      "explanation": "Epsilon-greedy balances exploration and exploitation by mostly using known-good words while occasionally trying new candidates, controlled by a small exploration probability."
+    },
+    {
+      "q": "In the epsilon-greedy restaurant analogy, what does 'trying somewhere completely new roughly one time in five' represent?",
+      "options": [
+        "A defensive technique used by restaurants to detect suspicious customer behavior",
+        "Exploitation — always returning to the one restaurant known to be reliably good",
+        "Exploration — testing an unproven option in case it turns out even better than the current favorite",
+        "A fixed cost applied uniformly to every single query regardless of outcome"
+      ],
+      "answer": 2,
+      "explanation": "The occasional visit to a new restaurant mirrors exploration — sacrificing some certainty of a known-good outcome for the chance of discovering something even better."
+    },
+    {
+      "q": "What is synergy, as it relates to word combinations in a black-box GoodWords attack?",
+      "options": [
+        "A technique for compressing multiple words into a single, shorter token",
+        "A measurement of how visually similar two different words appear when rendered",
+        "A defensive mechanism that automatically detects and blocks word combinations",
+        "A combination performing better than simply adding up its individual parts would predict, such as 'meeting tomorrow' outperforming 'meeting' plus 'tomorrow' separately"
+      ],
+      "answer": 3,
+      "explanation": "Synergy captures the phenomenon where certain word pairings produce a combined evasion effect exceeding the simple sum of their individual impacts."
+    },
+    {
+      "q": "Roughly what fraction of white-box effectiveness does a black-box attacker typically achieve?",
+      "options": [
+        "Roughly 85-95% of white-box effectiveness",
+        "Black-box attacks are always more effective than white-box attacks",
+        "Exactly 50% of white-box effectiveness, no more and no less",
+        "Roughly 10-20% of white-box effectiveness"
+      ],
+      "answer": 0,
+      "explanation": "The module states black-box attacks reach approximately 85-95% of white-box effectiveness, showing that hiding model internals provides only limited protection."
+    },
+    {
+      "q": "Why is it accurate to say 'obscurity is not security' regarding Naive Bayes evasion?",
+      "options": [
+        "Because Naive Bayes classifiers are always deployed with full source code publicly available",
+        "The vulnerability lives in the architecture of Naive Bayes itself, not in any leaked parameters, so a query-only attacker can still rediscover the winning words through trial and error",
+        "Because black-box attacks are technically impossible to execute against any real system",
+        "Because obscurity-based defenses are illegal to implement under most security regulations"
+      ],
+      "answer": 1,
+      "explanation": "Since the underlying architectural weakness (additive, order-blind scoring) doesn't depend on visible internals, hiding the model doesn't fix the fundamental flaw an attacker can still exploit empirically."
+    },
+    {
+      "q": "Why do queries function as 'currency' in a black-box evasion attack?",
+      "options": [
+        "Because classifiers charge attackers a literal monetary fee for every single word tested",
+        "Because queries are the only mechanism by which a model's weights can ever be updated",
+        "Because query results are stored using a blockchain-based ledger system",
+        "Real systems impose rate limits, charge per request, or flag suspicious bursts of traffic, so every query has a genuine cost"
+      ],
+      "answer": 3,
+      "explanation": "Cost, rate limits, and detection risk all impose real constraints on how many queries an attacker can afford to send, making each query a precious, budgeted resource."
+    },
+    {
+      "q": "What is the recommended default query budget allocation across the three discovery phases?",
+      "options": [
+        "40% exploration, 40% exploitation, 20% combination",
+        "33% exploration, 33% exploitation, 34% combination",
+        "80% exploitation, 10% exploration, 10% combination",
+        "100% exploration with no allocation to exploitation or combination"
+      ],
+      "answer": 0,
+      "explanation": "The recommended default split allocates 40% to exploration, 40% to exploitation, and the remaining 20% to hunting for word combination synergies."
+    },
+    {
+      "q": "Why does testing a single word's impact typically cost two queries rather than just one?",
+      "options": [
+        "Because every API call is automatically duplicated by the server for redundancy",
+        "Because the classifier requires two separate authentication tokens per request",
+        "Because the first query always fails and must be retried once automatically",
+        "One query establishes the baseline message score, and a second query tests the same message with the word added; the difference between them is the actual reward"
+      ],
+      "answer": 3,
+      "explanation": "Measuring a word's true impact requires comparing before-and-after scores, meaning each meaningful test consumes two separate queries from the budget."
+    },
+    {
+      "q": "What is 'information gain,' in the context of choosing which query to run next?",
+      "options": [
+        "A measurement of how much the classifier's accuracy improves after retraining",
+        "The total amount of data transmitted during a single API request",
+        "The financial cost saved by choosing a cheaper query strategy",
+        "The difference between your uncertainty before asking a question and your uncertainty after getting the answer back — early exploration of new words tends to clear the most fog"
+      ],
+      "answer": 3,
+      "explanation": "Information gain measures how much a given query reduces overall uncertainty — testing brand-new words early on typically yields the highest information gain since so little is known yet."
+    },
+    {
+      "q": "When adapting the standard 40-40-20 query budget split, what should a very small query budget shift toward?",
+      "options": [
+        "Exploration, to maximize the number of new candidate words discovered",
+        "Exploitation, to get a quick reliable win rather than spending scarce queries on uncertain exploration",
+        "An equal three-way split regardless of the total available budget",
+        "Combination, to prioritize finding synergistic word pairs above all else"
+      ],
+      "answer": 1,
+      "explanation": "With very limited queries, prioritizing exploitation of already-promising words offers a more reliable path to a working result than gambling on unproven exploration."
+    },
+    {
+      "q": "Why is a tight query budget beneficial for stealth as well as cost?",
+      "options": [
+        "A defender watching request logs will notice 5,000 near-identical probes far more easily than 200 carefully chosen ones",
+        "Because a smaller number of queries always completes faster regardless of network conditions",
+        "Because tight budgets automatically encrypt all outgoing query traffic",
+        "Because query budgets have no relationship whatsoever to detection risk"
+      ],
+      "answer": 0,
+      "explanation": "A large volume of near-identical probing requests is a strong detection signal — minimizing query count also minimizes the behavioral footprint an attacker leaves behind."
+    },
+    {
+      "q": "What does sentiment analysis measure, and why is it a good target for GoodWords-style evasion?",
+      "options": [
+        "It measures the exact reading time required to process a piece of text",
+        "It measures only the total character count of a message with no regard to word choice",
+        "It is exclusively built using image-recognition neural networks, immune to word-based attacks",
+        "It judges the emotional tone of text, and is often built on additive text classifiers like Naive Bayes or linear models, carrying the same evasion weakness"
+      ],
+      "answer": 3,
+      "explanation": "Sentiment classifiers share the same additive, bag-of-words architecture that makes spam filters vulnerable, so the same GoodWords technique applies directly."
+    },
+    {
+      "q": "In the fictional BrightCart scenario, what real business impact could result from an attacker flipping negative reviews to appear positive?",
+      "options": [
+        "The sentiment model would refuse to process any further reviews permanently",
+        "Negative reviews slip through classified as positive and never reach the support team, letting genuine customer issues go unaddressed",
+        "All customer accounts would be automatically deleted from the database",
+        "The entire BrightCart platform would immediately shut down due to a critical server error"
+      ],
+      "answer": 1,
+      "explanation": "By flipping negative reviews to positive, an attacker could hide genuine customer complaints from the support team responsible for addressing them, causing real operational harm."
+    },
+    {
+      "q": "What is the key difference in word selection when flipping sentiment from positive to negative, versus negative to positive?",
+      "options": [
+        "Positive-to-negative flipping is technically impossible, only the reverse direction can succeed",
+        "The direction simply reverses which class of words you append — negative-leaning words for positive-to-negative, positive-leaning words for negative-to-positive",
+        "Both directions require an identical, fixed set of neutral words with no distinction between them",
+        "Positive-to-negative flipping requires white-box access exclusively, while negative-to-positive only works black-box"
+      ],
+      "answer": 1,
+      "explanation": "Sentiment flipping simply targets whichever class you want to push toward, appending words strongly associated with that target class regardless of direction."
+    },
+    {
+      "q": "In white-box sentiment flipping, how are words to append actually selected?",
+      "options": [
+        "By randomly selecting words from a general English dictionary with no regard to sentiment",
+        "By translating the review into a foreign language and back again repeatedly",
+        "By reading the model's per-class word probabilities directly and ranking words by how strongly they signal the target class",
+        "By asking human reviewers to manually suggest words for each individual review"
+      ],
+      "answer": 2,
+      "explanation": "White-box access allows direct computation of class-association scores from the model's learned probabilities, identical in principle to the goodness score used for spam evasion."
+    },
+    {
+      "q": "In black-box sentiment flipping, how is the impact of a candidate word determined?",
+      "options": [
+        "By querying the model with and without the word added, and measuring the resulting difference in the target class's predicted probability",
+        "By asking the model directly whether the word is positive or negative in tone",
+        "By counting the total number of letters in the candidate word",
+        "By checking whether the word appears in a pre-existing, publicly available sentiment lexicon"
+      ],
+      "answer": 0,
+      "explanation": "Black-box impact measurement follows the same before/after query pattern used in spam evasion — comparing predicted probability shifts to identify effective words."
+    },
+    {
+      "q": "What is the general defensive strategy recommended for stopping evasion attacks, since no single fix is described as perfect?",
+      "options": [
+        "Relying exclusively on a single, sufficiently strong coherence check",
+        "Trusting that obscuring the model's architecture alone provides adequate protection",
+        "Defense-in-depth — layering several different defenses together",
+        "Disabling the classifier entirely to eliminate any possibility of evasion"
+      ],
+      "answer": 2,
+      "explanation": "Since individual defenses each have limitations, the recommended approach layers multiple complementary defenses together to raise the overall bar against evasion."
+    },
+    {
+      "q": "What do the three lab defense modes VULN, HARD, and GUARD each teach?",
+      "options": [
+        "VULN, HARD, and GUARD refer exclusively to different network transport protocols",
+        "VULN teaches how the raw attack works, HARD teaches how defenses change attack cost, and GUARD teaches how to catch an attack in progress",
+        "VULN teaches encryption, HARD teaches compression, and GUARD teaches authentication",
+        "All three modes teach an identical set of concepts with no meaningful distinction between them"
+      ],
+      "answer": 1,
+      "explanation": "Each mode isolates a different pedagogical focus — the raw vulnerability, active mitigations, and detection/monitoring, respectively."
+    },
+    {
+      "q": "What is a coherence check, as a HARD-mode feature-level mitigation?",
+      "options": [
+        "A check that ensures the message contains no spelling or grammar errors",
+        "A check that confirms the message's sender identity matches their claimed name",
+        "A check for whether a message genuinely makes sense, or is spam text glued together with random ham words",
+        "A check that verifies the message was sent using a secure, encrypted connection"
+      ],
+      "answer": 2,
+      "explanation": "Coherence checks specifically target the tell-tale sign of GoodWords padding — a message that reads as an incoherent mashup of unrelated topics rather than a genuine, connected message."
+    },
+    {
+      "q": "What does 'feature capping' accomplish as a defense against GoodWords?",
+      "options": [
+        "It caps the total number of messages a classifier can process per day",
+        "It permanently removes all features from the classifier's vocabulary after training completes",
+        "It restricts the classifier to processing only messages shorter than 10 words",
+        "It limits how much a single word can shift the overall score, reducing the payoff of simply piling on more words"
+      ],
+      "answer": 3,
+      "explanation": "By limiting any single word's maximum influence on the final score, feature capping reduces the effectiveness of simply adding many high-goodness words in bulk."
+    },
+    {
+      "q": "Why do n-gram features directly attack the naive independence assumption that GoodWords relies on?",
+      "options": [
+        "N-grams require the message to be translated into a different language first",
+        "N-grams consider word pairs, so 'free money' stays suspicious even when good words follow it, since it's the pairing itself being scored, not each word alone",
+        "N-grams only work on classifiers that have never seen adversarial examples during training",
+        "N-grams eliminate the need for the classifier to process any text at all"
+      ],
+      "answer": 1,
+      "explanation": "By scoring word pairs (not just isolated single words), n-gram features preserve local context that plain independence-assuming bag-of-words discards, directly undermining the attack's core exploit."
+    },
+    {
+      "q": "Why are ensemble models a stronger defense than relying on a single classifier type?",
+      "options": [
+        "Ensembles automatically double the training dataset size available to the classifier",
+        "Ensembles eliminate the need for any feature extraction step whatsoever",
+        "Ensembles are always faster to run than any single individual model",
+        "Combining several different models means one single word set can't fool all of them at once, since each model type may not share the exact same blind spot"
+      ],
+      "answer": 3,
+      "explanation": "Since different model architectures have different vulnerabilities, an ensemble requires an attacker to simultaneously fool multiple distinct decision processes, raising the difficulty considerably."
+    },
+    {
+      "q": "What does adversarial training accomplish as a defense?",
+      "options": [
+        "It trains the model directly on examples that include GoodWords attacks, essentially teaching it the trick in advance",
+        "It trains a completely separate, unrelated model with no connection to the original classifier",
+        "It disables the model's ability to process any adversarial input by refusing to respond",
+        "It removes all training data related to spam messages entirely from the dataset"
+      ],
+      "answer": 0,
+      "explanation": "Adversarial training exposes the model to known attack patterns during training itself, helping it learn to recognize and resist the specific manipulation technique."
+    },
+    {
+      "q": "In GUARD mode, what does 'query pattern analysis' watch for?",
+      "options": [
+        "The specific web browser used to submit a given request",
+        "Many near-identical messages differing only by which words were appended, a massive red flag for active probing",
+        "The exact time zone from which a request originated",
+        "Whether a message contains any punctuation marks at all"
+      ],
+      "answer": 1,
+      "explanation": "A pattern of many near-identical messages, varying only in appended words, is a strong behavioral signature of an active black-box attack in progress."
+    },
+    {
+      "q": "In a defense-effectiveness comparison, which category of defenses is best described as detecting an attack without necessarily stopping or slowing it?",
+      "options": [
+        "Query monitoring",
+        "Feature capping",
+        "Ensembles",
+        "N-gram features"
+      ],
+      "answer": 0,
+      "explanation": "Query monitoring specifically identifies suspicious activity patterns without directly blocking or slowing down the underlying attack itself, serving purely a detection role."
+    },
+    {
+      "q": "Why are blocking, slowing, and detecting considered three genuinely different jobs, none of which alone is sufficient?",
+      "options": [
+        "Because only detection actually matters, while blocking and slowing provide no real security value",
+        "Because blocking a determined attacker is always technically impossible regardless of defenses used",
+        "No single row in the defense comparison table is enough on its own — all three functions need to work together to form a complete defense",
+        "Because slowing an attack down is illegal under most cybersecurity regulations"
+      ],
+      "answer": 2,
+      "explanation": "Since no individual defense type fully addresses every aspect of the threat, combining complementary blocking, slowing, and detecting mechanisms provides more comprehensive protection than any single approach."
+    },
+    {
+      "q": "Why should red team testers always confirm black-box evasion in addition to white-box, even if white-box access is available?",
+      "options": [
+        "Because black-box results are always mathematically identical to white-box results",
+        "Real attackers rarely have direct model access, so proving the attack also works with query-only access better reflects real-world risk",
+        "Because black-box testing is always significantly faster than white-box testing",
+        "Because white-box access is illegal to use during any authorized security assessment"
+      ],
+      "answer": 1,
+      "explanation": "Since most real-world attackers only have black-box access, confirming the attack works under those realistic constraints gives a more accurate picture of actual business risk."
+    },
+    {
+      "q": "Why is it recommended that red team testers report a full effectiveness curve rather than a single evasion number?",
+      "options": [
+        "A single number is always more accurate than any curve-based representation of the data",
+        "Curves are required by international regulation for all security assessment reports",
+        "Reporting a single number is technically impossible given how evasion rates are calculated",
+        "The curve tells the client exactly where their filter collapses, rather than hiding that information behind one aggregated statistic"
+      ],
+      "answer": 3,
+      "explanation": "A full curve (evasion rate versus words added) reveals the specific threshold at which the filter's effectiveness breaks down, providing far more actionable detail than one summary figure."
+    },
+    {
+      "q": "Why is it recommended that red team testers keep detailed evidence, such as baseline scores, augmented messages, and final labels?",
+      "options": [
+        "Evidence is only required if the client explicitly requests it after the assessment is complete",
+        "Keeping evidence has no bearing on the credibility or usefulness of a security report",
+        "Reproducibility is what makes a report genuinely credible",
+        "Detailed evidence is legally mandated only for assessments involving government systems"
+      ],
+      "answer": 2,
+      "explanation": "Thorough documentation allows the client (or another tester) to independently reproduce and verify the findings, which is essential for a report to be taken seriously."
+    },
+    {
+      "q": "What blue team recommendation directly targets the naive independence assumption GoodWords exploits?",
+      "options": [
+        "Increase the total number of training examples used, regardless of feature type",
+        "Add context features, such as n-grams and interaction terms, which break the independence assumption attackers rely on entirely",
+        "Migrate the classifier to run on faster, more powerful hardware",
+        "Reduce the classifier's vocabulary size to only the 10 most common words"
+      ],
+      "answer": 1,
+      "explanation": "Context-aware features like n-grams specifically address the root architectural flaw (word independence) rather than just treating the symptoms of the attack."
+    },
+    {
+      "q": "Which common mistake is listed regarding relying solely on model obscurity as a defense?",
+      "options": [
+        "Obscurity-based defenses are only relevant for classifiers deployed before 2010",
+        "Model obscurity has no relationship whatsoever to evasion attack effectiveness",
+        "Obscurity is listed as the single most effective and sufficient defense on its own",
+        "Relying on obscurity fails since attackers discover words by query — the real fix is fixing the underlying architecture"
+      ],
+      "answer": 3,
+      "explanation": "As demonstrated by black-box attacks reaching 85-95% of white-box effectiveness, hiding a model's internals doesn't address the underlying architectural vulnerability that makes evasion possible."
+    },
+    {
+      "q": "Under which MITRE ATLAS technique categories does evasion fall?",
+      "options": [
+        "Initial Access and Persistence",
+        "Privilege Escalation and Lateral Movement",
+        "Data Exfiltration and Command and Control",
+        "ML Model Access and Evade ML Model"
+      ],
+      "answer": 3,
+      "explanation": "MITRE ATLAS specifically categorizes evasion techniques under its ML Model Access and Evade ML Model technique groupings within its adversarial-ML knowledge base."
+    },
+    {
+      "q": "Under the NIST AI Risk Management Framework, how is evasion typically categorized?",
+      "options": [
+        "A hardware reliability concern affecting only GPU-based systems",
+        "An issue exclusively related to model training data licensing",
+        "A purely legal compliance issue unrelated to model behavior",
+        "A core robustness concern under trustworthy-AI guidance"
+      ],
+      "answer": 3,
+      "explanation": "NIST AI RMF treats evasion as a fundamental robustness concern, reflecting its impact on a model's reliability and trustworthiness under adversarial conditions."
+    },
+    {
+      "q": "What is a concise one-sentence summary of why evasion succeeds against simple additive classifiers?",
+      "options": [
+        "Simple classifiers require constant human supervision to function at all",
+        "Simple classifiers are incapable of processing more than 10 words per message",
+        "Simple classifiers always fail to reach 50% accuracy on any real-world dataset",
+        "Simple classifiers add up independent word evidence, so an attacker who piles on the right words can effectively outvote the truth"
+      ],
+      "answer": 3,
+      "explanation": "This summary captures the core mechanism throughout the module — additive scoring lets accumulated evidence from added words overwhelm the original content's signal."
+    },
+    {
+      "q": "A tester finds that a target sentiment classifier flips label with just 3 well-chosen words on 90% of tested reviews, compared to a typical illustrative Naive Bayes case needing roughly 15 words for similar success. What does this suggest about the classifier's baseline vulnerability?",
+      "options": [
+        "The target classifier must be using image-based features rather than text-based ones",
+        "This result proves the target classifier cannot possibly be using any form of additive scoring",
+        "This result is impossible and indicates a fundamental measurement error in the test",
+        "The target classifier's decision boundary is unusually easy to cross, suggesting weaker feature diversity or lighter regularization than the illustrative example"
+      ],
+      "answer": 3,
+      "explanation": "A classifier flipping with far fewer words than the illustrative curve suggests a comparatively weaker or more easily manipulated decision boundary, worth flagging as a notably severe finding in a report."
+    },
+    {
+      "q": "A red teamer has a 200-query black-box budget against a highly-defended target already known to use coherence checks and n-gram features. Which adjustment to the standard 40-40-20 split makes the most sense against a heavily-defended target?",
+      "options": [
+        "Shifting the entire budget toward exploitation only, ignoring combination entirely",
+        "Abandoning the black-box approach entirely, since query budgets never apply to defended targets",
+        "Shifting more of the budget toward combination, since synergies can help overcome strong filters that individual words alone might not defeat",
+        "Allocating 100% of the budget to exploration and 0% to any other phase"
+      ],
+      "answer": 2,
+      "explanation": "The module's adaptation table specifically recommends shifting toward combination when facing a highly-defended target, since synergistic word pairings can overcome protections that single words cannot defeat alone."
+    },
+    {
+      "q": "A defender implements feature capping and query monitoring but no n-gram features or ensembles. Based on the defense comparison table, what specific weakness remains in this configuration?",
+      "options": [
+        "This configuration provides complete, guaranteed protection against all forms of evasion",
+        "The attack itself may still succeed (since capping only slows rather than stops it, and n-grams/ensembles — the strongest stopping defenses — are absent), even though monitoring would detect the attempt",
+        "No weakness remains since query monitoring alone is sufficient to stop any evasion attempt",
+        "Feature capping and query monitoring together are mathematically equivalent to having n-gram features"
+      ],
+      "answer": 1,
+      "explanation": "Since feature capping only slows (not stops) an attack and query monitoring only detects (not blocks), the absence of stronger stopping defenses like n-grams or ensembles leaves the classifier still vulnerable to a sufficiently persistent attacker, even if that attacker is eventually noticed."
+    },
+    {
+      "q": "A white-box test achieves 98% evasion using the top 20 goodness-ranked words, but a follow-up black-box test using the exact same 20 words (discovered independently through querying) only achieves 82% evasion. What does this discrepancy most likely reflect?",
+      "options": [
+        "Proof that the black-box test was executed against a completely different, unrelated classifier",
+        "A mathematical impossibility, since black-box and white-box attacks must always produce identical results",
+        "Evidence that the classifier actively detected and specifically blocked the black-box queries",
+        "The general 85-95% relative effectiveness gap between black-box and white-box attacks, since black-box word selection relies on empirical, noisier estimates rather than exact model probabilities"
+      ],
+      "answer": 3,
+      "explanation": "This gap aligns with the module's documented expectation that black-box attacks typically achieve somewhat lower effectiveness than white-box due to the inherent noise and imprecision of query-based word discovery."
+    },
+    {
+      "q": "A company's spam filter uses only single-word bag-of-features with no n-grams, no ensembling, and no query monitoring, but does enforce a strict per-account rate limit of 5 requests per minute. Which specific attack approach would be most directly constrained by this rate limit, and how might an attacker adapt?",
+      "options": [
+        "The rate limit would have no effect on any evasion technique covered in this module",
+        "The rate limit would only affect the attacker's ability to perform sentiment flipping, not spam evasion",
+        "A black-box attack would be significantly slowed by the rate limit, pushing an attacker to prioritize a heavier exploitation-weighted budget split to make the most of each limited, spaced-out query",
+        "A white-box attack would be completely blocked, since rate limits apply equally to attackers with full model access"
+      ],
+      "answer": 2,
+      "explanation": "Since white-box attacks require no queries to the live system, only black-box (query-dependent) attacks would be constrained by a rate limit — pushing that attacker toward a strategy that minimizes wasted exploration in favor of more reliable exploitation."
+    },
+    {
+      "q": "What is the typical goal in a classic ML evasion scenario for a spam filter?",
+      "options": [
+        "Increasing the total processing time required for every classification request",
+        "Permanently deleting the spam filter's training dataset",
+        "Making a legitimate message get classified as spam, to annoy the recipient",
+        "Making a spam message get classified as ham (legitimate), so it slips past the filter into the inbox"
+      ],
+      "answer": 3,
+      "explanation": "The classic evasion goal is flipping a message that would normally be caught as spam into being classified as legitimate (ham), letting it bypass the filter."
+    },
+    {
+      "q": "Why does evasion often survive existing content filters undetected?",
+      "options": [
+        "Because evasion attacks physically bypass network firewalls at the hardware level",
+        "Because evasion attacks are always encrypted and therefore undetectable by any filter",
+        "Since the model itself still appears to be working normally and producing seemingly reasonable outputs, evasive input doesn't trigger the kind of obvious errors that might raise suspicion",
+        "Because filters are legally prohibited from blocking any AI-generated content"
+      ],
+      "answer": 2,
+      "explanation": "Since the classifier continues functioning and producing plausible-looking outputs, evasive inputs don't trigger obvious error conditions that would otherwise draw scrutiny."
+    },
+    {
+      "q": "What does it mean for a classifier's decision boundary to be 'crossed' by an evasion attack?",
+      "options": [
+        "The modified input's score moves from one side of the classification threshold to the other, flipping the predicted label",
+        "The classifier's underlying source code is physically altered by the attacker",
+        "The classifier's training dataset is deleted and replaced with new data",
+        "The classifier stops accepting any further input after the boundary is crossed"
+      ],
+      "answer": 0,
+      "explanation": "Crossing the decision boundary simply means the modified input's calculated score has shifted enough to fall on the opposite side of the classification threshold from where it started."
+    },
+    {
+      "q": "What is one-hot encoding, in the context of turning text into features a model can process?",
+      "options": [
+        "A technique for encrypting text so it becomes unreadable to any model",
+        "A process that automatically corrects spelling errors before classification",
+        "A representation where each word gets its own dedicated position, marked present or absent, rather than sharing space with other words",
+        "A method for compressing text files to reduce their storage size"
+      ],
+      "answer": 2,
+      "explanation": "One-hot encoding assigns each distinct word its own dedicated slot in a feature vector, marking simple presence or absence rather than blending multiple words together."
+    },
+    {
+      "q": "Why are structural, non-text features like message length or link count harder for an attacker to disguise through simple word substitution?",
+      "options": [
+        "Structural features are always encrypted separately from the message's actual text content",
+        "These features measure properties of the message as a whole (like overall length or link count) rather than depending on any single word choice, so rewording alone doesn't change them",
+        "Structural features are legally required to be disclosed to the sender of any message",
+        "Structural features can only be calculated by a human reviewer, never automatically"
+      ],
+      "answer": 1,
+      "explanation": "Since structural signals reflect aggregate properties of the whole message rather than specific word choices, they resist the kind of word-level manipulation that defeats purely lexical features."
+    },
+    {
+      "q": "What advantage does a Naive Bayes classifier's transparent math offer specifically for learning evasion fundamentals?",
+      "options": [
+        "Its additive scoring lets you watch each word push the decision one way or the other, making the underlying mechanism of evasion directly observable",
+        "Naive Bayes requires no training data whatsoever to function correctly",
+        "Naive Bayes is the only classifier type that can ever be evaded under any circumstances",
+        "Naive Bayes automatically generates its own adversarial training examples during deployment"
+      ],
+      "answer": 0,
+      "explanation": "Because each word's contribution to the final score is simply added together and directly visible, Naive Bayes makes the underlying evasion mechanism transparent and easy to reason about."
+    },
+    {
+      "q": "What is the practical implication of white-box access for an attacker planning a GoodWords-style evasion attack?",
+      "options": [
+        "They can read the model's internal word probabilities directly, computing the exact goodness score for every candidate word without needing to send a single query",
+        "They can only test one candidate word per day due to strict access limitations",
+        "They must send thousands of test queries before selecting any candidate word",
+        "White-box access provides no practical advantage over black-box access for this specific attack"
+      ],
+      "answer": 0,
+      "explanation": "Full visibility into the model's learned probabilities lets a white-box attacker compute exact goodness scores mathematically, entirely bypassing the need for query-based discovery."
+    },
+    {
+      "q": "Why does Naive Bayes' 'static learned probabilities' property matter for evasion, once a model has been trained and deployed?",
+      "options": [
+        "Static probabilities mean the model must be retrained after every single classification it performs",
+        "This property has no practical significance for how evasion attacks are actually planned",
+        "Static probabilities cause the model to reject all future input after initial deployment",
+        "The model doesn't move or adapt between attacks — an attacker can study it once and reuse the same discovered good words repeatedly against the same deployed model"
+      ],
+      "answer": 3,
+      "explanation": "Since the model's learned probabilities remain fixed after training (barring retraining), an attacker's discovered good words remain reliably effective for repeated future attacks against that same deployed model."
+    },
+    {
+      "q": "What happens mathematically when a word that appeared frequently in spam but never in ham during training is evaluated for its goodness score?",
+      "options": [
+        "The word is automatically and permanently removed from the classifier's vocabulary",
+        "The classifier assigns that word an infinite goodness score, guaranteeing evasion success",
+        "The goodness score calculation throws a fatal error and the entire classifier crashes",
+        "Thanks to Laplace smoothing, the word still receives a small non-zero ham probability rather than an outright zero, keeping the goodness score calculation finite and stable"
+      ],
+      "answer": 3,
+      "explanation": "Laplace smoothing ensures every word, even one never seen in a particular class during training, still receives a small non-zero probability, avoiding division-by-zero errors in the goodness score calculation."
+    },
+    {
+      "q": "What does the term 'effectiveness curve' refer to in the context of GoodWords testing?",
+      "options": [
+        "A graph showing the total dollar cost of running a black-box attack over time",
+        "A curve representing the classifier's training accuracy over successive training epochs",
+        "A plot showing evasion rate as a function of how many good words have been added, typically following a sigmoid (S-shaped) growth pattern",
+        "A visualization of network latency between the attacker and the target server"
+      ],
+      "answer": 2,
+      "explanation": "The effectiveness curve tracks how evasion success rate grows as more good words are appended, typically showing slow initial gains followed by a rapid rise and eventual plateau."
+    },
+    {
+      "q": "In black-box GoodWords, why might an attacker choose to re-test a top-performing word multiple times rather than only testing it once?",
+      "options": [
+        "Because re-testing automatically doubles the word's effective goodness score",
+        "Because the classifier's API technically requires each word to be submitted exactly three times",
+        "Because single-test results are always completely deterministic and never vary",
+        "Since results can vary slightly due to noise in how the classifier scores different messages, repeated testing (exploitation) helps confirm the word's reliability before committing to it"
+      ],
+      "answer": 3,
+      "explanation": "Repeated testing (exploitation) helps build confidence in a word's true effectiveness, smoothing out any noise or message-specific variation from a single test."
+    },
+    {
+      "q": "What does the exponential moving average technique accomplish when updating a candidate word's score after each test?",
+      "options": [
+        "It converts the word's numeric score into a text-based description automatically",
+        "It doubles the word's score every time the word is tested again",
+        "It permanently deletes the word's score history after each new test",
+        "It smooths out the effect of one lucky or unlucky individual test, blending new results with the word's prior established performance rather than fully overwriting it"
+      ],
+      "answer": 3,
+      "explanation": "An exponential moving average blends new observations with historical performance, preventing a single anomalous test result from dramatically swinging a word's overall estimated effectiveness."
+    },
+    {
+      "q": "Why might an attacker prioritize testing longer, less common candidate words later in a black-box campaign rather than earlier?",
+      "options": [
+        "Word length has no bearing whatsoever on optimal query sequencing strategy",
+        "The classifier's API technically rejects any word submitted before a set number of prior queries",
+        "Longer words always produce a mathematically stronger evasion effect regardless of when they are tested",
+        "Early queries testing brand-new, diverse words typically yield the highest information gain since so little is known yet, while later queries are better spent refining already-promising candidates"
+      ],
+      "answer": 3,
+      "explanation": "Since information gain tends to be highest early on (when uncertainty is greatest), later-stage queries are typically better spent refining known-promising candidates rather than exploring further unknowns."
+    },
+    {
+      "q": "What role does a sample review's baseline positive probability play when measuring candidate word impact in black-box sentiment flipping?",
+      "options": [
+        "It serves as the reference point against which each candidate word's impact is measured, by comparing the new positive probability after adding the word to this baseline",
+        "It determines which programming language the attack script must be written in",
+        "It has no functional role in the black-box sentiment-flipping process",
+        "It sets a hard, absolute time limit on how long the entire attack campaign may run"
+      ],
+      "answer": 0,
+      "explanation": "The baseline probability establishes the starting point for measuring each candidate word's impact — the difference between the new score and this baseline is the word's measured 'push' toward the target class."
+    },
+    {
+      "q": "Why are both spam evasion and sentiment flipping considered examples of the same underlying vulnerability pattern?",
+      "options": [
+        "Both target additive, bag-of-words classifiers where the independence assumption lets an attacker add words that shift the overall score without the model questioning coherence",
+        "Because sentiment flipping and spam evasion are actually the exact same technical attack with no meaningful distinction",
+        "Because spam filters and sentiment classifiers are always trained on the exact same dataset",
+        "Because both attack types require identical query budgets regardless of target complexity"
+      ],
+      "answer": 0,
+      "explanation": "Both attacks exploit the same architectural weakness — additive, order-blind scoring in bag-of-words classifiers — just applied to different classification tasks (spam/ham vs. positive/negative)."
+    },
+    {
+      "q": "Why does a classifier's use of interaction terms (features that combine two or more variables together) make it harder to evade with simple word additions?",
+      "options": [
+        "Interaction terms always require significantly more training data than any other feature type",
+        "Interaction terms automatically detect and reject any message containing an even number of words",
+        "Interaction terms specifically capture relationships between features rather than treating each one in isolation, undermining the pure additive independence that GoodWords relies on",
+        "Interaction terms are only usable with image-based classifiers, never text-based ones"
+      ],
+      "answer": 2,
+      "explanation": "By modeling how features relate to each other rather than treating each independently, interaction terms disrupt the exact independence assumption that makes pure additive scoring exploitable."
+    },
+    {
+      "q": "Why are ensembles and adversarial training both described as 'often' stopping an attack rather than 'always'?",
+      "options": [
+        "No defense in the comparison is presented as a guaranteed, absolute fix — each raises the difficulty and cost of a successful attack without eliminating the possibility entirely",
+        "Because ensembles and adversarial training are actually completely ineffective against any real evasion attempt",
+        "Because 'often' and 'always' are used interchangeably with identical meaning throughout the comparison",
+        "Because these defenses only function correctly on days with an even calendar date"
+      ],
+      "answer": 0,
+      "explanation": "The comparison deliberately avoids claiming any defense is a perfect, guaranteed fix — reflecting the honest reality that determined attackers can often still find a path around even strong individual defenses."
+    },
+    {
+      "q": "Under the OWASP framework mapping referenced for evasion attacks, what general category of risk is covered?",
+      "options": [
+        "Only issues related to software licensing compliance",
+        "Only issues specific to relational database management systems",
+        "Exclusively physical hardware security vulnerabilities",
+        "Improper handling of model output and input validation gaps"
+      ],
+      "answer": 3,
+      "explanation": "OWASP's coverage of evasion-related risk focuses on improper output handling and input validation gaps, both directly relevant to how classifiers process potentially adversarial input."
+    },
+    {
+      "q": "Why is 'staying in scope' listed as an important red team best practice specifically for evasion testing?",
+      "options": [
+        "Scope restrictions only apply during business hours, not during off-hours testing",
+        "Staying in scope is a purely optional recommendation with no real consequence if ignored",
+        "Scope limitations only apply to attacks targeting image-based classifiers, never text-based ones",
+        "Evasion testing is powerful, so it should only be run against systems the tester is explicitly authorized to test"
+      ],
+      "answer": 3,
+      "explanation": "Given the real-world power and potential impact of evasion techniques, ensuring testing is limited to explicitly authorized systems is a foundational ethical and legal requirement."
+    },
+    {
+      "q": "A blue team adds n-gram features to their spam classifier but keeps using unbounded per-word influence with no feature capping. What residual risk remains from this specific configuration?",
+      "options": [
+        "A sufficiently large number of individually weak but n-gram-safe words could still accumulate enough combined score shift to cross the decision boundary, since no single-word or aggregate cap limits total influence",
+        "The classifier would immediately stop functioning upon receiving any adversarial input under this configuration",
+        "This configuration eliminates all forms of evasion risk completely, with no residual vulnerability remaining",
+        "N-gram features alone are sufficient to guarantee that feature capping becomes entirely unnecessary in any scenario"
+      ],
+      "answer": 0,
+      "explanation": "While n-grams address word-pair independence, without a cap on cumulative influence, an attacker could still potentially find enough n-gram-compatible padding to accumulate sufficient score shift, since nothing bounds the total possible influence."
+    },
+    {
+      "q": "A defender deploys query monitoring (GUARD-style detection) but has no HARD-mode mitigations in place at all. If an attacker's black-box campaign is detected mid-attack, what limitation does this configuration have?",
+      "options": [
+        "Query monitoring alone automatically retrains the classifier to become immune to future attacks",
+        "Detection alone doesn't prevent the attack from succeeding before or during the time it takes to notice and respond — the underlying vulnerability remains fully exploitable unless paired with blocking or slowing defenses",
+        "This configuration provides identical protection to a full defense-in-depth setup combining all three defense categories",
+        "Detection-only configurations are mathematically guaranteed to stop 100% of all evasion attempts instantly"
+      ],
+      "answer": 1,
+      "explanation": "Since detection only provides visibility (not prevention), an attacker's queries may still successfully complete the underlying attack before or during the detection and response process, highlighting why detection alone is insufficient without complementary blocking/slowing controls."
+    },
+    {
+      "q": "Why is it misleading to describe a successful evasion attack as 'breaking' or 'hacking' the classifier?",
+      "options": [
+        "Because a successful evasion attack always requires physically damaging the server hardware",
+        "Because evasion attacks are technically impossible to execute against any properly trained model",
+        "Because the term 'hacking' only applies to attacks against network infrastructure, never software models",
+        "The classifier still functions exactly as trained and designed — it correctly classifies the input it was given, which just happens to be a carefully crafted input engineered to sit on the wrong side of the decision boundary"
+      ],
+      "answer": 3,
+      "explanation": "Evasion doesn't corrupt or malfunction the model — it exploits the model working exactly as designed against a deliberately crafted input, which is a subtly different framing than 'breaking' something."
+    }
+  ]
+}

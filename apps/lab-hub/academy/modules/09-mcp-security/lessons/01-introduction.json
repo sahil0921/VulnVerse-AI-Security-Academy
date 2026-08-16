@@ -1,0 +1,25 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to MCP",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Introduction to MCP\n\nModern AI assistants are only as useful as the things they can actually reach. A chatbot that can talk but can't read your files, query your database, or send a message is really just a fancy autocomplete.\n\nMCP, short for Model Context Protocol, is the standard that lets an AI model safely connect to those external tools and data sources.\n\n## The problem MCP solves\n\nBefore MCP existed, every company that wanted their AI to talk to a tool had to write custom glue code for each individual connection.\n\n- Want the AI to read Google Drive? Write custom code for that.\n- Want it to query Postgres? Write different custom code for that.\n- Want it to send Slack messages? Write yet another separate integration.\n\nThis approach is slow, messy, and genuinely hard to secure properly, since every integration ends up behaving differently from the next.\n\n## A simple comparison\n\nThink of MCP like a USB-C port, but for AI.\n\nBefore USB existed, every device had its own oddly shaped plug. USB-C gave us one standard connector that works everywhere, regardless of the device. MCP does essentially the same thing for AI: one standard way for a model to plug into any tool it needs.\n\n## What MCP actually is\n\nMCP is an open protocol, meaning a shared set of rules, released by Anthropic in late 2024. It defines:\n\n- How an AI application asks a tool to actually do something.\n- What format those messages need to use.\n- How tools describe exactly what they're capable of doing.\n\nBecause it's a genuine standard, a tool built for MCP works with any MCP-compatible AI application, not just one specific vendor's product.\n\n## Why security people care\n\nHere's the key insight running through this entire module:\n\n> MCP gives the AI hands. And anything with hands can be tricked into doing real damage.\n\nWhen an AI can read files, run commands, or move money, an attacker who can influence that AI effectively inherits those same powers. MCP dramatically expands what a compromised AI is actually capable of doing.\n\nThat's exactly why MCP has become one of the fastest-growing attack surfaces in enterprise AI today.\n\n---\n\nIn this module, you'll learn how MCP actually works, where its weak points are, how attackers exploit them in practice, and how to defend real systems built on it."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    U[User] --> H[AI Host App]\n    H --> M[MCP Layer]\n    M --> T1[File Tool]\n    M --> T2[Database Tool]\n    M --> T3[Slack Tool]\n    style M fill:#4f8cff,color:#fff\n    style H fill:#a855f7,color:#fff"
+    },
+    {
+      "type": "note",
+      "body": "**Remember this throughout the whole module:** MCP doesn't make an AI smarter. It makes an AI more capable of acting on the world. Every new capability it gains is also a new door an attacker might potentially walk through."
+    },
+    {
+      "type": "content",
+      "body": "## Where MCP shows up\n\n| Setting | Example |\n|---|---|\n| Developer laptop | VS Code AI extension reading local files and git history |\n| Enterprise platform | Shared AI assistant connected to a company database and chat |\n| Cloud agent | Autonomous agent that browses, codes, and deploys |\n\n## Key Takeaways\n\n- MCP is a standard protocol connecting AI models to external tools and data sources.\n- It replaces messy, custom integrations with one common shared language.\n- Think of it as USB-C, but for AI.\n- MCP gives AI the power to act, which is exactly why it's such a major security concern.\n- An attacker who successfully influences the AI inherits the AI's own tool permissions."
+    }
+  ]
+}

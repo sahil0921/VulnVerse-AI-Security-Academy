@@ -1,0 +1,43 @@
+{
+  "slug": "03-tools-and-actions",
+  "title": "Tools & Actions",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Tools & Actions\n\nTools are what make an agent genuinely powerful, and also what make it genuinely risky. A tool is simply a function the agent is allowed to call.\n\n## Function calling: how tools actually work\n\nModern LLMs support function calling, sometimes also called tool calling. The developer describes each available tool to the model, including:\n\n- Its name, such as `get_order`\n- What it does, through a description\n- Its inputs, defined through a schema, such as `order_id: string`\n\nThe model then decides when to use a tool and what inputs to send with it. It outputs a structured request. The orchestrator then actually runs the real function and returns the result back to the model.\n\n**A simple comparison:** function calling works like a waiter, the LLM, and a kitchen, your actual code. The waiter can't cook. The waiter just writes an order ticket. The kitchen reads that ticket and prepares the food. If a customer can trick the waiter into writing any ticket they want, they can effectively order things that were never on the menu."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Defining a tool the model is allowed to call.\ntools = [{\n    \"type\": \"function\",\n    \"function\": {\n        \"name\": \"get_order\",\n        \"description\": \"Look up an order by its ID for the current customer.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"order_id\": {\"type\": \"string\", \"description\": \"The order ID\"}\n            },\n            \"required\": [\"order_id\"]\n        }\n    }\n}]\n\n# The model outputs (as TEXT):\n#   { \"name\": \"get_order\", \"arguments\": { \"order_id\": \"12345\" } }\n# Your orchestrator then calls the REAL get_order(\"12345\")."
+    },
+    {
+      "type": "content",
+      "body": "## The two big problems with tools\n\n### 1. The model chooses the inputs\n\nThe model itself decides what value to pass as `order_id`. If an attacker can influence the model, they can effectively influence the tool's inputs too. Nothing inherently stops the model from sending something like `order_id = \"'; DROP TABLE orders; --\"` if that tool passes its input straight into a database query.\n\n### 2. Tools often carry too much power\n\nDevelopers frequently give tools broad permissions simply because it's easier to build that way. A single `run_sql` tool might end up with full read and write access to the entire database. A `send_email` tool might be able to email absolutely anyone. The agent inherits all of that underlying power by default.\n\n## Common tool categories\n\n| Tool type | Example action | Worst-case abuse |\n|-----------|----------------|------------------|\n| Data lookup | Query a database | Dump every customer record |\n| Communication | Send email / Slack | Spam, phishing, data exfiltration |\n| File access | Read / write files | Read secrets, overwrite configs |\n| Code execution | Run shell / Python | Full server takeover |\n| Web browsing | Fetch a URL | Pull in attacker-controlled text |\n| External API | Call a payment API | Move money, issue refunds |"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Attacker input\"] --> B[\"LLM decides tool + args\"]\n    B --> C[\"Orchestrator runs tool\"]\n    C --> D{\"Tool over-privileged?\"}\n    D -->|\"Yes\"| E[\"Big impact: data loss, RCE\"]\n    D -->|\"No, least privilege\"| F[\"Limited impact\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Vulnerable vs secure tool design\n\nA vulnerable design uses a broad tool that simply trusts whatever inputs the model sends it.\n\nA secure design uses a narrow tool that validates its inputs and enforces the current user's permissions directly in code, never relying on the prompt to do that job."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: trusts whatever the model sends, unlimited scope.\ndef get_order(order_id):\n    return db.query(f\"SELECT * FROM orders WHERE id = {order_id}\")  # SQLi + no ownership check\n\n\n# SECURE: parameterized, scoped to the logged-in user, validated.\ndef get_order(order_id, *, current_user_id):\n    if not order_id.isdigit():\n        raise ValueError(\"Invalid order id\")\n    return db.query(\n        \"SELECT * FROM orders WHERE id = %s AND customer_id = %s\",\n        (order_id, current_user_id),   # ownership enforced in CODE, not in the prompt\n    )"
+    },
+    {
+      "type": "note",
+      "body": "**Golden rule:** never trust the LLM to enforce security on its own. The model can be talked out of any rule you write into the prompt. Permissions, ownership, and limits need to be enforced in real code that the model has no ability to argue with."
+    },
+    {
+      "type": "content",
+      "body": "## Key takeaways\n\n- A tool is a function the agent can call. Function calling lets the model decide when and how to use it.\n- The model controls the tool's inputs, so attacker-influenced input can become attacker-influenced tool calls.\n- Over-privileged tools turn small tricks into genuinely large breaches.\n- Always validate inputs and enforce permissions in code, never rely on the prompt for security."
+    }
+  ]
+}

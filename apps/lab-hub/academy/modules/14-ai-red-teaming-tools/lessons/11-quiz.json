@@ -1,0 +1,146 @@
+{
+  "slug": "11-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 23,
+  "questions": [
+    {
+      "q": "Which organization created PyRIT?",
+      "options": ["NVIDIA", "Microsoft", "IBM", "Confident AI"],
+      "answer": 1,
+      "explanation": "PyRIT (Python Risk Identification Tool) was built and open-sourced by Microsoft's AI Red Team."
+    },
+    {
+      "q": "What is the correct pip install command for Garak?",
+      "options": ["pip install nvidia-garak", "pip install garak-scanner", "pip install garak", "pip install ai-garak"],
+      "answer": 2,
+      "explanation": "Garak installs with the simple command 'pip install garak'."
+    },
+    {
+      "q": "In Garak's terminology, what is a 'probe'?",
+      "options": ["The report file it generates", "An attack module designed to trigger a specific vulnerability class", "The adapter connecting to a target model", "A scoring function for grading responses"],
+      "answer": 1,
+      "explanation": "A probe is an attack module — e.g. dan, promptinject, encoding — each targeting a different vulnerability class."
+    },
+    {
+      "q": "Which tool is specifically known for dynamic, multi-turn stress testing of RAG pipelines and chatbots, with a strong focus on hallucination detection?",
+      "options": ["Giskard", "CleverHans", "Nmap", "AutoDAN"],
+      "answer": 0,
+      "explanation": "Giskard specializes in testing RAG chatbots for hallucination, factual consistency, and off-topic drift, not just jailbreaks."
+    },
+    {
+      "q": "DeepTeam organizes its testing around what structure?",
+      "options": ["A single fixed probe list", "A matrix of vulnerability classes crossed with attack strategies", "Only white-box gradient attacks", "A YAML-only configuration with no code"],
+      "answer": 1,
+      "explanation": "DeepTeam applies multiple attack strategies (jailbreaking, roleplay, encoding, etc.) against each vulnerability class (PII leakage, bias, excessive agency, etc.), producing a matrix of results."
+    },
+    {
+      "q": "Which tool is best suited for wiring red teaming directly into a CI/CD pipeline using a YAML config file?",
+      "options": ["PyRIT", "Promptfoo", "CleverHans", "TextAttack"],
+      "answer": 1,
+      "explanation": "Promptfoo is designed to run as a pipeline step from a promptfooconfig.yaml file, making it well suited to CI/CD gates."
+    },
+    {
+      "q": "What is the Adversarial Robustness Toolbox (ART) primarily built by?",
+      "options": ["Google", "OpenAI", "IBM", "Meta"],
+      "answer": 2,
+      "explanation": "ART (Adversarial Robustness Toolbox) is IBM's open-source library for evasion, poisoning, extraction, and inference attacks against ML models."
+    },
+    {
+      "q": "CleverHans is best described as:",
+      "options": ["An enterprise CI/CD red teaming platform", "A lightweight library of research-paper-accurate adversarial example algorithms (FGSM, PGD, etc.)", "A prompt injection payload repository", "A network enumeration tool for AI infrastructure"],
+      "answer": 1,
+      "explanation": "CleverHans focuses specifically on implementing published adversarial example generation algorithms in a lean, reference-accurate way."
+    },
+    {
+      "q": "Which supporting tool would you use to intercept and modify HTTP requests sent to an LLM-backed API endpoint?",
+      "options": ["CyberChef", "Burp Suite", "Jupyter Notebooks", "PayloadsAllTheThings"],
+      "answer": 1,
+      "explanation": "Burp Suite is used to intercept, inspect, and modify API requests, letting you see exactly what's sent to an LLM endpoint and replay it with changes."
+    },
+    {
+      "q": "What is CyberChef primarily used for in AI red teaming workflows?",
+      "options": ["Running white-box gradient attacks", "Encoding and decoding payloads (Base64, ROT13, URL encoding, Unicode)", "Hosting a vector database", "Scanning open network ports"],
+      "answer": 1,
+      "explanation": "CyberChef is a browser-based tool for encoding/decoding payloads, useful for building filter-evasion prompts like those tested by Garak's encoding probes."
+    },
+    {
+      "q": "Which ports would be most relevant to check when running Nmap against AI infrastructure, based on this module?",
+      "options": ["21, 22, 23", "80, 443 only", "11434 (Ollama), 6333 (Qdrant), 9200 (Elasticsearch)", "3389, 5900"],
+      "answer": 2,
+      "explanation": "11434 is Ollama's default port, 6333 is Qdrant's default port, and 9200 is Elasticsearch's default port — all common components of an AI stack."
+    },
+    {
+      "q": "What technique does GCG (from the llm-attacks research) use to find adversarial suffixes?",
+      "options": ["Random brute force", "Greedy Coordinate Gradient optimization", "Manual prompt engineering only", "Genetic algorithms"],
+      "answer": 1,
+      "explanation": "GCG uses Greedy Coordinate Gradient optimization to search for a suffix string that increases the likelihood of a harmful response, and these suffixes often transfer across models."
+    },
+    {
+      "q": "PAIR (Prompt Automatic Iterative Refinement) requires which type of access to the target model?",
+      "options": ["White-box access to model weights", "Black-box, query-only access", "Physical access to the GPU server", "Access to the training dataset"],
+      "answer": 1,
+      "explanation": "PAIR uses one LLM as an attacker to iteratively refine prompts against a target LLM using only its responses as feedback — no gradient or weight access is needed."
+    },
+    {
+      "q": "How does TAP (Tree of Attacks with Pruning) improve on PAIR?",
+      "options": ["It requires white-box weight access", "It branches multiple candidate prompts in a search tree and prunes unlikely branches", "It only works against classic ML classifiers", "It removes the need for any target model queries"],
+      "answer": 1,
+      "explanation": "TAP explores multiple candidate jailbreak prompts as branches of a search tree, pruning branches an evaluator judges unlikely to succeed, generally making it more query-efficient than PAIR."
+    },
+    {
+      "q": "What is JailbreakBench primarily used for?",
+      "options": ["Generating new zero-day jailbreak prompts", "Providing a standardized dataset and evaluation harness to benchmark jailbreak attacks and defenses", "Encoding payloads for filter evasion", "Scanning network ports on AI infrastructure"],
+      "answer": 1,
+      "explanation": "JailbreakBench offers a shared dataset of harmful behaviors and a reproducible evaluation methodology so different attacks can be compared on equal footing."
+    },
+    {
+      "q": "TextAttack was originally designed to attack what type of model?",
+      "options": ["Generative chat LLMs directly", "Classic NLP classifiers (sentiment, spam, toxicity detectors)", "Vector databases", "Kubernetes clusters"],
+      "answer": 1,
+      "explanation": "TextAttack was built for adversarial NLP against classifiers, which is directly relevant to attacking classifier-based guardrails placed in front of production LLMs."
+    },
+    {
+      "q": "What does Rebuff primarily provide?",
+      "options": ["An attack framework for generating jailbreaks", "A prompt-injection detection layer combining heuristics, an LLM judge, and canary tokens", "A GPU-accelerated model training pipeline", "A network fuzzing tool"],
+      "answer": 1,
+      "explanation": "Rebuff is a defensive tool for detecting prompt injection, useful for a red teamer to understand what a defended target's guardrail stack might resemble."
+    },
+    {
+      "q": "What advantage does AutoDAN offer over GCG-style attacks?",
+      "options": ["It requires no compute at all", "It produces fluent, readable jailbreak prompts less likely to be flagged by perplexity-based filters", "It only works on classifiers, not LLMs", "It eliminates the need for any target access"],
+      "answer": 1,
+      "explanation": "AutoDAN uses a genetic-algorithm-style search to evolve prompts that remain natural-sounding, unlike GCG's often unnatural/gibberish suffixes, helping evade filters that flag unusual text."
+    },
+    {
+      "q": "According to the module, which category of tools generally requires white-box (model weight) access?",
+      "options": ["Garak and Promptfoo", "PAIR and TAP", "GCG and AutoDAN", "DeepTeam and Giskard"],
+      "answer": 2,
+      "explanation": "GCG and AutoDAN are optimization-based attacks that typically require access to model weights or heavy compute, unlike black-box tools like PAIR and TAP."
+    },
+    {
+      "q": "In a typical engagement flow described in this module, what comes right after infrastructure recon (Nmap/service discovery)?",
+      "options": ["Filing the final report", "A broad scan with Garak for fast baseline coverage", "Running GCG against production immediately", "Skipping straight to classifier-specific attacks"],
+      "answer": 1,
+      "explanation": "The recommended flow runs Garak's broad scan early to get fast baseline coverage before moving to targeted, tool-specific deep-dives."
+    },
+    {
+      "q": "Which tool would be most appropriate if your target has a classic spam-filter classifier sitting in front of an LLM, similar to labs in the AI Evasion module?",
+      "options": ["Promptfoo", "ART or CleverHans", "Rebuff", "JailbreakBench"],
+      "answer": 1,
+      "explanation": "ART and CleverHans are built for classic ML evasion attacks against classifiers like spam filters, directly extending the white-box/black-box evasion techniques covered earlier."
+    },
+    {
+      "q": "Why does this module caution against relying purely on automated scanner output?",
+      "options": ["Because scanners are always 100% accurate", "Because scanners can produce false positives and false negatives, just like any other security tool", "Because scanners are illegal to use", "Because scanners only work on closed-source models"],
+      "answer": 1,
+      "explanation": "Automated tools automate techniques you should already understand from first principles; findings should still be validated manually since scanners can misjudge results in both directions."
+    },
+    {
+      "q": "What is the primary reason PyRIT is well suited to enterprise environments?",
+      "options": ["It has the smallest probe library of any tool", "It supports repeatable, auditable, multi-modal, chained attack pipelines", "It only works with a single fixed CLI command", "It cannot be integrated into other reporting pipelines"],
+      "answer": 1,
+      "explanation": "PyRIT is a composable framework (targets, converters, orchestrators, scorers) designed for building repeatable and auditable red team pipelines, including multi-modal targets."
+    }
+  ]
+}

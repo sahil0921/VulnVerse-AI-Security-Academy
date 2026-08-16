@@ -1,0 +1,230 @@
+{
+  "slug": "13-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "difficulty": "Beginner",
+  "reading_time": "10 min",
+  "questioncount": 20,
+  "questions": [
+    {
+      "q": "What is Machine Learning?",
+      "options": [
+        "A computer that follows only hand-written rules",
+        "A type of AI where the computer learns patterns from examples",
+        "A physical robot brain",
+        "A programming language"
+      ],
+      "answer": 1,
+      "explanation": "Machine Learning allows a computer to learn patterns directly from example data, instead of being given exact rules by a programmer."
+    },
+    {
+      "q": "In simple terms, what is a 'model'?",
+      "options": [
+        "The method used to train the AI",
+        "The raw data used for training",
+        "The output produced after training, containing the learned patterns",
+        "The question a user asks"
+      ],
+      "answer": 2,
+      "explanation": "A model is the result of the training process. It stores the learned patterns and is used to generate predictions."
+    },
+    {
+      "q": "What is the difference between training and inference?",
+      "options": [
+        "Training uses the model; inference builds it",
+        "Training is when the model learns; inference is when it produces answers",
+        "They are the same process",
+        "Inference happens before training"
+      ],
+      "answer": 1,
+      "explanation": "Training is the learning phase, where the model is built. Inference is using that finished model to generate a response."
+    },
+    {
+      "q": "Which type of learning uses examples that already include the correct answer?",
+      "options": [
+        "Unsupervised learning",
+        "Reinforcement learning",
+        "Supervised learning",
+        "Random learning"
+      ],
+      "answer": 2,
+      "explanation": "Supervised learning trains a model using labeled data, meaning each example is paired with its correct answer."
+    },
+    {
+      "q": "What does an 'embedding' do?",
+      "options": [
+        "Encrypts the model file",
+        "Converts text or images into numbers that represent their meaning",
+        "Deletes training data",
+        "Speeds up network traffic"
+      ],
+      "answer": 1,
+      "explanation": "Embeddings convert data such as text into numerical values, where items with similar meaning end up with similar numbers."
+    },
+    {
+      "q": "What is a 'trust boundary'?",
+      "options": [
+        "The maximum allowed size of a model",
+        "The line between what you control and what you don't",
+        "A specific type of firewall",
+        "A model's accuracy score"
+      ],
+      "answer": 1,
+      "explanation": "A trust boundary separates trusted components you control from untrusted input coming from outside."
+    },
+    {
+      "q": "Why is user input to an LLM a security concern?",
+      "options": [
+        "It slows down the model",
+        "The model often cannot distinguish developer instructions from user text",
+        "It uses too much memory",
+        "It is always encrypted automatically"
+      ],
+      "answer": 1,
+      "explanation": "LLMs process all text the same way by default, which means carefully crafted user input can override intended developer instructions."
+    },
+    {
+      "q": "What is a 'hallucination' in an LLM?",
+      "options": [
+        "When the model crashes",
+        "When the model confidently produces false information",
+        "When the model refuses to answer",
+        "When the model runs out of tokens"
+      ],
+      "answer": 1,
+      "explanation": "A hallucination is a confident but incorrect response, since the model predicts likely patterns rather than verifying facts."
+    },
+    {
+      "q": "What is a 'token'?",
+      "options": [
+        "An API authentication key",
+        "A small unit of text that the model processes",
+        "A type of neural network",
+        "A complete training dataset"
+      ],
+      "answer": 1,
+      "explanation": "Models break text down into tokens, small chunks of words, before processing it."
+    },
+    {
+      "q": "What is 'data poisoning'?",
+      "options": [
+        "Deleting a model's training data",
+        "Inserting malicious data into training to influence the model's behavior",
+        "Encrypting a dataset",
+        "Speeding up the training process"
+      ],
+      "answer": 1,
+      "explanation": "Data poisoning involves inserting manipulated examples into the training data so the model learns behavior chosen by the attacker."
+    },
+    {
+      "q": "Why should AI output be treated as untrusted?",
+      "options": [
+        "It is always incorrect",
+        "It can contain attacks like XSS or SQL injection if used without validation",
+        "It takes too long to generate",
+        "It is encrypted by default"
+      ],
+      "answer": 1,
+      "explanation": "AI-generated output can carry malicious content, so using it directly in browsers, database queries, or system commands is risky."
+    },
+    {
+      "q": "What does the 'principle of least privilege' mean in the context of AI?",
+      "options": [
+        "Give the AI as much access as possible",
+        "Give the AI only the minimum access it actually needs",
+        "Never let the AI respond to questions",
+        "Only use small models"
+      ],
+      "answer": 1,
+      "explanation": "Least privilege limits what actions an AI system is allowed to take, reducing potential damage if it is ever manipulated."
+    },
+    {
+      "q": "What is 'indirect prompt injection'?",
+      "options": [
+        "Typing a command directly into a chatbot",
+        "Hiding malicious instructions inside external content the AI reads",
+        "Injecting SQL into a database",
+        "Overloading a model with too many requests"
+      ],
+      "answer": 1,
+      "explanation": "Indirect prompt injection hides malicious instructions inside content like web pages, files, or emails that the AI later processes."
+    },
+    {
+      "q": "What are 'parameters' (weights) in a model?",
+      "options": [
+        "The questions users ask",
+        "The learned numeric values that store the model's knowledge",
+        "The name of the training algorithm used",
+        "The server's IP address"
+      ],
+      "answer": 1,
+      "explanation": "Parameters are the numeric values inside the model that were adjusted during training and now hold what it learned."
+    },
+    {
+      "q": "What is 'overfitting'?",
+      "options": [
+        "The model learns general patterns effectively",
+        "The model memorizes training data instead of learning general patterns",
+        "The model is too small in size",
+        "The model runs faster than expected"
+      ],
+      "answer": 1,
+      "explanation": "Overfitting means the model memorized its specific training data rather than learning generalizable patterns, and can sometimes even leak that data."
+    },
+    {
+      "q": "What is the main risk of storing secrets in a system prompt?",
+      "options": [
+        "It slows the model down",
+        "The secrets can often be extracted through clever input",
+        "It only increases token usage cost",
+        "There is no real risk"
+      ],
+      "answer": 1,
+      "explanation": "System prompts can frequently be extracted by attackers, so any secret stored there is at risk of being exposed."
+    },
+    {
+      "q": "What is the 'attack surface'?",
+      "options": [
+        "A model's accuracy score",
+        "Every possible point where an attacker could try to gain access",
+        "The physical size of the server",
+        "The total training time"
+      ],
+      "answer": 1,
+      "explanation": "The attack surface refers to the complete set of entry points an attacker could potentially target."
+    },
+    {
+      "q": "Which of these should be treated as an untrusted source for an AI system?",
+      "options": [
+        "A web page the AI is asked to read",
+        "The developer's own verified configuration file",
+        "Both should be trusted equally",
+        "Neither should be trusted"
+      ],
+      "answer": 0,
+      "explanation": "External content such as web pages is untrusted and can contain hidden malicious instructions."
+    },
+    {
+      "q": "What does 'defense in depth' mean?",
+      "options": [
+        "Relying on one very strong defense",
+        "Stacking multiple layers of defense so a single failure doesn't compromise the whole system",
+        "Only securing the database",
+        "Disabling the AI system entirely"
+      ],
+      "answer": 1,
+      "explanation": "Defense in depth combines multiple layers of protection, so an attacker has to bypass all of them, not just one, to succeed."
+    },
+    {
+      "q": "Which statement is true about AI models?",
+      "options": [
+        "They truly understand meaning the way humans do",
+        "They predict patterns and can produce confident but incorrect answers",
+        "They are impossible to trick",
+        "Safety training alone makes them fully secure"
+      ],
+      "answer": 1,
+      "explanation": "Models predict likely patterns based on training data rather than truly understanding content, and their safety behavior can always be challenged by a determined attacker."
+    }
+  ]
+}

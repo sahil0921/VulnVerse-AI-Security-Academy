@@ -1,0 +1,6 @@
+flask
+requests
+anthropic
+openai
+google-generativeai
+markdown

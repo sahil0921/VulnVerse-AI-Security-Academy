@@ -1,0 +1,51 @@
+{
+  "slug": "07-sentiment-flip",
+  "title": "Sentiment Flip Techniques",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Beyond Spam: Flipping Sentiment\n\nThe GoodWords idea isn't limited to spam. It works against any additive text classifier. A powerful example is the sentiment classifier, a model that reads text and decides whether it's positive or negative.\n\nSentiment analysis means judging the emotional tone of a piece of text. Companies use it to monitor reviews, social media, and support tickets. If an attacker can flip sentiment, they can hide criticism, fake praise, or poison an entire analytics dashboard."
+    },
+    {
+      "type": "content",
+      "body": "## Why sentiment is a great target\n\n- It's often built on a Naive Bayes or linear model, carrying the same additive weakness covered earlier.\n- It reads bag-of-words, meaning word order is completely ignored.\n- Real business decisions ride on it: a dashboard flooded with fake \"positive\" reviews can mislead an entire company.\n\n**Real-world scenario:** a fictional review platform, BrightCart, uses a sentiment model to auto-flag negative reviews for the support team. An attacker appends positive-leaning words to angry reviews so they slip through classified as \"positive\" and never actually reach support."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Positive review] --> B[Append negative-leaning words]\n    B --> C{Sentiment model}\n    C -->|Now scores negative| D[Sentiment flipped]\n    E[Negative review] --> F[Append positive-leaning words]\n    F --> C\n    C -->|Now scores positive| G[Sentiment flipped]"
+    },
+    {
+      "type": "content",
+      "body": "## Two directions, two word sets\n\nSentiment flipping mirrors spam evasion closely, but with a twist: you can push in either direction.\n\n| Goal | Append words that are... | Example words |\n|---|---|---|\n| Positive → Negative | Strongly negative-leaning | terrible, boring, disappointing, waste |\n| Negative → Positive | Strongly positive-leaning | excellent, brilliant, loved, wonderful |\n\nThe method for finding these words is identical to the GoodWords technique: rank by class-association score in white-box settings, or discover them through querying in black-box settings."
+    },
+    {
+      "type": "content",
+      "body": "## White-box: positive to negative\n\nWith full access, download the model, read its per-class word probabilities, and rank words by how strongly they signal the target class. Then append the top-ranked words until the label actually flips."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\n\n# Rank words most associated with the NEGATIVE class\nneg_log = classifier.feature_log_prob_[0]   # negative class row\npos_log = classifier.feature_log_prob_[1]   # positive class row\nvocab   = vectorizer.get_feature_names_out()\n\nepsilon = 1e-10\nneg_words = []\nfor i, w in enumerate(vocab):\n    neg_p = np.exp(neg_log[i])\n    pos_p = np.exp(pos_log[i])\n    score = neg_p / (pos_p + epsilon)   # high = strongly negative\n    neg_words.append((w, score))\n\nneg_words.sort(key=lambda x: x[1], reverse=True)\ntop_negative = [w for w, _ in neg_words[:30]]\n\ndef flip_to_negative(review, budget=30):\n    aug = review\n    for w in top_negative[:budget]:\n        aug += \" \" + w\n        probs = classifier.predict_proba(vectorizer.transform([aug]))[0]\n        if probs[0] > probs[1]:      # negative now wins\n            return aug\n    return aug"
+    },
+    {
+      "type": "content",
+      "body": "## Black-box: negative to positive\n\nWithout model access, discover positive-leaning words by querying instead. Measure each word's push toward positive, keep the strongest performers, and append them until the label flips, all within your available query budget."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import requests\n\ndef predict(text, base_url):\n    r = requests.post(f\"{base_url}/predict\", json={\"text\": text})\n    return r.json()   # -> {'label', 'positive_probability', ...}\n\ndef discover_positive_words(sample_review, candidates, base_url):\n    base_pos = predict(sample_review, base_url)['positive_probability']\n    impacts = []\n    for w in candidates:\n        new_pos = predict(sample_review + \" \" + w, base_url)['positive_probability']\n        impacts.append((w, new_pos - base_pos))   # positive push\n    impacts.sort(key=lambda x: x[1], reverse=True)\n    return [w for w, d in impacts if d > 0]\n\ndef flip_to_positive(review, good_words, base_url, budget=40):\n    aug = review\n    for w in good_words[:budget]:\n        aug += \" \" + w\n        if predict(aug, base_url)['label'] == 'positive':\n            return aug\n    return aug"
+    },
+    {
+      "type": "note",
+      "body": "**The upcoming assessment mirrors this exactly.** Phase 1 asks you to flip 10 positive reviews to negative using white-box access, with up to 30 words each. Phase 2 asks you to flip 10 negative reviews to positive using only black-box queries, with up to 40 words each. Master both code patterns shown above and you'll have your full solution scaffold ready."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- GoodWords generalizes cleanly to any additive text classifier, including sentiment models.\n- Flipping works in both directions, you simply pick words leaning toward your target class.\n- White-box reads word scores directly from the model; black-box discovers them through repeated querying.\n- Sentiment flipping can hide criticism, fake praise, and poison analytics dashboards in real deployments.\n- The two-phase skills assessment tests exactly these two workflows in practice."
+    }
+  ]
+}

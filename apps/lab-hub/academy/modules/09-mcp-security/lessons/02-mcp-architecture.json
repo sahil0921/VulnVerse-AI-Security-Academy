@@ -1,0 +1,37 @@
+{
+  "slug": "02-mcp-architecture",
+  "title": "MCP Architecture",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# MCP Architecture\n\nTo attack or defend MCP effectively, you first need to understand its moving parts. MCP has three core roles and communicates using a simple message format. Let's build the full picture piece by piece.\n\n## The three roles\n\n### 1. Host\n\nThe Host is the AI application the user actually interacts with directly, for example, a desktop AI assistant or an IDE extension.\n\n- It talks directly to the language model.\n- It decides when to actually use a tool.\n- It creates and manages Clients.\n\nThink of the Host as the manager overseeing everything.\n\n### 2. Client\n\nThe Client is created by the Host. Its only job is to hold a connection to exactly one MCP Server.\n\n- One Client always maps to one Server, a strict 1:1 link.\n- If the Host connects to three separate servers, it spins up three separate Clients.\n\nThink of the Client as a dedicated phone line connecting to a single server.\n\n### 3. Server\n\nThe Server is where the real capabilities actually live. It exposes tools, data, and prompts to the rest of the system.\n\n- A file server exposes file operations.\n- A database server exposes database queries.\n\nThink of the Server as the worker that actually does things."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    U[User] --> H[Host]\n    H --> C1[Client 1]\n    H --> C2[Client 2]\n    C1 --> S1[Server: Filesystem]\n    C2 --> S2[Server: Database]\n    style H fill:#a855f7,color:#fff\n    style C1 fill:#4f8cff,color:#fff\n    style C2 fill:#4f8cff,color:#fff\n    style S1 fill:#22c55e,color:#fff\n    style S2 fill:#22c55e,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## The three server capabilities\n\nAn MCP Server can offer three distinct kinds of things. This distinction matters a great deal for security, because who actually controls each one is different.\n\n| Capability | Controlled by | What it does | Risk level |\n|---|---|---|---|\n| Prompts | The user | Pre-made templates the user picks | Low |\n| Resources | The application | Read-only data for context (files, records) | Medium |\n| Tools | The model | Actions the AI decides to run | High |\n\n### Prompts\n\nReusable templates. For example, a `spell_check` prompt that wraps your text in specific instructions. The user chooses when to actually use it.\n\n### Resources\n\nRead-only data pulled in specifically to give the AI additional context. For example, reading a config file in order to answer a question. The application itself decides when to fetch it.\n\n### Tools\n\nActions that can genuinely change things: writing a file, running a command, sending an email. The model itself decides to call these based purely on the conversation so far.\n\nTools are the highest risk of the three, precisely because the model chooses to run them, and the model itself can be manipulated."
+    },
+    {
+      "type": "note",
+      "body": "**Security lens:** tools are model-controlled. That means if an attacker controls the model's input, whether through prompt injection or poisoned data, they effectively control which tools run and with what arguments those tools are called."
+    },
+    {
+      "type": "content",
+      "body": "## How a request flows\n\nHere's a simplified end-to-end flow for when a user asks the AI to do something:\n\n1. The user sends a prompt.\n2. The Host asks each Server for its list of available tools and resources.\n3. The Host injects those tool descriptions directly into the model's context.\n4. If additional context is needed, the Host fetches Resources from a Server.\n5. The Host sends the enriched prompt to the model.\n6. The model decides to call a Tool, the Host calls it on the Server, and the result gets added back into context.\n7. The final answer is returned to the user.\n\nStep 6 can repeat many times in a row, since the model may chain together several tool calls before finishing."
+    },
+    {
+      "type": "diagram",
+      "src": "sequenceDiagram\n    participant U as User\n    participant H as Host\n    participant M as Model\n    participant S as Server\n    U->>H: Ask a question\n    H->>S: tools/list\n    S-->>H: Available tools\n    H->>M: Prompt + tool list\n    M-->>H: Call tool X\n    H->>S: tools/call X\n    S-->>H: Result\n    H->>M: Result added to context\n    M-->>H: Final answer\n    H-->>U: Response"
+    },
+    {
+      "type": "content",
+      "body": "## Why this architecture is attackable\n\n- **Tool descriptions enter the model's context.** A maliciously crafted description can inject instructions directly into the model's reasoning.\n- **Tool results enter the model's context too.** Poisoned data returned from a tool can effectively hijack the model's behavior.\n- **The Server runs with its own permissions**, which are often broader than the actual user's permissions.\n- **The Host trusts the Server** to describe itself honestly, with no independent verification.\n\nEvery arrow in the diagram above represents a trust relationship, and every trust relationship can potentially be broken.\n\n## Key Takeaways\n\n- MCP has three roles: Host (the manager), Client (a 1:1 connection), and Server (the worker).\n- Servers expose Prompts (controlled by the user), Resources (controlled by the app, read-only), and Tools (controlled by the model, taking real actions).\n- Tools are the highest-risk capability, precisely because the model itself chooses to run them.\n- Both tool descriptions and tool results flow directly into the model's context, making this a key injection surface to watch."
+    }
+  ]
+}

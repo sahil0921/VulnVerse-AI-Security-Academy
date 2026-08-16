@@ -1,0 +1,47 @@
+{
+  "slug": "02-data-poisoning",
+  "title": "Data Poisoning",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Data Poisoning\n\nData poisoning is the act of deliberately inserting or altering data so that a model learns something wrong. It's the parent category for most attacks covered in this module.\n\n**A simple comparison:** think of poisoning a well. You don't attack the villagers directly. You quietly drop something into the water they all drink from. Everyone who drinks it is affected, and no one ever sees you do it.\n\n## The AI data lifecycle\n\nTo poison data, you first need to know exactly where that data actually lives. Every AI system moves data through a lifecycle, and each stage represents a possible attack point.\n\n| Stage | What happens | Poisoning risk |\n|-------|-------------|----------------|\n| Collection | Raw data is gathered (logs, reviews, images) | Attacker submits fake data |\n| Labeling | Humans or tools assign correct answers | Wrong labels get added |\n| Cleaning | Bad rows are removed, data is normalized | Cleaning scripts are tampered with |\n| Storage | Data sits in databases or cloud buckets | Files are edited directly |\n| Training | The model learns from the data | Poisoned data shapes the model |\n| Retraining | Model updates with new data | Ongoing (online) poisoning |"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Collection] --> B[Labeling]\n    B --> C[Cleaning]\n    C --> D[Storage]\n    D --> E[Training]\n    E --> F[Deployed Model]\n    F -->|feedback| A\n    style A fill:#f59e0b,color:#000\n    style D fill:#f59e0b,color:#000\n    style F fill:#22c55e,color:#000"
+    },
+    {
+      "type": "content",
+      "body": "## Two timing styles of poisoning\n\nOffline poisoning happens once, before training even begins. The attacker corrupts a dataset, the model gets trained on it, and the damage is essentially fixed in place from that point forward.\n\nOnline poisoning happens gradually over time. Many modern systems retrain themselves continuously using new data submitted by users. If an attacker keeps feeding bad data through this feedback loop, the model slowly drifts toward whatever outcome the attacker wants.\n\n**Real-world example:** a shopping site recommends products based on user reviews. An attacker writes hundreds of fake glowing reviews for a low-quality product. During the next retraining cycle, the model \"learns\" that this product is genuinely loved and starts recommending it to everyone. No server was ever hacked here, only the underlying data was manipulated."
+    },
+    {
+      "type": "content",
+      "body": "## Where poisoning enters the pipeline\n\nThe most common real-world entry points include:\n\n- **Public data** — if you train on data scraped from the internet, anyone can plant poison on a webpage they control.\n- **User-submitted content** — reviews, uploads, chat feedback, and ratings.\n- **Third-party datasets** — data purchased or downloaded from outside sources you don't fully control.\n- **Compromised storage** — an attacker with write access to an S3 bucket or database edits the underlying data directly.\n- **Compromised pipeline code** — if cleaning or labeling scripts get altered, otherwise clean data becomes poisoned somewhere in transit."
+    },
+    {
+      "type": "note",
+      "body": "**Trust boundary rule:** any data that comes from outside your control and flows into training is crossing a trust boundary. Every trust boundary needs validation. Most poisoning succeeds simply because someone assumed incoming data was already safe."
+    },
+    {
+      "type": "content",
+      "body": "## Vulnerable vs secure: a simple example\n\nHere's a naive retraining pipeline that blindly trusts all incoming reviews."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: blindly trains on all user reviews\ndef retrain_model(new_reviews):\n    # No checks at all - every review is trusted\n    data = load_existing_dataset()\n    data.extend(new_reviews)   # attacker's fake reviews go straight in\n    model = train(data)\n    return model\n\n# An attacker submits 500 fake positive reviews.\n# All 500 are added and the model happily learns from them."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# SECURE: validate and limit incoming data before training\ndef retrain_model(new_reviews):\n    data = load_existing_dataset()\n\n    for review in new_reviews:\n        # 1. Rate-limit per user to stop mass submission\n        if submissions_today(review.user_id) > MAX_PER_USER:\n            continue\n        # 2. Drop obvious duplicates (bot-like behaviour)\n        if is_duplicate(review):\n            continue\n        # 3. Flag statistical outliers for human review\n        if is_outlier(review):\n            queue_for_review(review)\n            continue\n        data.append(review)\n\n    model = train(data)\n    return model\n\n# Why this is better:\n# - Rate limiting stops one attacker flooding the dataset.\n# - Duplicate detection catches copy-paste poisoning.\n# - Outlier detection sends suspicious data to a human, not the model."
+    },
+    {
+      "type": "content",
+      "body": "## Common mistakes\n\n- Treating user-submitted data as automatically trustworthy by default.\n- No rate limiting on feedback that flows into retraining.\n- No record kept of where each data point actually came from, meaning no provenance tracking.\n- Retraining automatically with zero human review anywhere in the loop.\n\n## Best practices\n\n- Validate and sanitize all incoming data before it's used.\n- Rate-limit and de-duplicate user submissions.\n- Track provenance, meaning knowing the source of every individual data point.\n- Use outlier detection to flag suspicious samples for human review.\n- Keep a clean, trusted \"golden\" dataset to compare newer data against.\n\n## Summary\n\n- Data poisoning corrupts what a model actually learns.\n- It can be one-time (offline) or continuous and ongoing (online).\n- Feedback loops and public data represent the biggest risks.\n- Validation at trust boundaries is the core defense against this class of attack.\n\n## Key Takeaways\n\n- Poisoning is the parent category behind label flipping, clean-label, and backdoor attacks.\n- The retraining loop is a favorite target for attackers.\n- Never let untrusted data reach training without proper validation first."
+    }
+  ]
+}

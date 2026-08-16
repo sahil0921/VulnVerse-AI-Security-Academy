@@ -1,0 +1,37 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to Evasion Attacks",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# What Is AI Evasion?\n\nAI evasion is the art of tricking a trained AI model at the exact moment it makes a decision, without ever touching the model itself.\n\nThink of a school exam where the teacher has already learned how to grade papers. You can't change how the teacher thinks. But you can write your answer in a clever enough way that makes a bad answer look like a good one. That's evasion.\n\nA quick definition of a term we'll use a lot: inference time is the moment a model is actually being used to make a prediction, as opposed to while it's being trained. Think of it this way: training time is when a chef learns recipes; inference time is when the chef actually cooks your dish. Evasion attacks the cooking, not the learning.\n\n---\n\n## Why evasion exists\n\nEvery AI model draws an invisible line separating one class from another. A spam filter draws a line between spam and not-spam, often called ham. Evasion works by nudging your input just far enough that it lands on the wrong side of that line.\n\nThe model isn't broken. It's doing exactly what it was trained to do. The attacker simply crafts an input the model was never prepared to see.\n\n## Why attackers use evasion\n\n- **It's quiet.** You don't need to hack a database or steal a password. You only need to send normal-looking input.\n- **It needs no special access.** The attacker uses the exact same public interface as everyone else.\n- **It scales well.** One working trick can be reused across thousands of messages or requests.\n- **It often survives filters.** Because the model still appears to be \"working\" normally, defenders may not notice anything wrong."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Attacker Input] --> B{Model Decision Line}\n    B -->|Normal spam| C[Blocked as Spam]\n    A2[Crafted Input] --> D[Added Harmless Words]\n    D --> B\n    B -->|Pushed over the line| E[Allowed as Ham]"
+    },
+    {
+      "type": "content",
+      "body": "## Training-time attacks vs inference-time attacks\n\nAI can be attacked in two very different places. Knowing the difference tells you exactly which defense actually applies.\n\n| Feature | Training-Time Attack | Inference-Time Attack (Evasion) |\n|---|---|---|\n| When it happens | While the model learns | While the model is used |\n| What it changes | The model's memory | Only the current input |\n| Access needed | The training data or pipeline | Just the normal API |\n| Example | Poisoning training samples | Adding \"good words\" to spam |\n| Effect | Global (all future inputs) | Local (one input at a time) |\n\nTraining-time attacks, such as data poisoning, change what the model actually learned. Evasion attacks leave the model completely untouched and only change what the model sees right now, in this one specific interaction."
+    },
+    {
+      "type": "content",
+      "body": "## Transferability: why evasion scales\n\nTransferability means an attack built against one model often fools a completely different model too.\n\nThink of it like a lock-picking trick that works on one brand of lock and often works on similar brands as well.\n\n**Practical example:** an attacker builds and tests a spam-evasion trick on their own copy of a spam filter, called a surrogate model. That same trick then fools a company's real filter, even though the attacker never actually saw inside it.\n\nThis is exactly what makes evasion dangerous in the real world. Attackers can prepare entirely offline and then strike a black-box system they've never directly inspected."
+    },
+    {
+      "type": "content",
+      "body": "## Evasion in classic ML vs large language models\n\nBoth types of evasion attack the input, but the leverage point involved is different.\n\n| | Classic ML (e.g. spam filter) | Large Language Models (LLMs) |\n|---|---|---|\n| What model reads | Numeric features (word counts) | Natural-language instructions |\n| Attack style | Nudge feature statistics | Inject or reframe instructions |\n| Output risk | A wrong label | Code, SQL, or actions that run |\n| Main technique | GoodWords / feature edits | Prompt injection / jailbreaks |\n\nWe start with a classic classifier because the underlying math is easy to see and measure directly. Once you understand why a spam filter can be fooled, that same intuition maps cleanly onto LLMs, where the surface is richer but the underlying goal is identical: change only the input, and steer the model's decision."
+    },
+    {
+      "type": "note",
+      "body": "**This module's anchor technique** is the GoodWords attack against a Naive Bayes spam filter. It's simple, measurable, and teaches the core idea that fooling a probabilistic model is often about quantity of evidence, not clever obfuscation. You'll run it in both white-box and black-box settings, and finish with a two-phase sentiment-flip assessment."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Evasion means fooling a model at inference time by carefully crafting the input.\n- The model itself is never changed or broken; only the input is manipulated.\n- Training-time attacks change the model's memory; evasion changes only the current input.\n- Transferability lets attackers prepare their attacks offline and strike systems they've never seen.\n- Classic ML evasion nudges numeric features; LLM evasion targets instruction-following behavior instead.\n\n## Quick Self-Check\n\nAsk yourself: if a model is behaving perfectly on normal traffic but letting crafted inputs slip through, is the model broken? The answer is no, that's exactly what a successful evasion attack actually looks like."
+    }
+  ]
+}

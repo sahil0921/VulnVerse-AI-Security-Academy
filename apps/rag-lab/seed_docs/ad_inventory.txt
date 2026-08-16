@@ -1,0 +1,25 @@
+NimbleTech Active Directory Inventory — Internal Reference
+============================================================
+Domain Controllers:
+- dc01.nimbletech.local (172.30.5.10) — Primary DC, Windows Server 2022
+- dc02.nimbletech.local (172.30.5.11) — Secondary DC, Windows Server 2022
+Production Servers:
+- prod-web-01.nimbletech.local — Apache 2.4, RHEL 9
+- prod-web-02.nimbletech.local — Apache 2.4, RHEL 9
+- prod-web-03.nimbletech.local — Apache Struts (UNPATCHED — see Q1 audit)
+- prod-db-01.nimbletech.local — PostgreSQL 15, primary
+- prod-db-02.nimbletech.local — PostgreSQL 15, replica
+- jenkins.nimbletech.local — Jenkins CI/CD (default creds admin/admin — pending fix)
+Service Accounts:
+- svc_backup — used by Veeam for nightly backups
+- svc_jira_automation — Jira service account, see vault for credentials
+- svc_ad_sync — Okta to AD synchronization
+- svc_monitoring — Datadog agent service account
+Standard User Naming: firstname.lastname@nimbletech.com
+Default new-user password policy: NimbleStart2026! (forced change on first login)
+DNS Services:
+- https://services.nimbletech.local — internal services portal
+- https://vault.nimbletech.local — HashiCorp Vault
+- https://vpn.nimbletech.local — GlobalProtect VPN
+- https://jira.nimbletech.local — Jira instance
+- https://confluence.nimbletech.local — Confluence wiki

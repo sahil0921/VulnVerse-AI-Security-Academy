@@ -1,0 +1,47 @@
+{
+  "slug": "03-label-flipping",
+  "title": "Label Flipping",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Label Flipping\n\nLabel flipping is the simplest data poisoning attack. The attacker leaves the data itself completely untouched, but changes its label, meaning the correct answer attached to it.\n\n**A simple comparison:** think of a teacher's answer key. The exam questions themselves are perfect, but someone swaps a few answers in the key. Now every student who studies from that key learns the wrong answers with total confidence.\n\n## What is a label?\n\nIn supervised learning, every training example has two parts:\n\n- Features — the actual input, such as the pixels of an image or the words in an email.\n- Label — the correct output, such as \"cat,\" \"spam,\" or \"positive.\"\n\nLabel flipping changes only the label. A spam email gets relabeled as \"not spam.\" A positive review gets relabeled as \"negative.\""
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TB\n    subgraph Original\n    A1[Review: Love this!] --> A2[Label: Positive]\n    end\n    subgraph Poisoned\n    B1[Review: Love this!] --> B2[Label: NEGATIVE]\n    end\n    A2 -.attacker flips.-> B2\n    style B2 fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Two kinds of label flipping\n\n### 1. Random label flipping\n\nThe attacker flips labels at random. The goal here is simply to make the model less accurate overall. They don't particularly care which specific cases break, only that the model becomes generally unreliable.\n\n### 2. Targeted label flipping\n\nThe attacker flips labels only within a specific class. For example, they might relabel only positive reviews as negative. This makes the model fail in one specific direction on purpose, a much more surgical and precise attack.\n\n**Real-world example:** a company analyzes customer feedback to guide its product strategy. An attacker flips enough labels that the model reports customers hate a genuinely popular product. The company then pulls a successful product from the market, based entirely on that poisoned analysis."
+    },
+    {
+      "type": "content",
+      "body": "## Why flipping labels breaks the model\n\nA classifier learns by minimizing loss, a number that measures how wrong its predictions currently are. During training, it adjusts its internal settings to make predictions match the labels it's shown.\n\nWhen you flip a label, you're essentially feeding the model a lie. To satisfy that lie, the model shifts its decision boundary, the invisible line separating one class from another. Flip enough labels, and that boundary moves so far that even legitimate, correctly-labeled examples end up on the wrong side of it.\n\nThe more labels you flip, the more the boundary distorts, and the worse the model ultimately performs on real, clean data going forward."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\n\n# A simple random label-flipping attack\ndef flip_labels(y, poison_percentage, seed=1337):\n    \"\"\"Flip a fraction of binary labels (0 <-> 1).\"\"\"\n    if not 0 <= poison_percentage <= 1:\n        raise ValueError(\"poison_percentage must be between 0 and 1\")\n\n    rng = np.random.default_rng(seed)\n    y_poisoned = y.copy()\n\n    n_to_flip = int(len(y) * poison_percentage)\n    flip_indices = rng.choice(len(y), size=n_to_flip, replace=False)\n\n    # Flip: 0 becomes 1, 1 becomes 0\n    y_poisoned[flip_indices] = 1 - y_poisoned[flip_indices]\n    return y_poisoned\n\n# Poison 20% of the labels\ny_poisoned = flip_labels(y_train, 0.20)"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# TARGETED version: only flip one class (e.g. hide positives)\ndef targeted_flip_labels(y, poison_percentage, target_class, new_class, seed=1337):\n    \"\"\"Flip only labels belonging to target_class into new_class.\"\"\"\n    rng = np.random.default_rng(seed)\n    y_poisoned = y.copy()\n\n    # Find only the examples in the class we want to attack\n    target_indices = np.where(y == target_class)[0]\n    n_to_flip = int(len(target_indices) * poison_percentage)\n    flip_indices = rng.choice(target_indices, size=n_to_flip, replace=False)\n\n    y_poisoned[flip_indices] = new_class\n    return y_poisoned\n\n# Relabel 30% of positive reviews (1) as negative (0)\ny_targeted = targeted_flip_labels(y_train, 0.30, target_class=1, new_class=0)\n# Result: the model becomes blind to many genuinely positive reviews."
+    },
+    {
+      "type": "content",
+      "body": "## Impact by poisoning rate\n\nLabel flipping doesn't always break a model instantly. On clean, well-separated data, a model can absorb a small amount of poison without much visible effect. But as the poisoning rate climbs, accuracy tends to collapse fairly quickly.\n\n| Poison rate | Typical effect |\n|-------------|----------------|\n| 5–10% | Small boundary shift, often little accuracy loss |\n| 20–30% | Noticeable accuracy drop |\n| 40–50% | Model becomes unreliable or effectively random |\n\nEven when overall accuracy holds up reasonably well, the decision boundary still shifts every single time, meaning specific edge cases start failing long before the average score visibly drops."
+    },
+    {
+      "type": "note",
+      "body": "**Detection hint:** label flipping often creates label-feature disagreement, meaning data points whose features clearly belong to one class but whose attached label says otherwise. Cross-checking labels against a trusted model, or clustering the underlying features, can surface these anomalies effectively."
+    },
+    {
+      "type": "content",
+      "body": "## How defenders fight label flipping\n\n- **Trusted labeling** — restrict exactly who can assign or edit labels in the first place.\n- **Consensus labeling** — require multiple independent labelers to agree before a label is finalized.\n- **Label auditing** — periodically re-check existing labels against a trusted reference model.\n- **Anomaly detection** — flag samples where the features and labels clearly disagree with each other.\n- **Provenance tracking** — log who labeled what and when, so any tampering becomes traceable after the fact.\n\n## Vulnerable vs secure labeling\n\n| Vulnerable | Secure |\n|------------|--------|\n| Anyone can edit labels | Role-based access to labels |\n| Single labeler, no review | Multiple labelers + consensus |\n| No history of changes | Full audit log of label edits |\n| Labels trusted blindly | Labels cross-checked before training |\n\n## Summary\n\n- Label flipping changes the answer attached to data, not the data itself.\n- Random flipping degrades the model generally; targeted flipping attacks one specific class.\n- It shifts the model's underlying decision boundary in the process.\n- Defenses center on trusted, audited, and cross-checked labeling practices.\n\n## Key Takeaways\n\n- This is the simplest poisoning attack in the module, yet it's still genuinely effective.\n- Targeted flipping is stealthier and more dangerous than purely random flipping.\n- Watch for feature-label disagreement as a strong early warning sign."
+    }
+  ]
+}

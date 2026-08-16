@@ -1,0 +1,1107 @@
+{
+  "slug": "module-11-exam",
+  "title": "Exam: Embeddings & Vector DB Security",
+  "type": "quiz",
+  "questions": [
+    {
+      "q": "What is an embedding?",
+      "options": [
+        "A compressed image file format",
+        "A one-way cryptographic hash of a password",
+        "A list of numbers that represents the meaning of a piece of text",
+        "A synonym for a relational database table"
+      ],
+      "answer": 2,
+      "explanation": "An embedding is a numeric vector designed to capture and preserve the semantic meaning of text."
+    },
+    {
+      "q": "Why is the belief 'embeddings are just numbers, an attacker can't do anything useful with them' considered a dangerous myth?",
+      "options": [
+        "Unlike a password hash, an embedding is designed to preserve meaning, and wherever meaning is preserved, meaning can eventually be recovered",
+        "Because this belief is technically true and poses no real risk",
+        "Because embeddings are always encrypted by default in every deployment",
+        "Because embeddings only exist temporarily during a single API request"
+      ],
+      "answer": 0,
+      "explanation": "The core myth-busting insight of the module is that embeddings, unlike one-way hashes, are reversible enough that meaning (and sometimes exact text) can be reconstructed from them."
+    },
+    {
+      "q": "How does an embedding differ fundamentally from a password hash?",
+      "options": [
+        "A hash and an embedding are functionally identical with no meaningful difference",
+        "An embedding can only be computed for numeric data, never for text",
+        "A hash is deliberately a one-way function with no path back to the original; an embedding is designed to preserve meaning, making it reversible to varying degrees",
+        "A hash is always longer than any embedding vector"
+      ],
+      "answer": 2,
+      "explanation": "Hashes are intentionally irreversible by design, while embeddings intentionally preserve semantic structure, which is exactly what makes them invertible."
+    },
+    {
+      "q": "Why do vector databases tend to have weaker security defaults than relational (SQL) databases?",
+      "options": [
+        "Vector databases are physically incapable of supporting any authentication mechanism",
+        "Relational databases were specifically designed to store embeddings from the start",
+        "Vector databases are newer and were built primarily for speed of similarity search first, with security added later as an afterthought, unlike relational databases which matured over decades of real-world attacks",
+        "Vector databases only became publicly available after security regulations were already fully established"
+      ],
+      "answer": 2,
+      "explanation": "Relational databases have decades of hardening against real-world attacks, while vector databases prioritized fast similarity search first, leaving security as a comparatively newer and less mature concern."
+    },
+    {
+      "q": "What comparison is used to explain how embeddings represent meaning as coordinates?",
+      "options": [
+        "A map, where cities close together on the map are physically close in the real world, just as texts with similar meaning end up placed close together in embedding space",
+        "A calendar, where dates are arranged sequentially with no spatial relationship",
+        "A dictionary, where words are simply listed alphabetically with no numeric representation",
+        "A phone book, where entries are sorted purely by surname"
+      ],
+      "answer": 0,
+      "explanation": "The map analogy captures how embeddings function as coordinates for meaning — semantically similar texts end up positioned close together, just as nearby cities share similar map coordinates."
+    },
+    {
+      "q": "What is the key difference between dense and sparse embeddings?",
+      "options": [
+        "Dense embeddings capture meaning/semantics using mostly non-zero numbers; sparse embeddings capture exact keywords using mostly zero-valued numbers",
+        "Sparse embeddings can only be used with image data, never text",
+        "Dense embeddings are always smaller in file size than sparse embeddings",
+        "There is no meaningful difference between dense and sparse embeddings"
+      ],
+      "answer": 0,
+      "explanation": "Dense embeddings encode semantic meaning across mostly non-zero dimensions, while sparse embeddings represent exact keyword matches with mostly zero values, each having different strengths."
+    },
+    {
+      "q": "What does 'dimensionality' refer to when discussing embeddings?",
+      "options": [
+        "The total number of documents stored in a vector database",
+        "The fixed size (number of values) that a given embedding model always produces for any input text",
+        "The programming language used to implement the embedding model",
+        "The exact date an embedding model was originally released"
+      ],
+      "answer": 1,
+      "explanation": "Dimensionality is a fixed property of a specific embedding model — every vector it produces has the same fixed length, regardless of input text length."
+    },
+    {
+      "q": "Why is dimensionality described as an attacker's 'first reconnaissance clue'?",
+      "options": [
+        "Because dimensionality directly reveals a company's internal network topology",
+        "Because counting dimensions requires no computer or calculation of any kind",
+        "Because dimensionality is always displayed publicly on a company's website",
+        "Simply counting the numbers in one stolen vector narrows down which model likely produced it, since dimensionality is a fixed, model-specific property"
+      ],
+      "answer": 3,
+      "explanation": "Since each embedding model produces vectors of a consistent, fixed length, counting the dimensions of a single stolen vector immediately narrows the field of candidate models."
+    },
+    {
+      "q": "Why does a large document, such as a 20-page PDF, get split into chunks before being embedded?",
+      "options": [
+        "The document is too large to meaningfully embed as a single vector, so it's split into smaller pieces, each of which gets its own separate embedding",
+        "Splitting a document into chunks automatically encrypts each individual piece",
+        "Chunking eliminates the need for a vector database entirely",
+        "Chunking is required to comply with international data protection regulations"
+      ],
+      "answer": 0,
+      "explanation": "Large documents exceed what a single embedding can meaningfully represent, so they're broken into smaller, individually-embedded chunks (typically 256-512 tokens each)."
+    },
+    {
+      "q": "Why is metadata stored alongside vector embeddings often described as its own attack surface?",
+      "options": [
+        "Metadata cannot be accessed by any party other than the database administrator",
+        "Metadata, such as source filename, author, or tenant ID, is often not encrypted, unlike the vectors themselves",
+        "Metadata is always encrypted with a stronger cipher than the vectors it accompanies",
+        "Metadata only exists for image-based embeddings, never text-based ones"
+      ],
+      "answer": 1,
+      "explanation": "Since metadata frequently lacks the same encryption applied to vectors, it can become an easier, overlooked target for an attacker seeking sensitive information."
+    },
+    {
+      "q": "What kind of question does a vector database answer, compared to a normal SQL database?",
+      "options": [
+        "A vector database only answers yes/no boolean questions",
+        "There is no functional difference between vector databases and SQL databases",
+        "A vector database can only be queried using the SQL language itself",
+        "A vector database answers 'find the vectors most similar to this one' (Nearest Neighbor Search), while SQL answers exact-match questions like 'find the row where id = 42'"
+      ],
+      "answer": 3,
+      "explanation": "Vector databases are purpose-built for similarity search (finding nearest neighbors in vector space), a fundamentally different query pattern than exact-match SQL lookups."
+    },
+    {
+      "q": "What does cosine similarity measure, and what range of values does it produce?",
+      "options": [
+        "A binary true/false value indicating whether two vectors are exactly identical",
+        "The exact physical distance in meters between two servers hosting a database",
+        "Whether two vectors point in the same direction, ranging from -1 (opposite) to 1 (identical direction)",
+        "The total file size difference between two stored vectors"
+      ],
+      "answer": 2,
+      "explanation": "Cosine similarity measures the directional alignment between two vectors, producing a score from -1 (completely opposite) to 1 (identical direction)."
+    },
+    {
+      "q": "Why do vector databases use Approximate Nearest Neighbor (ANN) search instead of exact search at real scale?",
+      "options": [
+        "Exact search is technically impossible to implement for any vector database",
+        "Checking every single vector (exact search) is far too slow at scale, so ANN trades a small amount of accuracy for a massive gain in speed",
+        "ANN search is required by law for any database storing more than 1,000 records",
+        "ANN search always produces more accurate results than exact search"
+      ],
+      "answer": 1,
+      "explanation": "Exhaustively comparing every vector doesn't scale to millions of records, so ANN methods sacrifice a small amount of precision for dramatically faster search performance."
+    },
+    {
+      "q": "What does Product Quantization (PQ) do to stored vectors, and how does this affect inversion attacks?",
+      "options": [
+        "PQ has no effect whatsoever on either storage size or inversion difficulty",
+        "PQ compresses vectors into smaller codes to save memory, which destroys fine detail and makes inversion attacks meaningfully harder",
+        "PQ automatically deletes any vector flagged as containing sensitive content",
+        "PQ encrypts vectors using a public-key cryptosystem, making them completely unreadable to anyone"
+      ],
+      "answer": 1,
+      "explanation": "PQ compresses vectors for memory efficiency at the cost of discarding fine numerical detail, which directly reduces the precision an inversion attack needs to work well."
+    },
+    {
+      "q": "Which reconnaissance technique for identifying an embedding model involves asking a RAG chatbot questions, then comparing the embedded answers against stolen vectors using multiple candidate models?",
+      "options": [
+        "Inference probing",
+        "Dimensionality counting alone",
+        "Config file inspection",
+        "Physical hardware inspection"
+      ],
+      "answer": 0,
+      "explanation": "Inference probing exploits the fact that a RAG chatbot's answers reflect its stored chunk content — embedding those answers with different candidate models and comparing to stolen vectors reveals the true model."
+    },
+    {
+      "q": "Why does inference probing work as a fingerprinting technique, even when a candidate model's dimension count matches the target's?",
+      "options": [
+        "Because dimension count alone always uniquely identifies exactly one specific model",
+        "Because every embedding model in existence shares an identical internal architecture",
+        "Because inference probing relies entirely on guessing rather than any measurable signal",
+        "Embedding geometry is model-specific even when dimension counts happen to match, so only the true model produces consistently high cosine similarity scores against the stolen vectors"
+      ],
+      "answer": 3,
+      "explanation": "Even models sharing the same output dimensionality organize their embedding space differently, so only the correct model reliably produces high-similarity scores against genuine stolen vectors."
+    },
+    {
+      "q": "Why should exported vectors be saved as .npy (NumPy) or Parquet files rather than CSV?",
+      "options": [
+        "CSV rounds numbers and bloats file size, while .npy and Parquet preserve the exact float32 precision needed for accurate inversion",
+        "NumPy files are always smaller than CSV files regardless of content",
+        "CSV files cannot be opened by any programming language other than Python",
+        "CSV format is illegal to use for storing any form of numeric data"
+      ],
+      "answer": 0,
+      "explanation": "CSV's text-based number formatting loses floating-point precision, while .npy/Parquet preserve exact values, which matters significantly for the fine-grained math inversion attacks depend on."
+    },
+    {
+      "q": "Why might an attacker export vectors in small pages with deliberate delays rather than one large burst?",
+      "options": [
+        "Downloading thousands of vectors in one burst is loud and can trigger rate-limit alerts, so spreading the export over time helps it blend into normal traffic patterns",
+        "Delays between requests automatically encrypt the exported data in transit",
+        "Paginated exports always produce higher-quality, more precise vector data",
+        "Small pages are technically required by every vector database's API specification"
+      ],
+      "answer": 0,
+      "explanation": "A large single burst of downloads is an obvious anomaly likely to trigger monitoring, while paced, paginated exports are much harder to distinguish from ordinary usage."
+    },
+    {
+      "q": "What is the core idea behind triage using sensitivity probes?",
+      "options": [
+        "Triage is only possible after every chunk has already been fully inverted",
+        "Sensitivity probes work only by directly executing SQL queries against the vector store",
+        "Triage requires manually reading every single chunk in the entire vector database",
+        "If a chunk contains a password reset message, its vector sits close to the vectors of other password-reset texts, even without knowing the exact words used, letting probes find sensitive chunks via cosine similarity"
+      ],
+      "answer": 3,
+      "explanation": "Sensitivity probes exploit the fact that semantically similar content clusters together in embedding space, letting an attacker find likely-sensitive chunks purely through similarity scoring, without any inversion needed yet."
+    },
+    {
+      "q": "What are the three stages of a professional triage pipeline for prioritizing which chunks to invert?",
+      "options": [
+        "Collection, Labeling, and Training",
+        "Density, Contrastive pairwise, and Reconstruction — combined using weighted Reciprocal Rank Fusion",
+        "Encryption, Compression, and Transmission",
+        "Authentication, Authorization, and Auditing"
+      ],
+      "answer": 1,
+      "explanation": "These three cascading stages — isolation-based density scoring, positive/negative probe comparison, and shallow reconstruction scoring — combine via weighted RRF to rank chunks by likely sensitivity."
+    },
+    {
+      "q": "What is the practical payoff of a well-executed triage pipeline?",
+      "options": [
+        "It automatically decrypts every chunk in the database simultaneously",
+        "It eliminates the need for any further attack steps whatsoever",
+        "It reduces the attack surface from an entire embedding store down to just a few chunks in seconds, without inverting a single vector, so expensive inversion effort is spent only on the most promising targets",
+        "It permanently deletes all non-sensitive chunks from the vector database"
+      ],
+      "answer": 2,
+      "explanation": "Triage lets an attacker efficiently narrow thousands of chunks to a small, high-value shortlist in seconds, reserving the costly inversion step for only the most promising candidates."
+    },
+    {
+      "q": "What are the three main attack categories once an attacker obtains embeddings?",
+      "options": [
+        "Embedding inversion, membership inference, and attribute inference",
+        "Phishing, malware, and ransomware",
+        "SQL injection, XSS, and command injection",
+        "Brute force, dictionary attack, and rainbow table lookup"
+      ],
+      "answer": 0,
+      "explanation": "These three categories — recovering original text, checking if a specific value is present, and predicting a document's category — represent the core embedding-focused attack techniques covered in the module."
+    },
+    {
+      "q": "What question does embedding inversion answer, and how does its difficulty compare to the other two attack categories?",
+      "options": [
+        "Embedding inversion answers no meaningful question and has no practical difficulty",
+        "'What did the original text say?' — it is the hardest but most valuable of the three attack categories",
+        "'What kind of document is this?' — it requires no computation at all",
+        "'Is this specific value present?' — it is the easiest of the three attack categories"
+      ],
+      "answer": 1,
+      "explanation": "Inversion attempts full text recovery, the hardest and most valuable goal, contrasted with membership inference's yes/no question and attribute inference's category-labeling question."
+    },
+    {
+      "q": "What does 'zero-shot' mean in the context of zero-shot embedding inversion, and what is a common misconception about the term?",
+      "options": [
+        "It means the attack works against exactly zero embedding models",
+        "It means the attack requires absolutely no knowledge or preparation whatsoever",
+        "It means you don't train a model against the target's specific embedding space; it does NOT mean zero preparation, since you still need to know the embedding model in use",
+        "It means the attack can only be performed exactly once per target system"
+      ],
+      "answer": 2,
+      "explanation": "Zero-shot refers to skipping target-specific training, not to skipping all preparation — knowing the embedding model remains a prerequisite."
+    },
+    {
+      "q": "What is the two-stage trick behind zero-shot inversion using templates?",
+      "options": [
+        "Convert the vector into an image, then apply optical character recognition",
+        "Encrypt the target vector, then decrypt it using a matching private key",
+        "Recover the sentence structure with placeholders like {PASSWORD}, then fill those placeholders using membership inference over a candidate wordlist",
+        "Delete the original chunk, then request a fresh copy from the target server"
+      ],
+      "answer": 2,
+      "explanation": "This two-stage approach separates recovering the surrounding sentence structure (via template matching) from recovering the actual secret value (via membership inference on candidate fills)."
+    },
+    {
+      "q": "Why can zero-shot template inversion recover meaningful values like usernames or dictionary-word passwords, but not truly random strings?",
+      "options": [
+        "Meaningful values are encoded distinctively by the model, while random strings tokenize into meaningless fragments the model treats essentially as noise, barely moving the resulting vector",
+        "Random strings are always longer than meaningful values, making them technically impossible to embed",
+        "The embedding model refuses outright to process any string containing numbers",
+        "Meaningful values are always stored in a completely separate database from random strings"
+      ],
+      "answer": 0,
+      "explanation": "Since the model's embeddings capture semantic meaning, genuinely random strings carry no learnable pattern, causing candidate swaps to barely shift the resulting vector — unlike meaningful words the model represents distinctively."
+    },
+    {
+      "q": "Why does the zero-shot method use a large template bank of hundreds of thousands of variations rather than relying on a single template?",
+      "options": [
+        "A single template is technically incapable of being processed by any embedding model",
+        "Template banks eliminate the need for the membership inference step entirely",
+        "Large template banks are required by law for any authorized security assessment",
+        "Using many structurally different templates as a voting panel builds real confidence — if the same password wins consistently across many templates, that's a stronger signal than any single template alone"
+      ],
+      "answer": 3,
+      "explanation": "Consistent agreement across many structurally diverse templates provides much stronger confidence in a recovered value than relying on any single template's result alone."
+    },
+    {
+      "q": "What is beam search, as a text-reconstruction technique?",
+      "options": [
+        "A method for encrypting text using multiple simultaneous cipher keys",
+        "A search technique that builds text step by step, keeping several of the best partial guesses (beams) alive at each step instead of committing to just one",
+        "A defensive tool that automatically blocks any inversion attempt in progress",
+        "A technique for physically searching a data center for a specific server rack"
+      ],
+      "answer": 1,
+      "explanation": "Beam search explores multiple promising partial text candidates in parallel at each step, gradually converging toward the best overall reconstruction rather than committing early to a single path."
+    },
+    {
+      "q": "What specific problem with the template-bank method does beam search inversion solve?",
+      "options": [
+        "If the target uses an unusual structure or comes from an unfamiliar domain, even a massive template bank may still miss, whereas beam search reconstructs text directly with no template bank required",
+        "Beam search eliminates the need for any embedding model to exist at all",
+        "Beam search removes the need for a GPU during any inversion attack",
+        "Beam search solves the problem of vector databases requiring authentication"
+      ],
+      "answer": 0,
+      "explanation": "Beam search directly reconstructs text token by token guided by embedding similarity, without depending on a pre-built template matching the target's specific structure."
+    },
+    {
+      "q": "In beam-search inversion, what specific role does GPT-2 play, and why was it chosen despite being an older, smaller model?",
+      "options": [
+        "GPT-2 was chosen because it is the only language model capable of producing English text",
+        "GPT-2 directly decrypts the stolen embedding before any further processing occurs",
+        "GPT-2 performs the final scoring of each candidate against the target vector",
+        "GPT-2 proposes plausible next tokens at each step; it was chosen because it runs on modest hardware and has a broad-enough vocabulary, since only the embedding model does the actual scoring"
+      ],
+      "answer": 3,
+      "explanation": "GPT-2's role is limited to proposing candidate token continuations; the actual quality scoring is done separately via cosine similarity against the target embedding, making a lightweight proposer model sufficient."
+    },
+    {
+      "q": "How does a practical beam-search pipeline combine with membership inference to handle high-entropy secrets?",
+      "options": [
+        "Membership inference runs first, followed by beam search as a final verification step",
+        "Beam search recovers only random strings, while membership inference recovers only meaningful words",
+        "The two techniques cannot be combined and must always be used entirely separately",
+        "Beam search recovers the overall sentence structure, entropy detection spots the secret region and replaces it with a typed slot, and the membership-inference slot filler then recovers the actual value"
+      ],
+      "answer": 3,
+      "explanation": "This pipeline mirrors the zero-shot approach's two-stage design — beam search handles the structural reconstruction, while membership inference fills in the high-entropy value the structure alone can't reveal."
+    },
+    {
+      "q": "What does 'dual-embedder mode' accomplish in an advanced beam-search tool?",
+      "options": [
+        "It runs two completely independent inversion attacks simultaneously against two different victim databases",
+        "It doubles the total number of beams kept alive at every single step of the search",
+        "It requires the attacker to have physical access to two separate GPU servers",
+        "It scores candidates with a local embedding model, then maps results to the victim model via a small regression matrix, cutting queries to the victim from thousands down to dozens per step"
+      ],
+      "answer": 3,
+      "explanation": "By scoring most candidates locally and only occasionally checking against the actual victim model, dual-embedder mode dramatically reduces the number of queries sent to the target, aiding stealth against a paid or rate-limited API."
+    },
+    {
+      "q": "What is ALGEN's key advantage over other embedding inversion methods that require knowing the target's embedding model?",
+      "options": [
+        "It requires no computer of any kind, only pen and paper calculations",
+        "It works exclusively on encrypted vectors and fails against unencrypted ones",
+        "It is the fastest method available, completing in under one second regardless of target",
+        "It can invert embeddings even when the target's embedding model is completely unknown"
+      ],
+      "answer": 3,
+      "explanation": "Unlike zero-shot, beam search, and Vec2Text, which all require knowing the target's embedding model, ALGEN specifically works around this requirement through its alignment technique."
+    },
+    {
+      "q": "What are the two distinct stages of the ALGEN approach?",
+      "options": [
+        "Train a decoder on your own hardware, then compute an alignment (a linear matrix) that translates the target's embedding space into your decoder's space",
+        "Encrypt the target vector, then send it to a certified third-party decryption service",
+        "Physically intercept network traffic, then decode it using standard packet analysis tools",
+        "Delete the target's original database, then rebuild it from scratch under attacker control"
+      ],
+      "answer": 0,
+      "explanation": "ALGEN separates decoder training (done entirely in the attacker's own space) from a lightweight alignment step that bridges the target's unknown embedding space to that trained decoder."
+    },
+    {
+      "q": "What is a 'canary,' as used in the ALGEN technique?",
+      "options": [
+        "A known piece of text the attacker deliberately inserts into the target's vector database, so the target system itself embeds it, producing genuine (text, vector) pairs from the exact target model",
+        "A physical hardware device used to detect gas leaks near a server room",
+        "A defensive tool deployed by the target to detect and block inversion attempts",
+        "A type of encryption key used exclusively for securing vector database backups"
+      ],
+      "answer": 0,
+      "explanation": "Canaries are attacker-known texts injected into the target system, which the target's own embedding model then processes, producing genuine text-vector pairs needed to compute the ALGEN alignment."
+    },
+    {
+      "q": "Roughly how many canary text-embedding pairs does ALGEN's alignment quality typically plateau around?",
+      "options": [
+        "Exactly 1 pair is sufficient for full alignment quality",
+        "1,000 to 3,000 pairs",
+        "1 million to 3 million pairs",
+        "10 to 20 pairs"
+      ],
+      "answer": 1,
+      "explanation": "The module notes that alignment quality plateaus around 1,000 to 3,000 canary pairs, beyond which additional pairs offer diminishing returns."
+    },
+    {
+      "q": "Why is ALGEN better described as a 'keyword finder' rather than a precise text recoverer?",
+      "options": [
+        "ALGEN cannot process any text data whatsoever, only numeric metadata",
+        "ALGEN only works on documents specifically formatted as keyword lists",
+        "ALGEN's decoder always produces perfectly accurate, word-for-word text reconstruction",
+        "Its decoder often produces approximate, wrong-topic text, so its real value lies in extracting semantic fingerprints (domain fragments, keywords) that feed into further RAG probing"
+      ],
+      "answer": 3,
+      "explanation": "Since ALGEN's cross-model alignment introduces approximation error, its practical strength lies in extracting rough semantic signals (keywords, domain hints) rather than exact reconstruction."
+    },
+    {
+      "q": "Why do redaction markers like '[REDACTED]' in a RAG chatbot's response actually help an attacker who already has the stolen embedding?",
+      "options": [
+        "Redaction markers are a bug that only appears when the embedding model has been compromised",
+        "Redaction markers automatically decrypt the entire vector database for any observer",
+        "A redaction marker tells the attacker exactly where a secret slot lives, and since the stolen embedding still encodes the original unredacted text, membership inference against it can recover the real value",
+        "Redaction has no relationship whatsoever to embedding-based attacks of any kind"
+      ],
+      "answer": 2,
+      "explanation": "This illustrates a key lesson — output-level redaction (in the chat response) doesn't change what's actually encoded in the stolen vector, so an attacker can still recover the original value directly from the embedding."
+    },
+    {
+      "q": "Why do output guardrails fail to protect against attackers who possess stolen embeddings directly?",
+      "options": [
+        "Output guardrails only fail when the embedding model uses more than 1000 dimensions",
+        "Output guardrails cannot protect data when the stolen embedding itself already encodes the unredacted text",
+        "Output guardrails work perfectly as long as redaction happens before ingestion rather than after",
+        "Output guardrails are completely unnecessary and provide no security benefit under any circumstances"
+      ],
+      "answer": 1,
+      "explanation": "This is a direct illustration that chat-level output filtering is a different, separate layer from the underlying vector data — protecting the response doesn't protect the raw stored embedding itself."
+    },
+    {
+      "q": "What are the two neural network components of Vec2Text, and what does each do?",
+      "options": [
+        "An encoder, which turns text into numbers, and a decoder, which turns numbers back into images",
+        "A classifier, which labels text by topic, and a translator, which converts between languages",
+        "An inverter, which makes a rough first guess at the text, and a corrector, which iteratively refines that guess over many passes",
+        "A firewall, which blocks malicious input, and a logger, which records all activity"
+      ],
+      "answer": 2,
+      "explanation": "Vec2Text's inverter produces an initial rough reconstruction, while the corrector iteratively refines that guess across multiple passes to improve accuracy."
+    },
+    {
+      "q": "What is the 'residual' in the Vec2Text corrector loop, and what role does it play?",
+      "options": [
+        "A permanent record of every previous guess the corrector has ever made",
+        "The exact number of GPU hours required to train the entire model",
+        "The total file size difference between the original text and its embedding",
+        "The gap between the current guess's re-embedded vector and the real target embedding — the corrector uses this gap to make a slightly better guess on the next pass"
+      ],
+      "answer": 3,
+      "explanation": "The residual quantifies how far the current hypothesis's embedding is from the actual target, directly guiding each subsequent refinement pass toward a closer match."
+    },
+    {
+      "q": "What is the most significant limitation of a trained Vec2Text model?",
+      "options": [
+        "Vec2Text cannot be used on any text shorter than 1,000 words",
+        "A trained Vec2Text model only works against one specific embedding model — it can't invert text from a different embedding model without separate training",
+        "Vec2Text requires the target's database to have zero authentication configured",
+        "Vec2Text can only be trained using exactly one specific programming language"
+      ],
+      "answer": 1,
+      "explanation": "Since Vec2Text's decoder is trained specifically against one embedding model's geometry, it doesn't generalize — attacking a different model requires a completely separate training run."
+    },
+    {
+      "q": "What three changes make Vec2Text practical to use on a single GPU rather than requiring a research lab's worth of hardware?",
+      "options": [
+        "Skip the inverter stage entirely and rely solely on the corrector",
+        "Only train on text written in languages other than English",
+        "Reduce the corrector to exactly one single refinement pass regardless of text quality",
+        "Train on enterprise-style synthetic text rather than general text, use it for recon rather than final extraction, and let the recon guide template choice"
+      ],
+      "answer": 3,
+      "explanation": "These three adaptations — domain-specific training data, using it as a structure-recovery tool rather than final extraction, and feeding results into template matching — make Vec2Text tractable within a normal single-GPU engagement."
+    },
+    {
+      "q": "What is 'progressive fill-and-lock' as a technique for recovering multiple pieces of hidden information within one chunk?",
+      "options": [
+        "Recover easy, low-randomness values first (like a URL or username), lock them in as known values, then re-run the attack on the harder piece with those known values already filled in",
+        "Delete the easy values first, then attempt to recover only the hardest remaining value",
+        "Attempt to recover all pieces of information simultaneously in a single, undivided pass",
+        "Lock the entire chunk permanently after the very first recovery attempt, regardless of accuracy"
+      ],
+      "answer": 0,
+      "explanation": "By locking in confidently-recovered low-entropy values first, the remaining uncertainty in the text is reduced, making it easier to isolate and recover the harder, higher-entropy value."
+    },
+    {
+      "q": "Under what conditions is Vec2Text worth using compared to faster, less resource-intensive inversion methods?",
+      "options": [
+        "Only when attacking exactly one single chunk with no need for repeated use",
+        "Only when the engagement lasts less than one hour with no advance preparation possible",
+        "Only when the target's embedding model is completely unknown and cannot be identified",
+        "When the exact embedding model is known in advance, you have several days to prepare, you need to attack many chunks from the same model, and you need the highest possible reconstruction quality"
+      ],
+      "answer": 3,
+      "explanation": "Vec2Text's heavy upfront training cost is only worthwhile when the model is known, sufficient prep time exists, and the payoff (many chunks, highest quality) justifies that investment."
+    },
+    {
+      "q": "What does membership inference determine, in simple terms?",
+      "options": [
+        "The exact identity of the person who originally wrote a given document",
+        "Whether one specific piece of information (like a guessed password) is present somewhere inside a set of embeddings — a yes/no answer",
+        "The physical geographic location of the server storing the vector database",
+        "The complete original text of an entire document from a single vector"
+      ],
+      "answer": 1,
+      "explanation": "Membership inference answers a binary question — is this specific candidate value present — rather than attempting to recover unknown content."
+    },
+    {
+      "q": "In the key-and-lock analogy for membership inference, what does 'this one turned the lock' represent?",
+      "options": [
+        "A defensive alert triggered automatically whenever any candidate is tested",
+        "A candidate value scoring clearly higher in cosine similarity than the wrong guesses, indicating it's likely the real value present in the embedding",
+        "A candidate value that produces a syntax error when tested against the embedding",
+        "A physical key that has been cryptographically signed by the database administrator"
+      ],
+      "answer": 1,
+      "explanation": "Just as a working key confirms a specific match without describing the lock's mechanism, a high-scoring candidate confirms membership without revealing the full surrounding text on its own."
+    },
+    {
+      "q": "Why is membership inference described as 'limited alone' but 'genuinely powerful' when paired with inversion?",
+      "options": [
+        "Because membership inference requires no candidate wordlist of any kind to function",
+        "Because inversion and membership inference are mathematically identical techniques",
+        "It only confirms things you already guessed and can't tell you what to guess in the first place, but inversion can recover the structure and mark where the secret goes for membership inference to then fill",
+        "Because membership inference alone always produces false results with no exceptions"
+      ],
+      "answer": 2,
+      "explanation": "Membership inference needs a candidate list to test, which inversion provides by identifying the structural slot; together they form a complete recovery pipeline neither achieves alone."
+    },
+    {
+      "q": "Why is it recommended to use small, targeted wordlists (a few hundred to a few thousand entries) rather than giant generic ones for membership inference?",
+      "options": [
+        "A password is usually only a small slice of a chunk's overall meaning, so testing too many candidates can bury the real signal under noise, making a 'winning' guess just random luck rather than a genuine match",
+        "Small wordlists guarantee 100% accuracy regardless of the actual candidate being tested",
+        "Large wordlists always cause the embedding model's API to return an immediate error",
+        "Small wordlists are required by international data protection law for any assessment"
+      ],
+      "answer": 0,
+      "explanation": "Since the secret typically contributes only a small portion of a chunk's total embedding signal, an overly large candidate pool increases the risk that noise produces a false 'winner' rather than the genuine match."
+    },
+    {
+      "q": "What is an 'attractor candidate,' and why is it a red flag during membership inference?",
+      "options": [
+        "A candidate that always produces a perfect cosine similarity score of exactly 1.0",
+        "A candidate value that has been cryptographically verified as definitely correct",
+        "A word that seems to 'win' across many completely unrelated chunks, usually indicating random noise rather than a genuine match",
+        "A word specifically flagged by the target system's own security team for monitoring"
+      ],
+      "answer": 2,
+      "explanation": "A candidate that consistently 'wins' across many structurally unrelated chunks is behaving suspiciously uniform, suggesting it's exploiting some generic similarity artifact rather than genuinely matching real content."
+    },
+    {
+      "q": "What does attribute inference predict, and what real-world analogy is used to describe it?",
+      "options": [
+        "The precise time of day a specific document was originally created",
+        "High-level information (metadata) about a document straight from its embedding, without recovering the actual text — like judging a sealed envelope's likely contents by its weight and thickness alone",
+        "The exact word-for-word content of a document, using a technique identical to full inversion",
+        "The physical color of the paper a printed document was originally written on"
+      ],
+      "answer": 1,
+      "explanation": "Attribute inference predicts general category-level information (like 'financial data' or 'HR record') without recovering specific text, similar to guessing an envelope's contents from external clues alone."
+    },
+    {
+      "q": "Why is attribute inference described as 'the engine behind triage'?",
+      "options": [
+        "It permanently deletes every chunk that is not classified as sensitive",
+        "It quickly labels which handful of chunks (out of thousands) are likely to contain credentials or sensitive data, letting expensive inversion effort be reserved for that smaller, promising subset",
+        "It requires running full inversion on every single chunk before any labeling can occur",
+        "It only works on chunks that have already been manually reviewed by a human"
+      ],
+      "answer": 1,
+      "explanation": "By rapidly categorizing large volumes of chunks based on embedding similarity to category descriptions, attribute inference enables efficient triage without the cost of full inversion on every chunk."
+    },
+    {
+      "q": "How do attribute inference, embedding inversion, and membership inference work together as a full attack chain?",
+      "options": [
+        "The three techniques are mutually exclusive and cannot be combined under any circumstances",
+        "Only one of the three techniques can ever be used within a single engagement",
+        "Attribute inference triages to find worthwhile chunks, inversion recovers structure and low-entropy text, and membership inference fills in high-entropy secrets that inversion alone misses",
+        "All three attacks must always be run in a completely random, unspecified order for any result"
+      ],
+      "answer": 2,
+      "explanation": "This chained pipeline — triage, then structural recovery, then secret-filling — turns a large, seemingly meaningless pile of raw embeddings into actual recovered sensitive information, more effectively than any single technique alone."
+    },
+    {
+      "q": "What is the recommended fix for a vector database sitting on an open port with no authentication?",
+      "options": [
+        "Publish the database's IP address publicly to increase transparency",
+        "Disable all logging to reduce the visible attack surface",
+        "Require strong authentication on every endpoint, enforce least-privilege authorization, and place the database on an isolated network segment",
+        "Rely entirely on the assumption that 'it's only reachable on localhost' provides sufficient protection"
+      ],
+      "answer": 2,
+      "explanation": "Combining strong authentication, least-privilege access, and network isolation directly addresses the most common and severe vector database vulnerability — being completely open with no protection."
+    },
+    {
+      "q": "Why should both vectors AND metadata be encrypted at rest?",
+      "options": [
+        "Metadata encryption is technically impossible using any current encryption technology",
+        "Metadata is often the easiest thing for an attacker to leak, since it's frequently overlooked compared to the vectors themselves",
+        "Encrypting only the vectors always provides equal protection to encrypting both",
+        "Metadata never actually contains any sensitive information of any kind"
+      ],
+      "answer": 1,
+      "explanation": "Since metadata is commonly under-protected relative to the vectors, applying equal encryption to both closes an easily-overlooked gap."
+    },
+    {
+      "q": "In a multi-tenant system, why should tenant filtering always be enforced server-side rather than trusted to the client application?",
+      "options": [
+        "A malicious or buggy client could simply omit the tenant filter, so never trusting the client to correctly scope its own query prevents cross-tenant data leakage",
+        "Tenant filtering only matters for databases storing fewer than 100 total records",
+        "Server-side filtering is always slower than client-side filtering, making it purely a performance trade-off",
+        "Client-side filtering is technically impossible to implement in any vector database"
+      ],
+      "answer": 0,
+      "explanation": "Relying on the client to self-restrict its own query creates a trust gap a malicious or buggy client could exploit; enforcing the filter server-side removes that dependency entirely."
+    },
+    {
+      "q": "What is considered the single most reliable fix among the defenses against embedding inversion attacks?",
+      "options": [
+        "Migrating the entire system to a completely different vector database vendor",
+        "Hiring additional security personnel to monitor the database around the clock",
+        "Never store real secrets inside documents that get embedded in the first place — if a secret was never ingested, no inversion attack can ever recover it",
+        "Applying the strongest possible encryption algorithm available on the market"
+      ],
+      "answer": 2,
+      "explanation": "Since every inversion and membership inference technique in the module relies on the secret having been embedded in the first place, never ingesting real secrets removes the target entirely, regardless of attack sophistication."
+    },
+    {
+      "q": "Why does quantization (like Product Quantization or dimensionality reduction) act as a defense, and what trade-off does it carry?",
+      "options": [
+        "It discards fine detail that inversion attacks rely on, lowering reconstruction quality, though it can also slightly reduce search accuracy for legitimate users",
+        "Quantization has no effect whatsoever on either security or search accuracy",
+        "Quantization completely eliminates the need for any authentication mechanism",
+        "Quantization only works as a defense against SQL injection attacks, not embedding attacks"
+      ],
+      "answer": 0,
+      "explanation": "Since inversion attacks rely on fine numerical precision, compressing vectors reduces attack quality — but this same compression can also slightly degrade legitimate search results, representing a genuine security/usability trade-off."
+    },
+    {
+      "q": "Why do output guardrails on a chat interface fail to protect a vector database that an attacker can access directly?",
+      "options": [
+        "Guardrails and vector databases are technically incompatible and cannot coexist in the same system",
+        "If an attacker has direct access to the vector database, output guardrails never even come into play, since they only filter what's shown in chat responses, not what's stored in the database itself",
+        "Output guardrails are always disabled automatically whenever a vector database is deployed",
+        "Output guardrails only function correctly during the first hour after a system is deployed"
+      ],
+      "answer": 1,
+      "explanation": "Output guardrails operate on the chat response pathway, entirely separate from direct database access — an attacker bypassing the chat interface encounters no guardrail protection whatsoever."
+    },
+    {
+      "q": "Which detection signal specifically helps catch bulk vector export activity?",
+      "options": [
+        "A slight increase in average response latency of under 5 milliseconds",
+        "Unusual pagination patterns or an unusually high volume of read requests",
+        "A single user logging in exactly once per day at a consistent time",
+        "The exact software version number reported by the database server"
+      ],
+      "answer": 1,
+      "explanation": "Unusual pagination behavior or elevated read volume are direct behavioral signatures of an attacker systematically exporting large volumes of stored vectors."
+    },
+    {
+      "q": "Which detection signal specifically helps catch canary injection or data poisoning attempts?",
+      "options": [
+        "A decrease in the total number of active user sessions",
+        "A user requesting a password reset through the normal support workflow",
+        "The database server's uptime exceeding 99.9% availability",
+        "Sudden spikes in ingestion volume"
+      ],
+      "answer": 3,
+      "explanation": "Since canary injection and poisoning both require writing new data into the target, an unexpected spike in ingestion activity is a direct behavioral signal worth monitoring."
+    },
+    {
+      "q": "What is a recommended attacker methodology, from recon to recovery, for a full embedding-based attack chain?",
+      "options": [
+        "Train, Test, Validate, Deploy, Monitor, Retrain, and Retire",
+        "Access, Export, Fingerprint the model, Triage, Invert, Fill in secrets via membership inference, and Clean up",
+        "Login, Logout, Login again, Repeat indefinitely, and Report",
+        "Encrypt, Compress, Transmit, Decrypt, Decompress, Store, and Delete"
+      ],
+      "answer": 1,
+      "explanation": "This seven-step methodology captures the complete attack lifecycle covered across the module — from initial access through final cleanup and documentation."
+    },
+    {
+      "q": "Which inversion method should typically be tried first in an engagement, given time constraints?",
+      "options": [
+        "Vec2Text, since it always produces the highest possible quality regardless of preparation time",
+        "ALGEN with canary injection, regardless of whether the embedding model is already known",
+        "Beam search, since it never requires knowing the target embedding model at all",
+        "Template-based inversion combined with membership inference, since it's fast, works on CPU, and requires no training"
+      ],
+      "answer": 3,
+      "explanation": "The recommended workflow starts with the fastest, lowest-prep method (templates + membership inference) before escalating to more resource-intensive approaches only as needed."
+    },
+    {
+      "q": "Under what specific condition should ALGEN with canary injection be used instead of other inversion methods?",
+      "options": [
+        "When the engagement has several days of preparation time available and many chunks to attack",
+        "When the target's document structure is unusually common and well-matched by existing templates",
+        "When the embedding model itself is unknown, since ALGEN is the one method that doesn't require knowing the target model",
+        "When no write access to the target's vector database exists"
+      ],
+      "answer": 2,
+      "explanation": "ALGEN's unique advantage of working without model knowledge makes it the specific fallback when the embedding model can't be identified through other means."
+    },
+    {
+      "q": "What token-length limitation applies broadly to most embedding inversion tools?",
+      "options": [
+        "Inversion tools require chunks to contain zero tokens for any attack to succeed",
+        "Inversion tools only work on chunks containing exactly 1,000,000 tokens or more",
+        "Token length has absolutely no effect on inversion quality for any method covered",
+        "These tools work best on short chunks (roughly 32-64 tokens); long prose degrades reconstruction quality badly"
+      ],
+      "answer": 3,
+      "explanation": "Across the inversion methods covered, reconstruction quality noticeably degrades on longer passages, favoring short chunks in the 32-64 token range."
+    },
+    {
+      "q": "Which inversion method is the exception to the general requirement of knowing the target's embedding model?",
+      "options": [
+        "ALGEN with canary injection",
+        "Beam search inversion",
+        "Vec2Text supervised inversion",
+        "Zero-shot template-based inversion"
+      ],
+      "answer": 0,
+      "explanation": "ALGEN's canary-and-alignment approach specifically works around not knowing the embedding model, unlike the other three methods which all require this knowledge upfront."
+    },
+    {
+      "q": "Why does a decoder trained on one type of content, such as legal text, tend to perform worse when applied to a very different domain, such as casual chat?",
+      "options": [
+        "Decoders are physically incapable of processing any text outside their exact original training set",
+        "Legal text and casual chat always produce mathematically identical embeddings",
+        "Domain has no effect whatsoever on decoder performance for any inversion method",
+        "Domain mismatch causes reconstruction quality to suffer, since the decoder learned patterns specific to the training domain's vocabulary and structure"
+      ],
+      "answer": 3,
+      "explanation": "Since decoders learn the specific vocabulary and structural patterns of their training data, applying them to a substantially different domain reduces the quality of their reconstructions."
+    },
+    {
+      "q": "What is the best practice for handling sensitive values relative to ingestion into the vector store?",
+      "options": [
+        "They should be encrypted twice using two completely different algorithms",
+        "They should be deleted from the source system entirely with no vector database record at all",
+        "They should be converted into a different human language before storage",
+        "They should be redacted before ingestion, not after — since redacting only the chat output leaves the original unredacted value still embedded and recoverable"
+      ],
+      "answer": 3,
+      "explanation": "Redacting only at output time leaves the raw secret embedded and recoverable via inversion — redacting before ingestion ensures the secret was never encoded into the vector at all."
+    },
+    {
+      "q": "What is a core idea worth remembering above all else regarding embeddings and data recoverability?",
+      "options": [
+        "Vector databases are always more secure than relational databases by default",
+        "Embeddings are not one-way hashes — they preserve meaning, and wherever meaning is preserved, meaning can eventually be recovered",
+        "Only large enterprise companies need to worry about vector database security",
+        "Embedding inversion is entirely theoretical and has never been demonstrated to work in practice"
+      ],
+      "answer": 1,
+      "explanation": "This is the module's central, repeated thesis — embeddings' meaning-preserving design is precisely what makes them recoverable, unlike genuinely one-way cryptographic hashes."
+    },
+    {
+      "q": "In the frosted-glass photo analogy for embeddings, what does the 'blur' represent, and why can it be 'sharpened'?",
+      "options": [
+        "The blur represents an intentional privacy feature that cannot be reversed under any circumstances",
+        "The blur represents a permanent, un-fixable data corruption bug in the embedding model",
+        "The blur represents the physical distance between the attacker and the target server",
+        "The blur represents the imperfect but recoverable nature of embedded information — with the right inversion technique, the underlying shape, colors, and details can be reconstructed into something readable"
+      ],
+      "answer": 3,
+      "explanation": "Unlike a shredded document (a hash), a blurry photo through frosted glass still contains recoverable information — the analogy captures how embeddings preserve enough structure that dedicated techniques can 'sharpen' them back into readable form."
+    },
+    {
+      "q": "Why should a vector store holding embeddings of sensitive documents be treated 'as a store of sensitive data itself,' rather than as a safe pile of numbers?",
+      "options": [
+        "Because embeddings preserve meaning and can be inverted, membership-tested, or category-inferred to extract sensitive information, so they deserve the same protection level as the original documents",
+        "Because vector stores are always physically larger in file size than the original documents",
+        "Because embeddings automatically become sensitive only after being stored for more than 90 days",
+        "Because this treatment is required only for vector stores hosted outside the company's home country"
+      ],
+      "answer": 0,
+      "explanation": "Given the multiple demonstrated techniques for extracting sensitive information from embeddings, they warrant the same security posture as the original sensitive source data."
+    },
+    {
+      "q": "A red teamer exports 5,000 vectors from an unauthenticated Weaviate instance, confirms the dimension count is 384, but cannot find any OSINT confirming the exact model. What is their most direct next recon step?",
+      "options": [
+        "Assume the model is all-MiniLM-L6-v2 without any further verification, since it's the most popular 384-dimension model",
+        "Perform inference probing by asking the target's RAG chatbot questions and comparing the embedded answers against the stolen vectors using each of the 384-dimension candidate models",
+        "Immediately begin training a full Vec2Text model without confirming the embedding model first",
+        "Abandon the engagement entirely, since model identification is described as technically impossible without OSINT"
+      ],
+      "answer": 1,
+      "explanation": "Since OSINT was unsuccessful and dimensionality alone only narrows down candidates, inference probing is the next logical step to definitively confirm the exact model among the remaining candidates."
+    },
+    {
+      "q": "A tester has thousands of exported chunks and limited time. Which technique should they apply BEFORE attempting any inversion, and why?",
+      "options": [
+        "Beam search inversion, since it works fastest when applied to every single chunk simultaneously",
+        "Attribute inference / triage, since it quickly narrows thousands of chunks down to a small, high-value subset before any expensive inversion effort is spent",
+        "Membership inference, since it must always be the very first step regardless of whether a candidate wordlist has been built yet",
+        "Vec2Text training, since it should always be applied to the entire dataset regardless of chunk count"
+      ],
+      "answer": 1,
+      "explanation": "Given time constraints and a large volume of chunks, triage via attribute inference is the efficient first step, ensuring costly inversion effort is spent only on the most promising candidates."
+    },
+    {
+      "q": "A tester recovers the template 'Please contact {NAME} at {URL} regarding your {SECRET}' via beam search, with high confidence in NAME and URL but low confidence in SECRET. Following the progressive fill-and-lock approach, what should happen next?",
+      "options": [
+        "Lock in the confidently recovered NAME and URL values, then re-run the attack specifically on the SECRET slot with those known values already fixed in place",
+        "Discard the entire template and restart the attack completely from scratch with no prior information retained",
+        "Immediately report SECRET as unrecoverable without attempting any further refinement",
+        "Apply membership inference to all three slots simultaneously with equal priority and no particular order"
+      ],
+      "answer": 0,
+      "explanation": "This is the exact fill-and-lock methodology — securing the confident, low-entropy values first reduces overall uncertainty, making the harder, high-entropy value easier to isolate in a subsequent pass."
+    },
+    {
+      "q": "A vector database enforces authentication and encrypts vectors at rest, but stores metadata in plaintext and allows any authenticated user to query any tenant's data. Which specific vulnerability remains exploitable despite these controls?",
+      "options": [
+        "Model fingerprinting, since encrypted vectors always fully prevent any form of dimensionality counting",
+        "Cross-tenant leakage, since tenant filtering isn't enforced, combined with metadata exposure, since metadata remains unencrypted despite the vectors themselves being protected",
+        "SQL injection, since authentication has no relationship to injection vulnerabilities of any kind",
+        "Canary injection, since authenticated users are always structurally incapable of writing new data"
+      ],
+      "answer": 1,
+      "explanation": "Encrypting vectors alone doesn't address either unencrypted metadata (a direct leak) or missing tenant isolation (allowing any authenticated user to access other tenants' data) — both remain fully exploitable gaps."
+    },
+    {
+      "q": "A defender applies aggressive quantization to all stored vectors and never embeds real secrets in source documents. An attacker still attempts full Vec2Text inversion against this system. What is the most likely combined outcome?",
+      "options": [
+        "Quantization has no effect on Vec2Text specifically, though it fully blocks all other inversion methods",
+        "The attack succeeds perfectly with no degradation, since quantization only affects membership inference, never full inversion",
+        "The absence of real secrets makes quantization entirely unnecessary as a complementary defense",
+        "Reconstruction quality is degraded by the quantization, and even a successful reconstruction would reveal no actual secrets, since none were ever embedded in the first place"
+      ],
+      "answer": 3,
+      "explanation": "These two defenses work complementarily — quantization degrades whatever reconstruction quality is achievable, while the absence of real secrets means even a technically successful inversion yields nothing of actual value."
+    },
+    {
+      "q": "A company deploys strong output guardrails on their RAG chatbot's chat interface but leaves their underlying vector database completely unauthenticated on an internal network. A red teamer with internal network access attempts an attack. What does this scenario best illustrate?",
+      "options": [
+        "This configuration provides complete, comprehensive protection against every attack technique covered in this module",
+        "Output guardrails provide no protection against an attacker who bypasses the chat interface entirely and accesses the vector database directly, since guardrails only filter chat responses, not raw stored data",
+        "Internal network access is always technically impossible regardless of authentication configuration",
+        "Output guardrails and database authentication are functionally identical controls providing redundant protection"
+      ],
+      "answer": 1,
+      "explanation": "This scenario directly demonstrates the module's repeated warning — chat-level guardrails are entirely bypassed by direct database access, which the missing authentication makes trivially possible for anyone on the internal network."
+    },
+    {
+      "q": "Why does the semantic map analogy explain that embeddings for 'dog' and 'puppy' land closer together than 'dog' and 'spreadsheet'?",
+      "options": [
+        "Because embeddings encode meaning, and related concepts (dog/puppy) share more semantic similarity than unrelated ones (dog/spreadsheet), placing them closer in vector space",
+        "Because embeddings are assigned in strict alphabetical order regardless of meaning",
+        "Because 'dog' and 'spreadsheet' were embedded using two completely different models",
+        "Because 'dog' and 'puppy' are exactly the same number of letters long"
+      ],
+      "answer": 0,
+      "explanation": "Embeddings position semantically related concepts closer together in vector space, which is the entire basis for similarity search and, unfortunately, also for many inversion techniques."
+    },
+    {
+      "q": "What role does the embedding model play during both ingestion (storing documents) and retrieval (searching for answers) in a RAG system?",
+      "options": [
+        "Different embedding models can be freely mixed between ingestion and retrieval with no consequence",
+        "The embedding model changes automatically and randomly for every retrieval query",
+        "The exact same embedding model must be used for both stages, or the resulting coordinates won't line up correctly for meaningful comparison",
+        "The embedding model is only used during ingestion and plays no role during retrieval"
+      ],
+      "answer": 2,
+      "explanation": "Consistency between ingestion and retrieval embedding models is essential, since mismatched models would produce vector spaces that don't meaningfully compare to each other."
+    },
+    {
+      "q": "What does HNSW (Hierarchical Navigable Small World) refer to in the context of vector databases?",
+      "options": [
+        "A network protocol used exclusively for authenticating vector database users",
+        "A file format used for exporting vectors in a human-readable form",
+        "A specific encryption standard used to protect vectors at rest",
+        "A popular algorithm used to implement Approximate Nearest Neighbor search efficiently"
+      ],
+      "answer": 3,
+      "explanation": "HNSW is a widely-used ANN algorithm that organizes vectors into a navigable graph structure to enable fast approximate similarity search at scale."
+    },
+    {
+      "q": "Why would an attacker specifically look for a vector database's config files or environment variables during reconnaissance?",
+      "options": [
+        "These files often directly reveal the exact embedding model name in use, saving the effort of inference probing or other fingerprinting techniques",
+        "Config files are the only place an attacker can find the database's IP address",
+        "Environment variables automatically decrypt the entire vector database contents",
+        "Config files always contain the plaintext password for every user account"
+      ],
+      "answer": 0,
+      "explanation": "Configuration files and environment variables commonly specify which embedding model is configured, providing a direct shortcut past more involved fingerprinting techniques like inference probing."
+    },
+    {
+      "q": "Why might exporting vectors via a public search API (rather than the admin interface) be a viable attack path if authentication is misconfigured?",
+      "options": [
+        "Search APIs are physically incapable of returning more than one result per request",
+        "Public search APIs never actually return vector data under any circumstances",
+        "A public-facing similarity search endpoint that returns raw vectors alongside search results can be abused to systematically harvest the underlying embeddings",
+        "Public APIs always require a signed certificate that only the database owner can generate"
+      ],
+      "answer": 2,
+      "explanation": "If a public-facing API returns raw vector values as part of its response (rather than just processed results), an attacker can systematically query it to harvest the underlying embeddings at scale."
+    },
+    {
+      "q": "What is the significance of a triage pipeline finding a sensitive-looking chunk without ever decoding a single word of its content?",
+      "options": [
+        "It demonstrates that similarity-based triage relies entirely on the geometric position of embeddings in vector space, not on understanding any actual text",
+        "It indicates the vector database has been fully and permanently compromised",
+        "It means the chunk in question cannot possibly contain any real sensitive content",
+        "It proves that the triage pipeline has made a technical error and needs to be re-run"
+      ],
+      "answer": 0,
+      "explanation": "This highlights the core insight behind triage — sensitive content clusters together in embedding space regardless of the specific words used, letting proximity alone flag likely candidates."
+    },
+    {
+      "q": "Why is a 'positive/negative probe comparison' stage useful in a triage pipeline, beyond simple density scoring?",
+      "options": [
+        "It requires the attacker to have already fully inverted the chunk before this stage can even begin",
+        "It only works on chunks that have already been manually labeled by a human reviewer",
+        "It measures purely the physical file size of each chunk with no relation to its actual content",
+        "It directly compares a chunk's similarity to known-sensitive example texts versus known-benign example texts, providing a more targeted signal than density alone"
+      ],
+      "answer": 3,
+      "explanation": "Comparing a chunk's similarity to curated positive (sensitive) and negative (benign) reference examples adds a targeted, contrastive signal beyond simple isolation/density-based scoring alone."
+    },
+    {
+      "q": "Why is zero-shot inversion fundamentally a template-matching problem rather than a text-generation problem?",
+      "options": [
+        "Because zero-shot inversion literally requires zero computation of any kind to execute",
+        "Because zero-shot inversion can only be applied to templates written in a foreign language",
+        "It works by matching the target embedding against a large bank of pre-generated sentence structures rather than generating new text token by token from scratch",
+        "Because template matching and decoding are mathematically identical processes with no distinction"
+      ],
+      "answer": 2,
+      "explanation": "Rather than generatively decoding text, zero-shot inversion searches a pre-built library of candidate sentence structures for the closest match to the target embedding."
+    },
+    {
+      "q": "In the template-based approach, why does recovering a value like a common first name tend to be more reliable than recovering a randomly generated API key?",
+      "options": [
+        "Because names are always stored in a completely separate database from API keys",
+        "Because API keys are technically forbidden from being embedded by any embedding model",
+        "Because names are always shorter in character count than any API key",
+        "Common names carry distinctive, learnable embedding patterns the model was trained on, while random API keys tokenize into essentially meaningless noise the model can't distinguish well"
+      ],
+      "answer": 3,
+      "explanation": "The model's training exposed it to many examples of names carrying learnable semantic signal, unlike random strings which lack any such learnable pattern, making them much harder to distinguish via embedding similarity."
+    },
+    {
+      "q": "Why does beam search maintain multiple candidate partial sequences ('beams') instead of just the single best guess at each step?",
+      "options": [
+        "Maintaining multiple beams is required by the specific hardware architecture of modern GPUs",
+        "A single beam would cause the embedding model itself to crash immediately",
+        "Multiple beams are only useful when the target text is written in more than one language",
+        "The locally best-looking choice at an early step isn't always part of the eventual best full sequence, so keeping several options alive avoids prematurely committing to a dead end"
+      ],
+      "answer": 3,
+      "explanation": "Greedy single-path search can get stuck on a locally attractive but ultimately suboptimal choice; keeping multiple beams alive preserves alternative paths that may prove better overall."
+    },
+    {
+      "q": "What is the practical benefit of dual-embedder mode specifically for a paid, rate-limited target embedding API?",
+      "options": [
+        "It eliminates the need for the attacker to have any local computing hardware whatsoever",
+        "It dramatically reduces the number of expensive/rate-limited queries sent to the actual victim model by scoring most candidates against a free local model instead",
+        "It doubles the monetary cost of the attack by requiring two separate paid API subscriptions",
+        "It only works when the victim API has absolutely no rate limiting configured at all"
+      ],
+      "answer": 1,
+      "explanation": "By handling the bulk of candidate scoring locally and only occasionally checking against the real victim model, dual-embedder mode conserves the attacker's limited query budget against a paid or rate-limited target."
+    },
+    {
+      "q": "Why does ALGEN's alignment step use a simple linear transformation (a matrix) rather than a complex neural network?",
+      "options": [
+        "Complex neural networks would make the alignment step run infinitely slower with no upper bound",
+        "A linear transformation is the only mathematical operation that computers can perform on vectors",
+        "Neural networks are technically incapable of processing any numeric vector data whatsoever",
+        "A simple linear mapping is sufficient to approximate the relationship between two different embedding spaces well enough for practical use, while remaining fast and lightweight to compute"
+      ],
+      "answer": 3,
+      "explanation": "Empirically, a relatively simple linear alignment captures enough of the relationship between embedding spaces to be useful, while remaining computationally lightweight compared to training a full neural network for this purpose."
+    },
+    {
+      "q": "Why must an attacker have some form of write access to the target system to use ALGEN's canary technique?",
+      "options": [
+        "Canaries must be actually processed by the target's own embedding model to produce genuine (text, vector) pairs, which requires inserting the canary text into the target system somehow",
+        "Write access is required exclusively to modify the attacker's own local decoder model",
+        "Write access is only needed to permanently delete the target's existing data before the attack begins",
+        "ALGEN's canary technique works entirely through passive network sniffing with no write access required"
+      ],
+      "answer": 0,
+      "explanation": "Since the canary's value comes from being processed by the target's actual embedding model, the attacker needs some mechanism (like a support ticket, comment field, or document upload) to get their known text ingested by the target system."
+    },
+    {
+      "q": "Why does Vec2Text's corrector loop show diminishing returns after a certain number of refinement passes?",
+      "options": [
+        "The corrector loop is limited by law to a maximum of exactly one pass per attack",
+        "Each additional refinement pass typically improves the reconstruction less than the previous one, so there's a practical point beyond which further iterations aren't worth the added computation",
+        "Additional corrector passes always cause the reconstruction quality to get progressively worse",
+        "Diminishing returns only apply when the target text is written in more than one language"
+      ],
+      "answer": 1,
+      "explanation": "Like many iterative refinement processes, each additional Vec2Text corrector pass tends to yield smaller improvements than the last, meaning attackers must balance quality gains against added computational cost."
+    },
+    {
+      "q": "Why is a membership-inference candidate list ideally built from context-specific sources (like a company's actual naming conventions) rather than a generic dictionary?",
+      "options": [
+        "A targeted list matching the likely real-world format of the secret (e.g. company username patterns) produces far more efficient and accurate results than a broad, generic wordlist",
+        "Generic wordlists always cause the target embedding model's API to return an error",
+        "Generic dictionaries are technically incompatible with the mathematical operations membership inference requires",
+        "Context-specific wordlists are required by international law for any authorized security assessment"
+      ],
+      "answer": 0,
+      "explanation": "A wordlist tailored to the likely real-world format of the secret (informed by context like company conventions) is both more efficient and more likely to include the actual correct value than a broad generic dictionary."
+    },
+    {
+      "q": "Why is attribute inference described as producing 'high-level information' rather than exact content?",
+      "options": [
+        "It always produces the exact word-for-word original text with perfect accuracy",
+        "Attribute inference exclusively works on numeric data and cannot process any textual embeddings",
+        "It predicts general categories or characteristics (like document type or sensitivity level) directly from the embedding's position, without attempting to reconstruct the actual underlying text",
+        "It requires the attacker to already have the exact original document to compare against"
+      ],
+      "answer": 2,
+      "explanation": "Rather than attempting full reconstruction, attribute inference stays at the level of broad categorization — predicting characteristics like document type or sensitivity based on where an embedding sits in vector space."
+    },
+    {
+      "q": "Why should defenders specifically consider rate-limiting vector search and export endpoints, not just login endpoints?",
+      "options": [
+        "Search and export endpoints are technically incapable of being rate-limited by any modern system",
+        "Bulk vector export is a distinct attack pattern from credential brute-forcing, and an unprotected search/export endpoint could still allow an attacker to harvest large volumes of vectors even with strong login security elsewhere",
+        "Login endpoints and export endpoints always share identical, interchangeable security requirements",
+        "Rate limiting only serves an aesthetic, cosmetic purpose with no actual security benefit"
+      ],
+      "answer": 1,
+      "explanation": "Since bulk export exploits a different pathway than credential attacks, protecting only login endpoints leaves search/export endpoints as an unaddressed avenue for mass vector harvesting."
+    },
+    {
+      "q": "Why is network segmentation (isolating the vector database on its own network segment) recommended as a defense, even alongside authentication?",
+      "options": [
+        "It adds a layer of defense in depth, so that even a compromised application server or misconfigured authentication doesn't automatically grant direct network-level access to the database",
+        "Network segmentation makes authentication entirely unnecessary and can fully replace it",
+        "Segmentation is only useful for databases storing fewer than 10 total vectors",
+        "Network isolation automatically encrypts all vectors stored within that segment"
+      ],
+      "answer": 0,
+      "explanation": "Segmentation provides defense in depth — even if authentication is somehow bypassed or a connected application is compromised, network isolation limits what that compromise can directly reach."
+    },
+    {
+      "q": "A red teamer identifies that a target's vector database returns raw embeddings through its public similarity-search API when queried with unusual parameters. What immediate risk does this specific misconfiguration create?",
+      "options": [
+        "This misconfiguration only affects the database's internal logging system and poses no external risk",
+        "An attacker could systematically query the public API to harvest large numbers of raw vectors without ever needing direct database access or admin credentials",
+        "Raw embeddings returned through a public API are always automatically anonymized before transmission",
+        "This specific misconfiguration is purely theoretical and has no practical attack path associated with it"
+      ],
+      "answer": 1,
+      "explanation": "A public API leaking raw vector data effectively provides an unauthenticated bulk-export path, letting an attacker harvest embeddings without ever needing to breach the database's actual access controls."
+    },
+    {
+      "q": "A defender notices unusually high similarity-search query volume from a single API key over a short period, alongside sequential pagination parameters. What combination of attack techniques does this pattern most likely indicate?",
+      "options": [
+        "A software bug causing the same single query to be submitted exactly once by mistake",
+        "Bulk vector export combined with systematic pagination, consistent with an attacker harvesting the full contents of the vector store",
+        "A routine, scheduled database backup process unrelated to any potential attack",
+        "A single legitimate user performing one normal search query with no unusual characteristics"
+      ],
+      "answer": 1,
+      "explanation": "High-volume queries combined with sequential pagination is the specific behavioral signature the module identifies for bulk export activity, distinct from normal single-query user behavior."
+    },
+    {
+      "q": "An engagement has a tight one-day deadline and the embedding model is confirmed via config file inspection. Which inversion approach best fits this time constraint?",
+      "options": [
+        "Abandoning inversion entirely, since one day is described as insufficient time for any inversion technique",
+        "ALGEN with canary injection, since it's specifically designed for time-constrained engagements with no model knowledge",
+        "Full Vec2Text training from scratch, since it always produces the best results regardless of available time",
+        "Template-based inversion combined with membership inference, since it requires no training and runs quickly on CPU"
+      ],
+      "answer": 3,
+      "explanation": "Given the tight timeline and confirmed model knowledge, the fast, no-training template-based approach is the appropriate first choice, reserving heavier methods like Vec2Text for engagements with more available time."
+    },
+    {
+      "q": "A vector database enforces authentication and network segmentation, but a developer accidentally commits real customer API keys into documents that later get embedded into the knowledge base. Which specific defense, if followed, would have prevented this exposure regardless of the other controls in place?",
+      "options": [
+        "Never storing real secrets in documents that get embedded in the first place, since that single practice removes the target entirely regardless of any other security controls",
+        "Authentication requirements, since they would have automatically redacted the API keys before ingestion",
+        "Network segmentation alone, since it would have automatically caught and blocked the accidental commit",
+        "Rate limiting on search endpoints, since it directly prevents secrets from ever entering source documents"
+      ],
+      "answer": 0,
+      "explanation": "None of the other listed controls (auth, segmentation, rate limiting) address what actually gets embedded — only the practice of never embedding real secrets in the first place directly prevents this specific exposure."
+    },
+    {
+      "q": "A security assessment confirms that stolen vectors from a target company's HR knowledge base can be inverted with high confidence for common terms but consistently fail to recover what appears to be a social security number pattern. What is the most likely reason for this specific gap?",
+      "options": [
+        "The embedding model used for HR data is fundamentally different from any embedding model that exists for other document types",
+        "High-entropy, effectively random-looking values like SSNs carry little learnable semantic pattern for the embedding model, making them much harder for inversion techniques than common, meaningful terms",
+        "Social security numbers are technically incapable of being embedded by any embedding model whatsoever",
+        "This gap indicates the vector database has implemented perfect, unbreakable encryption specifically for SSN-pattern data"
+      ],
+      "answer": 1,
+      "explanation": "This mirrors the module's core lesson about meaningful versus random values — high-entropy identifiers like SSNs lack the learnable semantic structure that makes common terms and names much easier targets for inversion."
+    }
+  ]
+}

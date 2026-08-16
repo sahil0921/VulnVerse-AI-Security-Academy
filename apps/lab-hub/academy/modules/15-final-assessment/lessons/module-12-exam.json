@@ -1,0 +1,1107 @@
+{
+  "slug": "module-12-exam",
+  "title": "Exam: AI Infrastructure",
+  "type": "quiz",
+  "questions": [
+    {
+      "q": "What is AI infrastructure?",
+      "options": [
+        "The AI model's training dataset and nothing else",
+        "All the technology needed to run an AI model in the real world — servers, GPUs, containers, networks, storage, cloud accounts, and secrets",
+        "A synonym for the AI model's user interface",
+        "Only the source code of the AI model itself"
+      ],
+      "answer": 1,
+      "explanation": "AI infrastructure is everything except the model itself — the entire supporting technology stack needed to actually run it in production."
+    },
+    {
+      "q": "What is a key mindset shift needed when attacking AI systems, beyond just attacking the model directly?",
+      "options": [
+        "You do not always need to break the AI model — sometimes you just break the box it lives in",
+        "Only the AI model itself can ever be a meaningful attack target",
+        "Infrastructure attacks only work against AI systems that use GPUs",
+        "AI infrastructure attacks are always significantly weaker than prompt injection attacks"
+      ],
+      "answer": 0,
+      "explanation": "The module's central idea is that attackers can bypass a well-defended model entirely by compromising the infrastructure underneath it instead."
+    },
+    {
+      "q": "What does IAM stand for, and what two questions does it answer?",
+      "options": [
+        "Identity and Access Management — who are you, and what are you allowed to do",
+        "Internal Application Manager — which software is installed on a server",
+        "Infrastructure Asset Mapping — where physical hardware is located",
+        "Internet Access Monitoring — how much bandwidth is being used"
+      ],
+      "answer": 0,
+      "explanation": "IAM is the cloud's system for both authenticating identity (who you are) and authorizing permissions (what you're allowed to do)."
+    },
+    {
+      "q": "What does RBAC stand for in a Kubernetes context, and what does it control?",
+      "options": [
+        "Registry-Based Artifact Cataloging — it controls how container images are named",
+        "Resource Balancing And Compute — it controls how CPU is allocated to pods",
+        "Role-Based Access Control — it decides which actions each identity is allowed to perform inside the cluster",
+        "Remote Backup Access Configuration — it controls how often backups run"
+      ],
+      "answer": 2,
+      "explanation": "RBAC is Kubernetes' permission system, determining what actions each identity can perform on which resources within the cluster."
+    },
+    {
+      "q": "What does SSRF stand for, and what does it let an attacker do?",
+      "options": [
+        "System Service Recovery Function — restart a crashed service automatically",
+        "Secure Socket Rotation Framework — automatically rotate TLS certificates",
+        "Server-Side Request Forgery — trick a server into making a request the attacker chose, instead of the one it expected",
+        "Software Supply Risk Filter — scan container images for vulnerabilities"
+      ],
+      "answer": 2,
+      "explanation": "SSRF exploits a server's own request-making capability, redirecting it to fetch a URL of the attacker's choosing rather than the intended one."
+    },
+    {
+      "q": "What is the internal IP address used by AWS, Azure, and GCP for their instance metadata services?",
+      "options": [
+        "169.254.169.254",
+        "10.0.0.1",
+        "192.168.1.1",
+        "127.0.0.1"
+      ],
+      "answer": 0,
+      "explanation": "All three major cloud providers use this specific reserved link-local address for their metadata services, reachable only from inside the instance itself."
+    },
+    {
+      "q": "Why does the metadata service exist on cloud instances?",
+      "options": [
+        "It exists to provide a backup copy of the operating system in case the instance crashes",
+        "It exists purely to display the current date and time to any process running on the instance",
+        "It tells the server useful facts about itself, most importantly its temporary cloud credentials, which it needs to prove its identity to other cloud services",
+        "It exists solely to log every network request made by the instance"
+      ],
+      "answer": 2,
+      "explanation": "The metadata service provides instances with their temporary security credentials, needed for authenticating to other cloud services."
+    },
+    {
+      "q": "Once an attacker walks the metadata path down to `iam/security-credentials/`, what three values does the response typically contain?",
+      "options": [
+        "Hostname, IP Address, and Port",
+        "AccessKeyId, SecretAccessKey, and Token",
+        "Username, Password, and PIN",
+        "Certificate, PrivateKey, and Passphrase"
+      ],
+      "answer": 1,
+      "explanation": "These three values together form a complete set of temporary AWS credentials that can be used to authenticate as the instance's role."
+    },
+    {
+      "q": "Why might the `file:///proc/self/environ` trick succeed even when `http://` URLs are blocked?",
+      "options": [
+        "This trick only works on servers that have already been fully compromised through other means",
+        "The file:// scheme is technically incapable of being blocked by any application",
+        "This file is always publicly readable by anyone on the internet with no access controls at all",
+        "Some apps block http:// but still allow the file:// scheme, and this file holds every environment variable the process was started with, which often includes injected credentials"
+      ],
+      "answer": 3,
+      "explanation": "If URL scheme filtering only blocks http:// while overlooking file://, an attacker can pivot to reading local files like the process environment, which frequently contains injected secrets."
+    },
+    {
+      "q": "Why is IMDSv2 considered a strong defense against SSRF-based credential theft?",
+      "options": [
+        "IMDSv2 completely disables the metadata service, removing it from the instance entirely",
+        "IMDSv2 encrypts all credentials so they cannot be read even by the instance's own legitimate processes",
+        "IMDSv2 only works on instances that have no network connectivity of any kind",
+        "It requires a special header and a two-step token request before returning anything, and most simple SSRF bugs cannot add custom headers to the request they trigger"
+      ],
+      "answer": 3,
+      "explanation": "Since most basic SSRF vulnerabilities can only control the URL (not custom headers), IMDSv2's header-and-token requirement blocks the majority of simple SSRF attacks by default."
+    },
+    {
+      "q": "What is privilege escalation, in the IAM context?",
+      "options": [
+        "A technique for encrypting cloud credentials before they are stored",
+        "Moving from low-level access to high-level access, often by hopping from one identity to a more powerful one repeatedly",
+        "A method for automatically renewing an expired TLS certificate",
+        "A process for permanently deleting an unused IAM role"
+      ],
+      "answer": 1,
+      "explanation": "Privilege escalation is the process of climbing from weaker initial access to progressively stronger access by exploiting misconfigured permission chains."
+    },
+    {
+      "q": "What does the IAM permission `sts:AssumeRole` allow an identity to do?",
+      "options": [
+        "Create a brand new AWS account from scratch",
+        "Encrypt all data stored in a specific S3 bucket",
+        "Permanently delete any IAM role in the account",
+        "Temporarily become a different, potentially more powerful role"
+      ],
+      "answer": 3,
+      "explanation": "AssumeRole lets an identity temporarily adopt the permissions of another role, which is the core mechanism exploited in IAM privilege escalation chains."
+    },
+    {
+      "q": "What is the PassRole trick, and how does it enable privilege escalation?",
+      "options": [
+        "If you can create a service (like a notebook) and attach (PassRole) a powerful role to it, code running inside that service inherits the powerful role's permissions",
+        "It's a method for renaming an IAM role without changing its underlying permissions",
+        "It's a technique for physically passing a hardware security key between two employees",
+        "It's a process for merging two separate IAM policies into a single unified policy"
+      ],
+      "answer": 0,
+      "explanation": "By creating a new service and attaching a powerful role to it via PassRole, an attacker's code running in that service inherits the attached role's permissions without ever directly assuming that role themselves."
+    },
+    {
+      "q": "What does a wildcard permission like `\"Action\": \"s3:*\", \"Resource\": \"*\"` grant, and why is it dangerous?",
+      "options": [
+        "It only applies to S3 buckets created within the last 24 hours",
+        "It only grants read-only access to a single specifically named S3 bucket",
+        "It grants access to every S3 action on every bucket in the account, including buckets belonging to completely different, unrelated projects",
+        "It grants no actual access at all and exists purely as documentation"
+      ],
+      "answer": 2,
+      "explanation": "The asterisk wildcard means 'everything' — this permission crosses project boundaries entirely, granting access far beyond what any single role should reasonably need."
+    },
+    {
+      "q": "Why is it recommended that defenders restrict who can read IAM policies?",
+      "options": [
+        "Reading policies is quiet and precise, letting attackers plan an escalation path without noisy brute-force guessing",
+        "Policy reading is technically impossible to restrict in any cloud provider",
+        "IAM policies contain the literal plaintext passwords for every user in the account",
+        "Reading IAM policies always automatically triggers an account-wide security lockdown"
+      ],
+      "answer": 0,
+      "explanation": "Since policy documents reveal exact escalation paths (like AssumeRole targets), restricting read access denies attackers this quiet reconnaissance advantage."
+    },
+    {
+      "q": "What is credential hunting?",
+      "options": [
+        "The act of searching a system for hidden secrets like passwords, API keys, database connection strings, and tokens",
+        "A process for verifying whether a password meets a company's complexity requirements",
+        "A technique for automatically generating strong, random passwords",
+        "A method for permanently deleting all credentials from a compromised account"
+      ],
+      "answer": 0,
+      "explanation": "Credential hunting is the systematic search for exposed secrets scattered across a compromised environment's various storage locations."
+    },
+    {
+      "q": "Why are AI systems described as especially 'leaky' regarding secrets, compared to more traditional software systems?",
+      "options": [
+        "AI systems are technically incapable of using any form of encryption whatsoever",
+        "AI-specific software licenses legally prohibit the use of any secrets manager",
+        "ML pipelines involve many moving parts (data prep, training, storage, deployment, monitoring) often built quickly by different people, and secrets get scattered across logs, images, configs, and old file versions",
+        "AI systems only exist in a single, tightly controlled location with no distributed components"
+      ],
+      "answer": 2,
+      "explanation": "The complexity and rapid, distributed development of ML pipelines creates many opportunities for secrets to end up scattered across logs, images, configs, and forgotten old file versions."
+    },
+    {
+      "q": "Why are 'old versions' of files in versioned object storage considered a hunting ground, even after a sensitive file has been deleted?",
+      "options": [
+        "Deleted files in versioned storage are permanently and completely destroyed within one hour",
+        "Old file versions are always automatically encrypted with a key the attacker cannot access",
+        "Versioning only applies to files smaller than 1KB in size, exempting most sensitive files",
+        "If versioning is enabled, deleting a file just creates a new version marker — the old version containing the secret still remains fully retrievable"
+      ],
+      "answer": 3,
+      "explanation": "Versioning preserves historical file states — a 'delete' operation just adds a new version marker while the earlier version, secrets and all, remains fully accessible."
+    },
+    {
+      "q": "Why are failed training/pipeline jobs described as 'gold' for credential hunting?",
+      "options": [
+        "Failed jobs are technically incapable of containing any environment variable data",
+        "Only successful jobs are ever logged; failed jobs produce no log output at all",
+        "Failed jobs always automatically delete themselves along with any associated logs",
+        "Error handlers often dump environment variables when something breaks, and nobody typically reviews failed runs closely"
+      ],
+      "answer": 3,
+      "explanation": "Error-handling code frequently dumps full environment state (including secrets) for debugging purposes, and failed runs receive far less scrutiny than successful ones, letting these leaks go unnoticed."
+    },
+    {
+      "q": "Why are container images (like those stored in ECR) described as 'one of the worst offenders' for leaked credentials?",
+      "options": [
+        "Images are deleted automatically after 24 hours, preventing any meaningful credential exposure",
+        "Secrets get baked directly into image layers, and hardcoded credentials in image environment variables are extremely common",
+        "Container images are technically incapable of storing any environment variable data at all",
+        "Container registries automatically encrypt every layer with a key inaccessible to anyone, including the registry owner"
+      ],
+      "answer": 1,
+      "explanation": "Since credentials baked into a Dockerfile's ENV directives become permanently embedded in the image's layers, anyone who can pull the image can extract those secrets."
+    },
+    {
+      "q": "Why do real attackers prefer targeted reads of known paths over bulk recursive listings when hunting for credentials?",
+      "options": [
+        "Recursive listings and bulk enumeration create large log events that defenders can alert on, while targeted reads are quieter and less likely to trigger detection",
+        "Bulk enumeration commands require special hardware not available to most attackers",
+        "Recursive listings are technically impossible to execute against any cloud storage service",
+        "Targeted reads always return significantly more data than any recursive listing could"
+      ],
+      "answer": 0,
+      "explanation": "Since large-scale enumeration generates distinctive, high-volume log activity, stealthy attackers prefer precise, targeted reads that blend in better with normal usage patterns."
+    },
+    {
+      "q": "What is an inference endpoint?",
+      "options": [
+        "The network address where you send requests to a running AI model and get outputs back — the 'front door' to the model",
+        "The exact physical location where a model's GPU hardware is installed",
+        "A synonym for the model's training dataset storage location",
+        "The internal variable name used to store a model's weights in memory"
+      ],
+      "answer": 0,
+      "explanation": "An inference endpoint is the network-accessible interface through which requests reach a deployed model and predictions are returned."
+    },
+    {
+      "q": "Why do many model-serving tools ship with no authentication by default?",
+      "options": [
+        "Developers often assume the server sits safely inside a private network, not anticipating that a misconfigured firewall could expose it publicly",
+        "Authentication would make the model's predictions significantly less accurate",
+        "Model servers are legally prohibited from implementing any authentication mechanism",
+        "Authentication is technically impossible to implement for any AI model-serving software"
+      ],
+      "answer": 0,
+      "explanation": "The assumption of network-level isolation (rather than requiring the server itself to enforce authentication) is exactly what makes a misconfigured firewall rule so dangerous."
+    },
+    {
+      "q": "Which of these is listed as a common, exposed AI model-serving tool along with its typical port?",
+      "options": [
+        "PostgreSQL on port 5432",
+        "MySQL on port 3306",
+        "Redis on port 6379",
+        "vLLM on port 8000"
+      ],
+      "answer": 3,
+      "explanation": "vLLM, a fast LLM serving framework with an OpenAI-compatible API, commonly runs on port 8000 and is one of the model-serving tools that can be left unintentionally exposed."
+    },
+    {
+      "q": "What is the specific danger sign in a firewall/security group rule that indicates a model server is exposed to the entire internet?",
+      "options": [
+        "A rule allowing SSH access only from a single specific known IP address",
+        "A rule allowing the model's port from CIDR 0.0.0.0/0",
+        "A rule allowing traffic only from within the same internal VPC subnet",
+        "A rule that blocks all inbound traffic to the instance by default"
+      ],
+      "answer": 1,
+      "explanation": "The CIDR range 0.0.0.0/0 represents 'any IP address on the internet,' meaning this rule opens the port to literally anyone, anywhere."
+    },
+    {
+      "q": "Once an exposed vLLM server's version is discovered (e.g. via the /version endpoint), what is the next logical attacker step?",
+      "options": [
+        "Immediately attempt to physically access the data center hosting the server",
+        "Assume the version information has no security relevance whatsoever",
+        "Wait exactly 30 days before taking any further action against the target",
+        "Research known CVEs matching that specific software version"
+      ],
+      "answer": 3,
+      "explanation": "Knowing the exact software version lets an attacker search for and potentially exploit publicly documented vulnerabilities specific to that version."
+    },
+    {
+      "q": "What real-world impacts can result from an exposed inference endpoint, beyond simple unauthorized use?",
+      "options": [
+        "Cost abuse from expensive GPU inference, model extraction (stealing the model's behavior), and exposure of sensitive decision-making logic",
+        "Exposed endpoints can only ever result in a minor increase in server response latency",
+        "The only possible impact is a temporary, automatically-resolving service outage",
+        "Exposed endpoints have no meaningful impact beyond a slight increase in electricity costs"
+      ],
+      "answer": 0,
+      "explanation": "Beyond direct cost abuse, attackers can systematically query an exposed model to copy its learned behavior (extraction) or probe automated decision systems (like loan approval) to learn and game their underlying rules."
+    },
+    {
+      "q": "What is Kubernetes, in simple terms?",
+      "options": [
+        "A type of specialized hardware chip used exclusively for GPU acceleration",
+        "A system for running many containers across many machines automatically, like an air traffic controller for containers",
+        "A programming language specifically designed for writing AI models",
+        "A cloud storage service used only for storing container images"
+      ],
+      "answer": 1,
+      "explanation": "Kubernetes automates the deployment, scaling, and management of containerized applications across a cluster of machines."
+    },
+    {
+      "q": "In Kubernetes terminology, what is a Pod?",
+      "options": [
+        "The smallest deployable unit, which holds one or more containers",
+        "A logical grouping mechanism used to organize namespaces",
+        "The entire group of machines that make up a Kubernetes cluster",
+        "A stored credential used to authenticate to the Kubernetes API server"
+      ],
+      "answer": 0,
+      "explanation": "A Pod is Kubernetes' smallest deployable unit, capable of holding one or more tightly-coupled containers that share networking and storage."
+    },
+    {
+      "q": "What is the difference between a Role and a ClusterRole in Kubernetes RBAC?",
+      "options": [
+        "A Role applies to one specific namespace only; a ClusterRole applies to the entire cluster",
+        "A Role is for human users only; a ClusterRole is exclusively for service accounts",
+        "A Role only allows read actions; a ClusterRole only allows write actions",
+        "There is no functional difference between a Role and a ClusterRole"
+      ],
+      "answer": 0,
+      "explanation": "The key distinction is scope — Roles are namespace-scoped while ClusterRoles apply cluster-wide, making ClusterRoles significantly more powerful (and risky) if overly broad."
+    },
+    {
+      "q": "Why does the ability to create pods effectively grant cluster admin-level power?",
+      "options": [
+        "A newly created pod can mount the host filesystem or be assigned a more powerful service account, giving the creator far-reaching control",
+        "Creating pods only affects the specific namespace where the pod is created, with no broader implications",
+        "Creating a pod always automatically grants direct root access to every other pod in the cluster",
+        "Pod creation is technically impossible for any identity except the cluster's original administrator"
+      ],
+      "answer": 0,
+      "explanation": "Since a newly created pod could be configured to mount sensitive host paths or run with a powerful identity, pod-creation permission is effectively equivalent to broad cluster control."
+    },
+    {
+      "q": "What is identity chaining, in the Kubernetes RBAC context?",
+      "options": [
+        "A method for encrypting a service account token so it becomes permanently unreadable",
+        "A process for automatically rotating every service account token in a cluster simultaneously",
+        "A technique for merging two separate Kubernetes clusters into a single unified cluster",
+        "Combining a weaker identity's permission to read secrets with a stronger identity's stolen token (found inside one of those secrets), gaining that stronger identity's capabilities"
+      ],
+      "answer": 3,
+      "explanation": "Identity chaining combines two partial capabilities — read access to secrets, and a powerful token found within one of those secrets — to achieve full capability that neither identity alone possessed."
+    },
+    {
+      "q": "What command lets an attacker inside a pod quickly determine exactly what their current identity is allowed to do in the cluster?",
+      "options": [
+        "kubectl create secret generic mysecret",
+        "kubectl delete pod --all --force",
+        "kubectl get nodes --show-labels",
+        "kubectl auth can-i --list -n <namespace>"
+      ],
+      "answer": 3,
+      "explanation": "This command directly lists all actions the current identity is authorized to perform within the specified namespace, serving as a map for planning further action."
+    },
+    {
+      "q": "How can an attacker enumerate Kubernetes resources from inside a pod that lacks the kubectl tool installed?",
+      "options": [
+        "Send an email request to the cluster administrator asking for the information directly",
+        "Physically connect a USB drive containing kubectl to the underlying host machine",
+        "This enumeration is technically impossible without kubectl being pre-installed in the pod's image",
+        "Use curl with the mounted service account token as a Bearer authorization header, sent directly to the Kubernetes API server"
+      ],
+      "answer": 3,
+      "explanation": "Since the API server is a standard REST interface, curl combined with the pod's mounted token and CA certificate can query it directly, without needing kubectl at all."
+    },
+    {
+      "q": "What is a service account, in Kubernetes?",
+      "options": [
+        "A backup storage location for Kubernetes configuration files",
+        "The identity that a pod (an automated, non-human process) uses to authenticate to the Kubernetes API",
+        "A human user's personal login credential for accessing the Kubernetes dashboard",
+        "A billing account used to pay for cloud infrastructure costs"
+      ],
+      "answer": 1,
+      "explanation": "Service accounts are non-human identities specifically designed for pods and automated processes, distinct from human user accounts."
+    },
+    {
+      "q": "Why is the automatic mounting of service account tokens into every pod by default considered a security weakness?",
+      "options": [
+        "Auto-mounting tokens is a feature that was permanently removed from all modern Kubernetes versions",
+        "If an attacker gets any shell inside any pod, they instantly have that pod's identity token, even though most pods never actually need to talk to the Kubernetes API",
+        "Auto-mounted tokens are always encrypted with a key only the pod's original creator can access",
+        "This mounting behavior only occurs in test/development clusters, never in production"
+      ],
+      "answer": 1,
+      "explanation": "Since most pods (like a basic inference server) don't actually need Kubernetes API access, automatically granting them a valid identity token anyway creates unnecessary risk with no functional benefit."
+    },
+    {
+      "q": "What field in a decoded JWT service account token payload reveals exactly which identity the token belongs to?",
+      "options": [
+        "The `alg` field, which shows only the cryptographic signing algorithm used",
+        "The `exp` field, which shows only the token's expiration timestamp",
+        "The `sub` field, which shows the namespace and service account name",
+        "The `iat` field, which shows only when the token was originally issued"
+      ],
+      "answer": 2,
+      "explanation": "The `sub` (subject) field in a decoded JWT specifically identifies the exact service account (including namespace) the token represents."
+    },
+    {
+      "q": "What does the SelfSubjectRulesReview API call let an attacker do?",
+      "options": [
+        "Grant themselves cluster administrator privileges directly through the API",
+        "Permanently delete their own service account token from the cluster",
+        "Automatically rotate every credential associated with the current identity",
+        "Directly ask the Kubernetes API 'what can this specific token do?' without needing to guess or brute-force permissions"
+      ],
+      "answer": 3,
+      "explanation": "This API call directly returns the exact permissions associated with a given token, providing precise reconnaissance without any guessing required."
+    },
+    {
+      "q": "What is the key security difference between legacy (pre-v1.24) Kubernetes tokens and modern bound service account tokens?",
+      "options": [
+        "Legacy tokens are always significantly longer in character length than bound tokens",
+        "There is no meaningful security difference between the two token types",
+        "Bound tokens can only be used by human users, never by automated service accounts",
+        "Legacy tokens never expire, making a stolen one valuable forever; bound tokens are short-lived and audience-restricted, becoming quickly useless if stolen"
+      ],
+      "answer": 3,
+      "explanation": "The lack of expiration on legacy tokens makes them a permanent prize if stolen, while bound tokens' short lifespan and audience restriction dramatically limit the value of a successful theft."
+    },
+    {
+      "q": "What single Kubernetes pod setting is described as one of the highest-value, lowest-effort defenses against token-based lateral movement?",
+      "options": [
+        "runAsNonRoot: false",
+        "privileged: true",
+        "hostNetwork: true",
+        "automountServiceAccountToken: false"
+      ],
+      "answer": 3,
+      "explanation": "Explicitly disabling the automatic token mount for pods that don't need Kubernetes API access removes the most common lateral-movement path with minimal implementation effort."
+    },
+    {
+      "q": "What is a sidecar container?",
+      "options": [
+        "A container specifically dedicated to storing a Kubernetes cluster's audit logs",
+        "An extra helper container running alongside the main container in the same pod, handling tasks like pre-processing, logging, or proxying",
+        "A container that runs exclusively on GPU-equipped nodes within the cluster",
+        "The very first container that ever starts within any Kubernetes cluster"
+      ],
+      "answer": 1,
+      "explanation": "Sidecars are auxiliary containers that support the main container's work, sharing the same pod but handling a distinct, complementary function."
+    },
+    {
+      "q": "What is an init container, and how does its lifecycle differ from a sidecar?",
+      "options": [
+        "An init container runs continuously for the entire lifetime of the pod, identical to how a sidecar operates",
+        "Init containers and sidecars are simply two different names for the exact same concept",
+        "An init container only runs after all other containers in the pod have already terminated",
+        "An init container runs once, before the main containers start, then exits — unlike a sidecar, which runs alongside the main container for its entire lifetime"
+      ],
+      "answer": 3,
+      "explanation": "Init containers perform one-time setup tasks (like fetching model files) before exiting, in contrast to sidecars which run continuously alongside the main container."
+    },
+    {
+      "q": "What two things do all containers within the same pod typically share?",
+      "options": [
+        "The same network (they can talk via localhost) and shared volumes (folders both can read/write)",
+        "The same external public IP address and the same TLS certificate",
+        "The same cloud billing account and the same IAM role permissions",
+        "The same physical GPU chip and the exact same container image"
+      ],
+      "answer": 0,
+      "explanation": "Shared networking (localhost communication) and shared volumes are the two defining characteristics that make containers within a pod tightly coupled — and create the sidecar attack surface."
+    },
+    {
+      "q": "An attacker compromises a pre-processing sidecar that writes cleaned input to a shared /queue folder, which the main inference container then reads from. What can the attacker accomplish without ever touching the model itself?",
+      "options": [
+        "Read every request flowing through, modify requests before the model sees them, inject fake requests, or write false log entries to hide their tracks",
+        "Nothing at all — sidecar compromise never provides any meaningful access to pipeline data",
+        "Only the ability to permanently delete the entire pod, with no other capability",
+        "Only the ability to physically power off the underlying host machine"
+      ],
+      "answer": 0,
+      "explanation": "Since the shared volume is the actual data pipeline, controlling the sidecar that writes to it gives the attacker full read/write/inject capability over everything the main container subsequently processes."
+    },
+    {
+      "q": "Why might an init container leave behind sensitive files like a `.aws-creds` temporary credentials file in a shared volume?",
+      "options": [
+        "Init containers perform setup tasks like downloading model files, and they might forget to clean up temporary credentials used during that download process",
+        "Leftover files are always automatically and immediately deleted by Kubernetes the moment the init container exits",
+        "Init containers are technically incapable of ever accessing any credential file",
+        "This scenario only occurs when a pod has been deliberately misconfigured by an attacker beforehand"
+      ],
+      "answer": 0,
+      "explanation": "Since init containers exit after completing setup, any temporary credentials they used (but didn't explicitly clean up) remain accessible in the shared volume to the main container and any attacker who compromises the pod."
+    },
+    {
+      "q": "What is the key trust-boundary insight regarding containers within the same pod?",
+      "options": [
+        "Containers within the same pod are always more isolated from each other than containers in entirely separate pods",
+        "Pod-level isolation is mathematically equivalent to full virtual-machine-level isolation",
+        "Containers in the same pod are NOT isolated from each other the way separate pods are — if one is compromised, assume the whole pod is compromised",
+        "Trust boundaries only exist between separate Kubernetes clusters, never within a single pod"
+      ],
+      "answer": 2,
+      "explanation": "Since containers in a pod share network and storage by design, compromising one effectively compromises the whole pod's trust boundary, unlike the stronger isolation between separate pods."
+    },
+    {
+      "q": "What is a container escape?",
+      "options": [
+        "A method for copying a container image from one registry to another registry",
+        "A technique for legitimately stopping and restarting a container as part of routine maintenance",
+        "A process for automatically scaling the number of running container replicas",
+        "When an attacker breaks out of a container's isolation and gains control of the host machine itself"
+      ],
+      "answer": 3,
+      "explanation": "A container escape breaks the fundamental isolation boundary that's supposed to keep containerized code confined, granting the attacker control over the underlying host."
+    },
+    {
+      "q": "Why does GPU isolation carry more inherent risk than CPU/memory isolation in containers?",
+      "options": [
+        "GPU isolation relies entirely on physical, hardware-level air-gapping with no software component at all",
+        "CPU and memory isolation are actually weaker than GPU isolation in every modern system",
+        "The Linux kernel's cgroups feature has no GPU controller, so GPU isolation is instead handled by userspace software (like the NVIDIA Container Toolkit), which is more prone to bugs than the battle-tested kernel",
+        "GPUs are technically incapable of being used inside any containerized environment whatsoever"
+      ],
+      "answer": 2,
+      "explanation": "Since cgroups (the kernel's resource-isolation mechanism) lacks GPU support, GPU access control falls to less battle-tested userspace software, creating a comparatively weaker isolation boundary."
+    },
+    {
+      "q": "What is LD_PRELOAD, and why is it central to the GPU container escape attack?",
+      "options": [
+        "A Kubernetes-specific annotation used to control pod scheduling priority",
+        "A network configuration option that restricts which IP ranges a container can communicate with",
+        "A hardware setting that controls how much GPU memory a container is allowed to allocate",
+        "A Linux environment variable that forces a program to load a specified library first, and if that library has a constructor function, it runs automatically before the real program even starts"
+      ],
+      "answer": 3,
+      "explanation": "LD_PRELOAD forces a specified library to load before anything else, and since library constructor functions run automatically on load, this becomes a mechanism for injecting and immediately executing attacker code."
+    },
+    {
+      "q": "What are the two chained bugs that make up CVE-2025-23266?",
+      "options": [
+        "A missing TLS certificate check combined with a weak default password on the GPU driver",
+        "Vulnerable runc versions copy container environment variables into runc's own environment before running hooks, and vulnerable NVIDIA Container Toolkit versions have a hook that inherits that same polluted environment",
+        "A buffer overflow in the container's network stack combined with an insecure default firewall rule",
+        "An SQL injection vulnerability combined with a cross-site scripting flaw in the container registry web interface"
+      ],
+      "answer": 1,
+      "explanation": "The two bugs combine sequentially — runc's environment-copying flaw pollutes its own environment with attacker-controlled values, and the toolkit hook's environment inheritance flaw then picks up that pollution."
+    },
+    {
+      "q": "Why do organizations' Docker wrapper scripts (which block flags like --privileged or --volume) fail to stop the CVE-2025-23266 exploit?",
+      "options": [
+        "The malicious LD_PRELOAD lives inside the Dockerfile's ENV directive, not on the command line, so a wrapper that only checks command-line flags never sees the threat",
+        "Wrapper scripts only function correctly on Windows-based container hosts, never on Linux",
+        "The exploit requires the --privileged flag to be explicitly present, which the wrapper always fails to detect",
+        "Wrapper scripts are technically incapable of blocking any Docker command-line flag whatsoever"
+      ],
+      "answer": 0,
+      "explanation": "Since the exploit's malicious environment variable is embedded in the image build itself (via Dockerfile ENV) rather than passed as a runtime flag, flag-based wrapper filtering never encounters or blocks it."
+    },
+    {
+      "q": "What happens once the malicious library's constructor function successfully runs during the CVE-2025-23266 exploit chain?",
+      "options": [
+        "It triggers an automatic security alert that immediately terminates the entire attack",
+        "It only affects the container's own internal filesystem, with no effect on the host at all",
+        "It executes with the exact same limited privileges as the original containerized process, achieving nothing extra",
+        "It executes as root, on the host, completing a full container escape"
+      ],
+      "answer": 3,
+      "explanation": "Since the vulnerable hook runs as root on the host, the malicious library loaded via the poisoned LD_PRELOAD executes with that same root-on-host privilege, completing the escape."
+    },
+    {
+      "q": "What is residual GPU memory, and why is it a risk in multi-tenant AI deployments?",
+      "options": [
+        "GPU memory automatically and permanently encrypts itself the instant a program using it terminates",
+        "This risk only applies to GPUs manufactured before the year 2010",
+        "Residual memory only ever affects CPU RAM, never actual GPU memory (VRAM)",
+        "GPU memory (VRAM) data from a finished program is often not wiped, so the next tenant using that same memory region can potentially read the previous tenant's leftover data"
+      ],
+      "answer": 3,
+      "explanation": "Without explicit wiping, VRAM content from a previous process can remain readable to the next process allocated that same memory region, potentially leaking another tenant's model weights or data."
+    },
+    {
+      "q": "What is NVIDIA MIG (Multi-Instance GPU), and what problem does it solve?",
+      "options": [
+        "A software tool used exclusively for monitoring GPU temperature and fan speed",
+        "A network protocol used specifically for transferring data between multiple GPUs",
+        "A cloud billing feature that automatically splits GPU costs evenly across all users",
+        "A technology that splits one physical GPU into isolated slices with their own compute, memory, and cache, preventing tenants sharing a GPU from seeing each other's data"
+      ],
+      "answer": 3,
+      "explanation": "MIG provides hardware-level isolation, carving a single physical GPU into genuinely separate instances so that different tenants cannot access each other's data even while sharing the same physical chip."
+    },
+    {
+      "q": "What is defense in depth, as a core defensive principle for AI infrastructure?",
+      "options": [
+        "A technique for compressing security logs to reduce their total storage footprint",
+        "A process for permanently disabling all network access to eliminate any possible attack surface",
+        "Relying entirely on a single, maximally strong firewall rule as the sole security control",
+        "Using many layers of protection, so that if one layer fails, others still hold"
+      ],
+      "answer": 3,
+      "explanation": "Defense in depth, illustrated by the castle analogy (moat, walls, guards, keep), ensures that a single failed control doesn't result in total compromise."
+    },
+    {
+      "q": "What is least privilege, generally regarded as one of the single most powerful defenses in infrastructure security?",
+      "options": [
+        "Granting every identity the maximum possible permissions to avoid operational friction",
+        "A policy requiring every employee to have identical access rights across the entire organization",
+        "Giving every identity only the permissions it truly needs, nothing more",
+        "A technique for encrypting all data using the strongest available cipher regardless of performance cost"
+      ],
+      "answer": 2,
+      "explanation": "Least privilege minimizes the potential damage of any single compromised identity by ensuring it never had more access than its actual job required in the first place."
+    },
+    {
+      "q": "What is the key difference between TLS and mTLS?",
+      "options": [
+        "TLS encrypts traffic and proves the server's identity; mTLS goes further, requiring both the client AND the server to prove their identity",
+        "mTLS is a deprecated, older version of TLS that modern systems should actively avoid using",
+        "TLS and mTLS are simply two different names referring to the exact same underlying technology",
+        "TLS only works for internal network traffic, while mTLS only works for external, public-facing traffic"
+      ],
+      "answer": 0,
+      "explanation": "Standard TLS (like HTTPS) verifies only the server's identity to the client; mTLS extends this by requiring mutual verification, which stops an attacker from impersonating an internal service."
+    },
+    {
+      "q": "What is an SBOM (Software Bill of Materials), and why is it useful?",
+      "options": [
+        "A billing document listing the exact monetary cost of running each individual container",
+        "A list of every library and component inside a container image, similar to an ingredients label — letting teams instantly check if they use a newly-discovered vulnerable library",
+        "A legal document required before any AI model can be deployed to production",
+        "A physical hardware inventory listing every server rack in a data center"
+      ],
+      "answer": 1,
+      "explanation": "An SBOM provides a complete component inventory, enabling rapid impact assessment whenever a new vulnerability is disclosed for any dependency."
+    },
+    {
+      "q": "What is a SIEM, and what role does it play in defense?",
+      "options": [
+        "A type of specialized hardware firewall appliance installed at the network perimeter",
+        "A programming framework used specifically for building AI model inference servers",
+        "Security Information and Event Management — a central system that collects logs from everywhere, analyzes them for signs of attack, and raises alerts",
+        "A cloud storage service used exclusively for archiving old, unused container images"
+      ],
+      "answer": 2,
+      "explanation": "A SIEM centralizes log analysis across an entire environment, functioning as a security control room that watches for attack patterns across multiple systems simultaneously."
+    },
+    {
+      "q": "What is a recommended attacker methodology's correct order for assessing AI infrastructure, from recon to documentation?",
+      "options": [
+        "Document, achieve impact, move laterally, hunt credentials, escalate, enumerate, initial access, recon",
+        "Escalate, recon, hunt credentials, document, initial access, enumerate, move laterally, achieve impact",
+        "Hunt credentials, escalate, recon, initial access, achieve impact, enumerate, document, move laterally",
+        "Recon, initial access, enumerate, escalate, hunt credentials, move laterally, achieve impact, document"
+      ],
+      "answer": 3,
+      "explanation": "This eight-step sequence — from initial reconnaissance through final documentation — represents the systematic methodology recommended for a thorough infrastructure assessment."
+    },
+    {
+      "q": "What is the golden rule regarding the order of enumeration versus action during an assessment?",
+      "options": [
+        "Documentation should always occur before any enumeration begins",
+        "Enumeration and action should always happen simultaneously, never sequentially",
+        "Always act immediately without any prior enumeration, to maximize speed",
+        "Enumerate before you act — reading is quiet, acting is loud"
+      ],
+      "answer": 3,
+      "explanation": "Since enumeration (reading policies, listing resources) is far quieter than action (creating resources, deleting data), performing it first minimizes detection risk before committing to a specific attack path."
+    },
+    {
+      "q": "Why should cloud accounts be separated per project?",
+      "options": [
+        "Separate accounts always automatically reduce the overall cloud computing costs",
+        "So that one breach cannot reach another project's data",
+        "Account separation is required by international law for any company operating in more than one country",
+        "This separation only matters for companies with more than 1,000 total employees"
+      ],
+      "answer": 1,
+      "explanation": "Account-level separation creates a hard boundary that contains a breach within its originating project, preventing lateral movement into unrelated projects' resources."
+    },
+    {
+      "q": "What should happen to old versions of stored secrets and parameters?",
+      "options": [
+        "They should be purged or disabled, since old versions can still hold valid secrets even after rotation",
+        "Old versions should be converted into publicly readable documentation for future employees",
+        "Old versions have no security relevance whatsoever and require no specific handling",
+        "Old versions should always be preserved permanently and never deleted under any circumstances"
+      ],
+      "answer": 0,
+      "explanation": "Since old parameter/file versions can retain valid secrets even after apparent rotation or deletion, actively purging them closes a commonly overlooked exposure gap."
+    },
+    {
+      "q": "What should never be granted to workload identities in a Kubernetes environment?",
+      "options": [
+        "The ability to respond to their own health-check probe requests",
+        "The ability to report their own resource usage metrics",
+        "The ability to read their own pod's specific, individually named logs",
+        "The ability to create pods, and cluster-wide secret read access"
+      ],
+      "answer": 3,
+      "explanation": "Both pod-creation and cluster-wide secret access represent capabilities that grant far more power than typical workloads legitimately need, making them prime targets for restriction under least privilege."
+    },
+    {
+      "q": "What should be done regarding unused GPU runtime hooks?",
+      "options": [
+        "Disable them, since unused hooks (like the vulnerable CUDA compat hook exploited in CVE-2025-23266) represent unnecessary attack surface",
+        "Only hooks that have been in production for more than one year should ever be considered for disabling",
+        "Hooks are purely cosmetic and have no relationship to any security consideration whatsoever",
+        "Unused hooks should always be left enabled by default for maximum compatibility with future software updates"
+      ],
+      "answer": 0,
+      "explanation": "Disabling unnecessary hooks (like the specific one exploited in the CVE-2025-23266 attack chain) directly reduces the available attack surface without sacrificing needed functionality."
+    },
+    {
+      "q": "Which mistake from the common-mistakes table is specifically linked to 'cluster-wide blast radius' as its consequence?",
+      "options": [
+        "Using a ClusterRole for everything, instead of namespaced Roles",
+        "Leaving DEBUG logging enabled in a production environment",
+        "Setting a firewall rule to 0.0.0.0/0 on a model's port",
+        "Hardcoding secrets directly into container images"
+      ],
+      "answer": 0,
+      "explanation": "Since ClusterRoles apply across the entire cluster rather than being confined to one namespace, over-relying on them (instead of properly scoped Roles) expands any single compromise's potential reach dramatically."
+    },
+    {
+      "q": "When writing security findings, what four things should each reported issue clearly state?",
+      "options": [
+        "What was found, how it was found, the real-world impact, and the specific fix",
+        "Only the name of the specific employee responsible for the misconfiguration",
+        "Only the total number of similar vulnerabilities found elsewhere in the industry",
+        "Only the exact monetary cost of the vulnerability, with no other detail required"
+      ],
+      "answer": 0,
+      "explanation": "Clear, actionable findings require all four components — vague reports without concrete evidence and remediation guidance tend to be deprioritized or ignored."
+    },
+    {
+      "q": "A red teamer finds an SSRF vulnerability in an AI document summarizer's `template_url` parameter, on a server running in AWS. What is the most direct next step to escalate this into cloud credential theft?",
+      "options": [
+        "Immediately attempt to physically access the data center hosting the vulnerable server",
+        "Send a phishing email to the company's IT department requesting their admin password",
+        "Report the SSRF finding immediately without attempting any further escalation whatsoever",
+        "Point the vulnerable parameter at http://169.254.169.254/latest/meta-data/iam/security-credentials/ to attempt reading the instance's temporary AWS credentials"
+      ],
+      "answer": 3,
+      "explanation": "The classic SSRF-to-credential-theft chain involves redirecting the vulnerable request-fetching feature toward the cloud metadata service to harvest the instance's temporary credentials."
+    },
+    {
+      "q": "An attacker's stolen role can AssumeRole into a role with an `s3:*` action on `Resource: *`, but no direct access to any secrets manager. What should the attacker do next to potentially find additional secrets?",
+      "options": [
+        "Assume the S3 wildcard access is purely theoretical and cannot actually be exploited in practice",
+        "Use the assumed role's broad S3 access to enumerate and search buckets across the account for exposed credentials, since S3 is one of the primary credential-hunting grounds",
+        "Immediately give up, since S3 access alone can never lead to further credential discovery",
+        "Attempt to directly modify the IAM policy of the AWS root account without any prior reconnaissance"
+      ],
+      "answer": 1,
+      "explanation": "Since S3 is explicitly identified as a top credential-hunting location (config files, notebooks with pasted keys, old file versions), the broad S3 access gained through escalation directly enables the next phase of the attack."
+    },
+    {
+      "q": "A pod's service account can read secrets in its own namespace but cannot create pods. A separate secret in that same namespace happens to contain the token for a controller identity that CAN create pods. What attack technique does exploiting this combination represent?",
+      "options": [
+        "Sidecar tampering, since this attack occurs entirely within the boundaries of a single pod's shared volume",
+        "Identity chaining, combining the weaker identity's secret-read capability with the stronger identity's stolen pod-creation token",
+        "GPU container escape, since any privilege combination involving pods relates directly to GPU isolation bugs",
+        "SSRF, since accessing a Kubernetes secret is functionally identical to a server-side request forgery attack"
+      ],
+      "answer": 1,
+      "explanation": "This is a textbook identity chaining scenario — neither capability alone (read secrets, or create pods) was sufficient, but combining them via the discovered token achieves full capability."
+    },
+    {
+      "q": "A defender scopes a Kubernetes Role to a single namespace and restricts it with `resourceNames` to one specific named secret. An attacker with this Role's identity attempts to read every secret in the namespace using a wildcard request. What is the most likely outcome?",
+      "options": [
+        "The Kubernetes API server crashes entirely upon receiving any wildcard-style secret request",
+        "The request succeeds fully, since a Role always implicitly grants access to every resource of that type within its namespace",
+        "The request is denied for all secrets except the one specifically named in resourceNames, since the Role's rule doesn't grant broader wildcard access",
+        "The attacker's service account token is immediately and permanently revoked simply for attempting the wildcard request"
+      ],
+      "answer": 2,
+      "explanation": "Since the Role's rule explicitly limits access via resourceNames to one specific secret, the RBAC system will only authorize access to that named resource, denying broader wildcard attempts."
+    },
+    {
+      "q": "A compromised pre-processing sidecar in an AI pipeline modifies incoming safety-incident reports, swapping 'critical' keywords for 'routine' ones before the inference container processes them. What defensive control would most directly have prevented this specific tampering?",
+      "options": [
+        "Patching the NVIDIA Container Toolkit and runc to their latest available versions",
+        "Disabling the automatic service account token mount on the inference container specifically",
+        "Using read-only mounts and preferring authenticated network APIs over shared writable file volumes for passing data between pipeline stages",
+        "Enforcing IMDSv2 on all cloud instances hosting the Kubernetes cluster's nodes"
+      ],
+      "answer": 2,
+      "explanation": "Since the tampering exploited a shared, writable volume between pipeline stages, restricting that channel (read-only mounts, or replacing shared files with authenticated APIs) directly addresses the root cause."
+    },
+    {
+      "q": "A company patches runc and the NVIDIA Container Toolkit to versions fixed against CVE-2025-23266, but continues using flag-blocking Docker wrapper scripts as their primary defense against arbitrary image builds. Is this residual defense (the wrapper) still meaningfully effective against other potential threats?",
+      "options": [
+        "No, because patching automatically disables all Docker wrapper script functionality permanently",
+        "Yes, but only because patching runc and the toolkit is now considered completely unnecessary",
+        "No, wrapper scripts provide zero security value under any circumstances and should be removed entirely",
+        "Yes, for threats that rely on blocked command-line flags — but the wrapper alone was never sufficient against the specific ENV-based attack, which is why patching was the actual necessary fix"
+      ],
+      "answer": 3,
+      "explanation": "The wrapper's flag-blocking still has value against threats using those specific flags, but the module's lesson is clear that this particular exploit bypassed it entirely via Dockerfile ENV — patching the actual underlying bugs was the necessary fix, not the wrapper."
+    },
+    {
+      "q": "A tester finds a vLLM server exposed to 0.0.0.0/0 with no authentication, returning `{\"version\": \"0.7.3\"}` from its /version endpoint, and also finds the hosting instance's security group allows SSH from 0.0.0.0/0 as well. Which single configuration change addresses the most immediate, direct exposure risk?",
+      "options": [
+        "Adding a Content Security Policy header to the model server's HTTP responses",
+        "Upgrading only the vLLM software version, while leaving both firewall rules completely unchanged",
+        "Increasing the model server's request-processing timeout value to reduce latency",
+        "Restricting the security group's inbound rules to specific internal CIDR ranges for both the model port and SSH, removing the 0.0.0.0/0 entries entirely"
+      ],
+      "answer": 3,
+      "explanation": "Since both the model port and SSH share the same fundamental exposure risk (an open-to-the-world firewall rule), restricting the security group's CIDR ranges directly closes both unauthorized access paths at once."
+    },
+    {
+      "q": "Why does an attacker not always need to break the AI model itself to compromise an AI system?",
+      "options": [
+        "Infrastructure attacks are always illegal, unlike direct model attacks which are always legal",
+        "A model rarely runs in isolation — it sits inside cloud infrastructure, and compromising the surrounding infrastructure can achieve the same goal without touching the model at all",
+        "This principle only applies to models that have never been deployed to production",
+        "AI models are technically incapable of being attacked under any circumstances"
+      ],
+      "answer": 1,
+      "explanation": "Since a model always runs within a larger infrastructure stack, compromising that surrounding stack (cloud accounts, containers, network) can achieve equivalent or greater impact without ever directly attacking the model's logic."
+    },
+    {
+      "q": "Why is 'the front door' description used for metadata service access, even though it requires no credentials to reach?",
+      "options": [
+        "The metadata service is physically located at the literal front entrance of every data center",
+        "This description only applies to metadata services running on non-cloud, on-premises hardware",
+        "Front door access requires the attacker to first pass through a physical security checkpoint",
+        "The metadata service is reachable from inside the instance with zero authentication required, making it a uniquely accessible entry point for anyone who can trigger a request from that instance"
+      ],
+      "answer": 3,
+      "explanation": "The metadata service's lack of authentication (in the original v1 design) made it an unusually accessible target for anyone able to trigger a request from the instance, such as via SSRF."
+    },
+    {
+      "q": "What is the difference between IMDSv1 and IMDSv2 in terms of request complexity?",
+      "options": [
+        "IMDSv1 and IMDSv2 are functionally identical, differing only in their internal version numbering",
+        "IMDSv1 requires more complex authentication than IMDSv2, making it the more secure option",
+        "IMDSv2 removed the metadata service entirely, replacing it with a different mechanism altogether",
+        "IMDSv1 accepts simple GET requests with no special headers; IMDSv2 requires an initial token request with a special header before any data can be retrieved"
+      ],
+      "answer": 3,
+      "explanation": "IMDSv2's added token-request step with a custom header creates a meaningful barrier against simple SSRF attacks that can only control the target URL, not custom headers."
+    },
+    {
+      "q": "Why might an attacker specifically target IAM roles attached to AI training or notebook instances rather than general-purpose compute roles?",
+      "options": [
+        "AI/ML roles often carry broader permissions (data access, model storage, GPU provisioning) than typical compute roles, since ML workflows commonly need to touch many different services",
+        "General-purpose compute roles always have significantly broader permissions than any AI-specific role",
+        "This targeting strategy has no practical basis and provides no advantage to an attacker",
+        "Training and notebook instances are technically incapable of having any IAM role attached to them"
+      ],
+      "answer": 0,
+      "explanation": "ML workflows commonly require touching many different services (storage, compute provisioning, model registries), often resulting in broader-than-necessary permissions attached to these roles."
+    },
+    {
+      "q": "Why is it worth specifically checking for `iam:PassRole` combined with resource-creation permissions when hunting for privilege escalation paths?",
+      "options": [
+        "The combination lets an attacker create a new service and attach a more powerful role to it, effectively gaining that role's capabilities without ever needing to directly assume it",
+        "PassRole alone, without any resource-creation permission, is always sufficient for full privilege escalation on its own",
+        "PassRole only works when combined with physical access to the underlying server hardware",
+        "This combination is purely theoretical and has never been demonstrated as an actual exploitable technique"
+      ],
+      "answer": 0,
+      "explanation": "iam:PassRole combined with the ability to create a service (like a notebook or function) lets an attacker attach a powerful role to that new resource, inheriting its permissions indirectly."
+    },
+    {
+      "q": "Why would leaving Jupyter notebook files in cloud storage be a specific credential-hunting risk?",
+      "options": [
+        "Jupyter notebooks are technically incapable of storing any text content whatsoever",
+        "Notebook files are always automatically encrypted with a key inaccessible to anyone but the original author",
+        "Notebooks are frequently used for interactive experimentation, and developers often paste API keys or credentials directly into cells for quick testing, then forget to remove them before saving",
+        "This risk only applies to notebooks that have never been executed or run"
+      ],
+      "answer": 2,
+      "explanation": "The interactive, exploratory nature of notebook development makes them a common place for developers to paste credentials for quick testing, which often get accidentally saved and left behind."
+    },
+    {
+      "q": "Why are CI/CD pipeline configuration files (like GitHub Actions workflows) a valuable credential-hunting target?",
+      "options": [
+        "Pipeline files are always deleted automatically immediately after each build completes",
+        "These files often reference secrets needed for deployment, and misconfigured pipelines sometimes echo or log those secret values during the build process",
+        "CI/CD configuration files are technically incapable of ever referencing any secret or credential value",
+        "This target only applies to pipelines that have never successfully completed a build"
+      ],
+      "answer": 1,
+      "explanation": "Since CI/CD pipelines routinely handle deployment secrets, misconfigured logging or echo statements within these pipelines can inadvertently expose those values in build logs."
+    },
+    {
+      "q": "Why is it worth checking parameter store and secrets manager services specifically, in addition to object storage, during credential hunting?",
+      "options": [
+        "Object storage services always contain significantly more credentials than any dedicated secrets manager",
+        "Parameter stores and secrets managers are technically incapable of storing any actual credential data",
+        "This recommendation only applies to organizations using exactly one specific cloud provider",
+        "Different services store different kinds of secrets, and dedicated secrets services (unlike general object storage) are specifically designed to hold credentials, making them a natural, high-value hunting target"
+      ],
+      "answer": 3,
+      "explanation": "Since secrets managers and parameter stores exist specifically to hold credentials (as opposed to general-purpose object storage), they represent a concentrated, high-value target for an attacker hunting for secrets."
+    },
+    {
+      "q": "What is the significance of a model server's health-check or status endpoint from a reconnaissance perspective?",
+      "options": [
+        "Status endpoints are always encrypted and therefore provide zero useful information to any observer",
+        "Health-check endpoints are technically incapable of returning any information beyond a simple true/false status",
+        "It often reveals internal configuration details, such as the model in use, dependent services, and version numbers, without requiring any authentication",
+        "This endpoint type only exists on model servers that have already been fully compromised"
+      ],
+      "answer": 2,
+      "explanation": "Health/status endpoints frequently over-share internal configuration details (model name, version, dependencies) as a convenience for legitimate monitoring, which doubles as a reconnaissance goldmine for attackers."
+    },
+    {
+      "q": "Why might an attacker specifically look for exposed model registries (like MLflow or a container registry) rather than just the inference endpoint itself?",
+      "options": [
+        "Model registries are technically incapable of storing any model file or associated metadata",
+        "A registry can expose the actual model artifacts, training metadata, or associated credentials, going beyond what a live inference endpoint alone would reveal",
+        "This targeting strategy provides no practical advantage over targeting the inference endpoint alone",
+        "Registries are always significantly harder for any attacker to locate than a live inference endpoint"
+      ],
+      "answer": 1,
+      "explanation": "Registries often expose the underlying model files and associated metadata directly, potentially revealing more than what could be inferred through the live inference endpoint's query-response behavior alone."
+    },
+    {
+      "q": "What is a Kubernetes Namespace, and why does it matter for RBAC scoping?",
+      "options": [
+        "A namespace refers exclusively to the DNS name assigned to a Kubernetes cluster's API server",
+        "Namespaces are purely cosmetic labels with absolutely no functional or security relevance",
+        "A logical partition within a cluster used to organize and isolate resources, and Roles (as opposed to ClusterRoles) are scoped to apply within just one specific namespace",
+        "A namespace is a synonym for an individual container running within a pod"
+      ],
+      "answer": 2,
+      "explanation": "Namespaces provide logical resource isolation within a cluster, and namespace-scoped Roles (rather than cluster-wide ClusterRoles) leverage this boundary to limit permission scope appropriately."
+    },
+    {
+      "q": "Why might a compromised identity with only `get pods` permission (no `list`) still be able to enumerate pod names, if it also has broader network access?",
+      "options": [
+        "Only cluster administrators are ever capable of discovering any pod names within a cluster",
+        "This scenario is technically impossible under any circumstances in a properly configured cluster",
+        "The identity could potentially discover pod names indirectly through other channels, such as DNS records, service discovery mechanisms, or application logs, without needing the list permission directly",
+        "get and list permissions are functionally identical in every version of Kubernetes with no meaningful distinction"
+      ],
+      "answer": 2,
+      "explanation": "Even without direct list permission, alternative discovery channels (DNS, service records, application-level logs) can sometimes reveal pod names, illustrating why permission scoping alone isn't always a complete solution."
+    },
+    {
+      "q": "Why is it significant that Kubernetes secrets are, by default, only base64-encoded rather than truly encrypted?",
+      "options": [
+        "Base64 encoding is mathematically equivalent to a strong, industry-standard encryption algorithm",
+        "Base64 encoding is trivially reversible by anyone, so relying on it alone for protection provides essentially no real security against someone who can already read the secret object",
+        "This design detail has no practical security implication whatsoever for any real deployment",
+        "Base64-encoded secrets automatically become unreadable after exactly 24 hours have elapsed"
+      ],
+      "answer": 1,
+      "explanation": "Since base64 is a simple, universally reversible encoding (not encryption), anyone who can read the secret object can trivially decode its actual value — genuine protection requires encryption at rest, not just encoding."
+    },
+    {
+      "q": "What is the purpose of Kubernetes Network Policies?",
+      "options": [
+        "They control which pods can communicate with which other pods, limiting lateral movement within the cluster",
+        "Network Policies determine which container images are permitted to be pulled into the cluster",
+        "Network Policies exclusively control which external websites a cluster's nodes are permitted to visit",
+        "Network Policies are used only to configure the cluster's DNS resolution settings"
+      ],
+      "answer": 0,
+      "explanation": "Network Policies restrict pod-to-pod communication within the cluster, directly limiting an attacker's ability to move laterally between compromised and uncompromised pods."
+    },
+    {
+      "q": "Why might a defender specifically want to alert on unusual patterns of `SelfSubjectRulesReview` calls?",
+      "options": [
+        "This specific API call was permanently removed from all versions of Kubernetes released after 2020",
+        "This API call is only ever used by Kubernetes' internal system processes and never by any external identity",
+        "SelfSubjectRulesReview calls always automatically indicate a successful, completed privilege escalation",
+        "This API call is exactly what an attacker uses to enumerate their own permissions after gaining initial access, making unusual patterns of its use a potential reconnaissance signal"
+      ],
+      "answer": 3,
+      "explanation": "Since this exact API is a common attacker reconnaissance technique for mapping out permissions, monitoring for unusual patterns of its use provides a specific detection signal for potential compromise."
+    },
+    {
+      "q": "Why is it recommended to verify a model file's checksum or signature before loading it into an inference container?",
+      "options": [
+        "Checksums are only useful for detecting hardware failures, never for detecting deliberate tampering",
+        "It confirms the model file hasn't been tampered with by a compromised sidecar or init container before the main inference container loads and trusts it",
+        "This verification step is purely a performance optimization with no security relevance",
+        "Checksum verification automatically improves the model's underlying prediction accuracy"
+      ],
+      "answer": 1,
+      "explanation": "Since a compromised container sharing the pod's volume could tamper with model files before the inference container loads them, integrity verification provides a check against that specific tampering path."
+    },
+    {
+      "q": "Why does running containers as non-root (`runAsNonRoot: true`) reduce the impact of a successful container compromise?",
+      "options": [
+        "A non-root process has fewer inherent permissions on the underlying system, limiting what an attacker can do even after gaining code execution inside that container",
+        "Non-root containers are technically incapable of ever being compromised in the first place",
+        "Running as non-root automatically and completely prevents any form of container escape",
+        "This setting only affects the container's networking configuration, with no relation to filesystem permissions"
+      ],
+      "answer": 0,
+      "explanation": "Restricting a container's process to non-root privileges limits the blast radius of a successful compromise, since the attacker inherits only the limited permissions of that non-root user rather than full root access."
+    },
+    {
+      "q": "Why is a `readOnlyRootFilesystem: true` setting recommended as a container hardening measure?",
+      "options": [
+        "Read-only filesystems are technically incapable of running any application whatsoever",
+        "This setting only applies to containers that have been specifically flagged as high-risk by an administrator",
+        "This setting automatically encrypts every file stored inside the container's filesystem",
+        "It prevents an attacker who gains code execution inside the container from writing malicious files to the container's own filesystem, such as planting persistence mechanisms"
+      ],
+      "answer": 3,
+      "explanation": "A read-only root filesystem prevents an attacker from writing new files or modifying existing ones within the container, closing off a common avenue for planting persistence or additional tooling."
+    },
+    {
+      "q": "Why is it recommended to scan container images for hidden secrets in CI/CD, rather than relying solely on manual code review?",
+      "options": [
+        "Automated scanning catches hardcoded secrets consistently and at scale before they ship, something manual review can miss due to human oversight or the sheer volume of code changes",
+        "Automated scanning tools are always significantly slower than any manual code review process",
+        "Manual code review is technically incapable of ever detecting any hardcoded secret under any circumstances",
+        "This recommendation only applies to organizations with fewer than 10 total developers"
+      ],
+      "answer": 0,
+      "explanation": "Automated scanning provides consistent, scalable coverage that catches secrets a busy or distracted human reviewer might miss, especially across a high volume of code changes."
+    },
+    {
+      "q": "Why is it recommended to sign container images and verify those signatures before running them?",
+      "options": [
+        "This practice only matters for images that are larger than 1GB in total file size",
+        "It ensures only images that genuinely came from a trusted source (and haven't been tampered with) are actually deployed and run",
+        "Signature verification is purely a legal compliance requirement with no actual security benefit",
+        "Image signing automatically improves the runtime performance of the containerized application"
+      ],
+      "answer": 1,
+      "explanation": "Cryptographic signing and verification confirms an image's authenticity and integrity, preventing tampered or unauthorized images from being deployed even if an attacker gains access to the registry."
+    },
+    {
+      "q": "Why might monitoring for 'traffic spikes' on model endpoints specifically help detect model extraction attempts?",
+      "options": [
+        "This monitoring approach only works for models that have already been publicly documented as vulnerable",
+        "Traffic spikes are always caused exclusively by legitimate marketing campaigns increasing genuine user interest",
+        "Model extraction is technically impossible to detect through any form of traffic-based monitoring",
+        "Extracting a model's learned behavior typically requires sending a very large number of systematic queries, which produces an unusually high volume of traffic compared to normal usage patterns"
+      ],
+      "answer": 3,
+      "explanation": "Systematic model extraction requires sending many queries to map the model's decision boundaries, producing a distinctive volume signature that differs from typical organic usage."
+    },
+    {
+      "q": "Why is it recommended to practice incident response with tabletop exercises, rather than relying only on a written runbook?",
+      "options": [
+        "Tabletop exercises are purely a team-building activity with no relationship to actual incident response effectiveness",
+        "Practicing a plan under simulated conditions reveals gaps and builds team familiarity that a purely written document alone cannot guarantee during an actual, high-pressure incident",
+        "Tabletop exercises are only useful for organizations that have never experienced any actual security incident",
+        "A written runbook alone is always completely sufficient with no need for any further practice or preparation"
+      ],
+      "answer": 1,
+      "explanation": "Simulated practice exposes procedural gaps and builds real team familiarity with the response plan, addressing weaknesses that a static written document alone can't reveal until a real crisis occurs."
+    },
+    {
+      "q": "A red teamer discovers an S3 bucket with versioning enabled that once contained a config file with hardcoded database credentials, now replaced with a version that has the credentials redacted. What should the tester attempt next?",
+      "options": [
+        "Immediately report the bucket as fully secure, since the currently visible version shows no exposed credentials",
+        "Retrieve the earlier version of the file (before the redaction), since versioning preserves the original credential-containing version even after it was apparently 'fixed'",
+        "Attempt to physically access the S3 storage hardware to recover the original file version",
+        "Assume the credentials are now permanently and completely inaccessible, since the current version shows them redacted"
+      ],
+      "answer": 1,
+      "explanation": "Since versioning preserves historical file states, the earlier version containing the original unredacted credentials remains fully retrievable despite the apparent 'fix' in the current version."
+    },
+    {
+      "q": "A pod runs with `automountServiceAccountToken: false` and mounts only a read-only volume containing model files, with no other shared volumes. If an attacker gains code execution inside this pod's main container, what is most directly limited compared to a pod without these settings?",
+      "options": [
+        "The attacker gains complete and unrestricted access to the entire underlying host machine regardless of these settings",
+        "The attacker cannot use a mounted service account token to interact with the Kubernetes API, and cannot tamper with the read-only model files, significantly reducing what the compromise can accomplish",
+        "The attacker automatically gains cluster administrator privileges as a direct result of these specific settings",
+        "These specific settings have no meaningful effect on what an attacker inside the pod could accomplish"
+      ],
+      "answer": 1,
+      "explanation": "Disabling token auto-mount removes API access via a stolen token, and the read-only volume prevents model tampering — both settings directly constrain what a compromised container's attacker can achieve, compared to a less-hardened configuration."
+    },
+    {
+      "q": "A defender enables IMDSv2, scopes IAM policies tightly, and separates cloud accounts per project — but leaves a vLLM inference server exposed to 0.0.0.0/0 with no authentication. What residual risk remains despite these strong cloud-layer defenses?",
+      "options": [
+        "No residual risk remains at all, since IMDSv2 and scoped IAM policies automatically also secure any exposed model server",
+        "The exposed, unauthenticated inference server remains directly reachable by anyone on the internet, since network-layer exposure is a separate risk from IAM/account-level hardening",
+        "Account separation alone is always sufficient to fully close any network-level exposure regardless of firewall configuration",
+        "The scoped IAM policies would automatically detect and block all unauthorized inbound network traffic to the model server"
+      ],
+      "answer": 1,
+      "explanation": "IAM and account-level hardening address a different layer than network exposure — an open security group rule on the model port remains fully exploitable regardless of how well IAM and metadata service access are secured."
+    },
+    {
+      "q": "Why is 'every credential is a stepping stone' a useful core mindset for infrastructure attackers?",
+      "options": [
+        "A single found credential rarely represents the end goal — it's typically used to pivot toward additional access, following credentials wherever they lead through the infrastructure",
+        "This mindset only applies to credentials belonging to a company's chief executive officer specifically",
+        "Credentials found during an assessment should always be immediately discarded without any further use",
+        "Individual credentials are always completely useless on their own with no potential for further access"
+      ],
+      "answer": 0,
+      "explanation": "This mindset emphasizes that credential discovery is rarely the endpoint of an attack chain — each found credential typically opens up further pivoting opportunities toward deeper access."
+    }
+  ]
+}

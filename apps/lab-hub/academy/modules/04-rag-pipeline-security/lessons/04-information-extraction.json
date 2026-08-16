@@ -1,0 +1,38 @@
+{
+  "slug": "04-information-extraction",
+  "title": "Information Extraction",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Attack 1: Getting Secrets Out of the Knowledge Base\n\nThe most common RAG vulnerability is also one of the simplest: information leakage. If a company dumps everything into its knowledge base and relies on weak filters, an attacker can often simply ask the chatbot for secrets directly.\n\nThis typically happens through two mechanisms:\n\n1. **Probing the LLM** — asking carefully worded questions to make the model reveal more of what it actually retrieved.\n2. **Weak access control** — the underlying databases have no proper permission checks in place, so any chunk becomes retrievable by anyone who asks.\n\n---\n\n## The scenario\n\nImagine a red team assessment. You have a foothold on an internal machine, but the network is heavily monitored, meaning scanning tools would get you caught fast.\n\nThen you notice an internal service: HelpDesk Companion, a chatbot that says \"Powered by RAG\" and lets users upload documents. Because everyone in the company uses it, your queries blend seamlessly into normal traffic. It becomes a genuinely stealthy reconnaissance tool, letting you learn about the network without running a single scanner.\n\nThis matters because you gain information about systems you can't even reach directly, using nothing but ordinary HTTP requests that no network monitor would flag as suspicious."
+    },
+    {
+      "type": "content",
+      "body": "## Precision is everything\n\nRAG retrieval is non-deterministic, meaning the model typically uses a temperature setting above zero, which controls randomness. As a result, the same question can return different amounts of data on different attempts. How you word your prompt directly changes what you get back.\n\n**First attempt (vague):**\n\n> Provide a list of all server names in Active Directory.\n\nThis returns only four hostnames, which seems suspiciously low for a real network.\n\n**Refined attempt (explicit):**\n\n> Provide a list of all server names in Active Directory. Make sure to include all.\n\nThis returns eight hostnames instead. Same underlying data, just a better-worded prompt.\n\nThe lesson here: when mining a RAG system, be specific and explicitly demand completeness. Add phrases like \"include all,\" \"list every,\" or \"do not omit any\" to your queries."
+    },
+    {
+      "type": "content",
+      "body": "## Useful extraction techniques\n\n**One-shot prompting.** Give the model a single example of the exact format you want, and it will typically follow that pattern closely.\n\n> Provide a list of unique DNS names of services, for example: services.northwind.internal\n\nThis example teaches the model exactly what shape of answer to produce, resulting in cleaner, more easily parseable results.\n\n**Targeting specific secrets.** Once you know the knowledge base contains infrastructure documentation, you can ask directly for:\n\n- Database connection strings\n- VPN configuration details\n- Service account passwords\n- Default passwords for new accounts\n- API keys and access key IDs"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[Attacker with internal foothold] --> B[Finds internal RAG chatbot]\n    B --> C[Asks broad question]\n    C --> D[Partial answer - only 4 of 8 hosts]\n    D --> E[Refines prompt - include all]\n    E --> F[Complete answer - all 8 hosts]\n    F --> G[Targets specific secrets - passwords keys]\n    G --> H[Stealthy recon complete - no scanners used]"
+    },
+    {
+      "type": "content",
+      "body": "## Why attackers favor this technique\n\n| Advantage | Why it matters |\n|---|---|\n| Stealth | Only HTTP requests to a known endpoint, blending naturally with normal user traffic |\n| No tooling required | No PowerView, BloodHound, or scanners that might trip EDR alerts |\n| Reach | Learn about segmented systems you can't touch directly at all |\n| Speed | Answers arrive in seconds rather than hours of manual enumeration |\n\n## Real limits\n\n| Limitation | Impact |\n|---|---|\n| Visual data | Network diagrams and images rarely appear in text-based answers |\n| Fragmentation | Answers may lack full context, requiring many queries stitched together |\n| Staleness | The knowledge base may be outdated and genuinely misleading |\n\nStitching many queries together does increase your footprint and detection risk, so it's worth planning your questions carefully rather than firing off queries randomly."
+    },
+    {
+      "type": "note",
+      "body": "**Defender's takeaway:** the root cause here is treating the knowledge base like a public search engine. Fixes covered in later lessons include per-user access control on individual chunks, redacting secrets before ingestion ever happens, and never storing credentials as retrievable text in the first place. If a secret exists anywhere in the vector store, you should assume it's retrievable by someone."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Defensive pattern: filter chunks by the caller's permissions\n# BEFORE they ever reach the model. This is metadata-based access control.\n\ndef secure_retrieve(query, user, vector_db, embed):\n    candidates = vector_db.search(embed(query), top_k=20)\n\n    # Only keep chunks the user is actually allowed to see.\n    allowed = [\n        c for c in candidates\n        if user.clearance >= c.metadata[\"required_clearance\"]\n        and c.metadata[\"department\"] in user.departments\n    ]\n\n    # Extra layer: never surface chunks tagged as secrets to a chatbot.\n    allowed = [c for c in allowed if not c.metadata.get(\"is_secret\", False)]\n\n    return allowed[:6]"
+    }
+  ]
+}

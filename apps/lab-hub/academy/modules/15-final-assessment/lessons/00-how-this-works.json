@@ -1,0 +1,12 @@
+{
+  "slug": "00-how-this-works",
+  "title": "How This Assessment Works",
+  "type": "content",
+  "difficulty": "Advanced",
+  "reading_time": "4 min read",
+  "sections": [
+    {"type": "content", "body": "## The Final Assessment\n\nThis module is a comprehensive exam covering everything taught across all 14 modules of the AI Security Academy. Each module gets its own dedicated exam of 80 questions, so you can test your mastery module-by-module or work through the whole assessment as a full capstone review."},
+    {"type": "content", "body": "## Question Mix\n\nEach 80-question exam blends several question styles rather than pure recall:\n\n- **Concept recall** — definitions, terminology, how a mechanism works\n- **Scenario-based** — a realistic situation where you pick the correct response or diagnosis\n- **Critical thinking** — trade-offs, 'which of these is the bigger risk and why'\n- **Best-prompt / best-approach** — given a goal, which technique or payload strategy is most effective\n- **Tool-based** — correct tool, command, or flag for a given task\n\nDifficulty is mixed across easy, medium, and hard within each exam, so early questions build confidence and later ones push deeper reasoning."},
+    {"type": "note", "body": "This assessment assumes you've completed the corresponding module already. If a question stumps you, that's a signal to revisit that module's lessons rather than guess — the goal is mastery, not just a score."}
+  ]
+}

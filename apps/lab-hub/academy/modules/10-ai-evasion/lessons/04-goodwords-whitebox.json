@@ -1,0 +1,55 @@
+{
+  "slug": "04-goodwords-whitebox",
+  "title": "GoodWords White-Box",
+  "type": "content",
+  "readingtime": "11 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# The GoodWords Attack (White-Box)\n\nThe GoodWords attack fools a spam filter by leaving the spam text completely untouched and simply appending harmless, legitimate-looking words to the end. First described by Lowd and Meek in 2005, it remains one of the clearest demonstrations of how evasion works against a classifier like the one covered in the last two lessons.\n\nIn the white-box setting, we have full access to the model. That means we can read its internal probabilities directly and select the most powerful words mathematically, instead of guessing which words might work.\n\n**A simple comparison:** picture a scale weighing evidence, with spam words piling weight onto one side. We add just enough ham-leaning words to the other side to tip the scale, without ever removing any of the original spam content already sitting there."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Original spam message] --> B[Extract goodness scores from model]\n    B --> C[Rank words: most ham-like first]\n    C --> D[Append top N good words]\n    D --> E{Classifier re-scores}\n    E -->|Ham total now higher| F[Evasion success]\n    E -->|Still spam| G[Add more good words]\n    G --> D"
+    },
+    {
+      "type": "content",
+      "body": "## Step 1: extract the GoodWords\n\nWith white-box access, we read the model's learned log-probabilities and compute a goodness score for every word in its vocabulary, the same score introduced in the previous lesson. Words that appear far more often in ham than in spam rise straight to the top of this ranking.\n\nThe small epsilon value here serves two jobs: it prevents a division-by-zero error when a word never once appeared in any spam message during training, and it keeps every score finite and comparable across the board."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\n\nvocabulary     = vectorizer.get_feature_names_out()\nham_log_probs  = classifier.feature_log_prob_[0]\nspam_log_probs = classifier.feature_log_prob_[1]\n\nepsilon = 1e-10\ngoodness_scores = []\n\nfor i, word in enumerate(vocabulary):\n    ham_prob  = np.exp(ham_log_probs[i])\n    spam_prob = np.exp(spam_log_probs[i])\n    goodness  = ham_prob / (spam_prob + epsilon)\n    goodness_scores.append((word, goodness, ham_prob, spam_prob))\n\ngoodness_scores.sort(key=lambda x: x[1], reverse=True)\ntop_good_words = goodness_scores[:100]\n\nfor word, score, hp, sp in top_good_words[:10]:\n    print(f\"{word:12} goodness={score:8.2f} ham={hp:.4f} spam={sp:.4f}\")"
+    },
+    {
+      "type": "content",
+      "body": "## Step 2: append and test\n\nWe append the top N good words to a spam message and ask the model to re-classify it. Because scores add up in log space, as covered in the previous lesson, each additional word pushes the running total a little further toward ham.\n\nThe helper function below keeps this attack clean and honest, it only appends words to the end, and never edits, removes, or rearranges the original spam content."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "def augment_message(message, words_to_add):\n    \"\"\"Append good words to the end of a message (append-only attack).\"\"\"\n    if words_to_add:\n        return message + \" \" + \" \".join(words_to_add)\n    return message\n\nword_counts = [0, 5, 10, 15, 20, 25, 30]\n\nfor num_words in word_counts:\n    selected = [w for w, *_ in top_good_words[:num_words]]\n    evaded = 0\n    for msg in spam_test_messages:\n        augmented = augment_message(msg, selected)\n        prob = classifier.predict_proba(vectorizer.transform([augmented]))[0]\n        if prob[0] > prob[1]:   # ham probability wins\n            evaded += 1\n    rate = evaded / len(spam_test_messages) * 100\n    print(f\"Words added: {num_words:2d} | Evasion: {rate:6.2f}%\")"
+    },
+    {
+      "type": "content",
+      "body": "## The effectiveness curve\n\nAttack success follows a classic S-shaped, or sigmoid, curve as you add more good words. This isn't a coincidence, the additive log-space math from the previous lesson predicts exactly this shape.\n\n| Good words added | Typical evasion rate | Meaning |\n|---|---|---|\n| 0 | ~6% | Natural false-negative rate (baseline) |\n| 5 | ~41% | Attack begins to bite |\n| 10 | ~74% | Decision threshold crossed for most messages |\n| 15 | ~96% | Near-total success |\n| 20+ | ~100% | Saturation — adding more barely helps further |\n\nThe jump between 5 and 15 words is dramatic, and this represents a catastrophic failure, not a gradual decline. The classifier simply cannot tell an augmented spam message apart from real ham once enough good words have been added."
+    },
+    {
+      "type": "content",
+      "body": "## Goodness score vs real impact\n\nA surprising, genuinely practical lesson here: the word with the highest goodness score on paper isn't always the one with the biggest real-world impact when actually added to a message.\n\n- Goodness score measures a word's theoretical ham-likelihood, calculated in isolation, ignoring everything else in the message.\n- Practical impact measures how much that word actually shifts a specific real spam message's score toward ham, once it's genuinely added.\n\nA word can look excellent on paper, very ham-like in general, yet only nudge one particular heavily-spammy message by a small amount. This is exactly why the attack relies on many words working together, not one silver-bullet word, since no single word flips the label on its own; it's the accumulated total that actually does the work."
+    },
+    {
+      "type": "note",
+      "body": "**Practical tuning.** Messages with weaker spam signals to begin with may evade the filter with just 5 to 10 added words. Messages loaded with strong, obvious markers, such as FREE, WINNER, exclamation marks, and currency symbols, may need 15 to 20. An efficient attacker checks the message's baseline spam score first, then adds only as many good words as actually needed, keeping the final message shorter, more readable, and less likely to look suspicious to a human reviewer even if it successfully fools the filter."
+    },
+    {
+      "type": "content",
+      "body": "## Append vs insert: a quick practical note\n\nThis lesson deliberately uses an append-only strategy, meaning good words go at the very end of the message. This isn't the only option available, but it's the safest starting point for two reasons:\n\n- It's the simplest approach to automate and test at scale, since you never have to figure out where inside the message to place each word.\n- Since Naive Bayes ignores word order entirely, as covered in the previous lesson, appending at the end produces the exact same score as inserting words anywhere else in the message, so there's no mathematical benefit to inserting them elsewhere for this specific classifier.\n\nThat said, appending a long list of random-looking legitimate words at the very end of a message can look visually odd to a human reviewer, even if it fools the model. Spreading the same words naturally throughout the message can achieve the identical score while looking noticeably less suspicious on a manual read."
+    },
+    {
+      "type": "content",
+      "body": "## Detecting and defending against GoodWords\n\nThe attack itself is fundamentally a math trick, so the strongest defenses target the underlying assumptions it relies on, not just the specific words used:\n\n| Defense idea | Why it helps |\n|---|---|\n| Check vocabulary diversity vs message length | A message stuffed with 20+ unrelated \"good\" words often has an unusually high count of distinct, unrelated topics for its length |\n| Use n-gram or order-aware models | Naive Bayes ignores word order entirely; a model that considers word sequences is harder to fool by just appending disconnected words |\n| Ensemble multiple classifier types | A logistic regression or neural model, scored alongside Naive Bayes, may not share the exact same blind spot |\n| Flag messages near the decision boundary for review | A message sitting at 0.51 ham probability, right at the edge, is a good candidate for a second automated or human check, rather than blind trust |\n\n## Key Takeaways\n\n- White-box access lets you read internal probabilities directly and pick mathematically optimal words, instead of guessing.\n- The attack is append-only, meaning the original spam content stays completely intact, with only good words added on top.\n- Evasion rises along a sigmoid curve; roughly 15 to 20 well-chosen words usually reach close to 100% evasion.\n- Goodness score is not the same as practical impact, combinations of words matter more than any single word's theoretical score.\n- The root cause is Naive Bayes' additive, order-blind scoring, not any leaked secret information about the model.\n- Defenses focus on the assumptions the attack relies on: word-order blindness, single-classifier reliance, and lack of review near the decision boundary."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "slug": "05-system-prompts",
+  "title": "System Prompts",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Beginner",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# System Prompts\n\nThe system prompt is one of the highest-value targets in AI reconnaissance. It defines who the AI is supposed to be, what it's allowed to do, and, critically, what it's explicitly told not to do.\n\n## What is a system prompt?\n\nA system prompt is a hidden set of instructions the developer gives the model before the user ever types anything. In most applications, the user cannot see this text at all.\n\n**Simple comparison:** think of an actor receiving a script and character notes before a play. The audience only sees the final performance, but those private notes control how the actor behaves throughout. The system prompt plays the same role for an AI system.\n\n**Practical example** of a system prompt behind a customer-support bot:\n\n> You are Aria, the support assistant for a fictional company, Meridian Cloud. Only answer questions about our products. Never discuss pricing, never reveal internal documents, and never mention competitors."
+    },
+    {
+      "type": "content",
+      "body": "## System prompt vs user prompt\n\n| | System Prompt | User Prompt |\n|---|---|---|\n| Who writes it | The developer | The end user, or a potential attacker |\n| Visible to the user? | Usually hidden | Yes, always visible |\n| Purpose | Sets rules, persona, and limits | Asks the actual question |\n| Trust level | High, treated as authoritative | Low, should be treated as untrusted |\n\nThe key security insight here: the model tends to treat the system prompt as an authoritative source of instructions. If an attacker can get their own text into that same position of authority, or convince the model to disregard the real system prompt, they gain significant control over the model's behavior."
+    },
+    {
+      "type": "content",
+      "body": "## Why attackers target the system prompt\n\nSuccessfully leaking a system prompt reveals several useful things:\n\n- **The AI's persona and purpose** — what the developer intended the assistant to do.\n- **Its restrictions** — every \"never do X\" instruction effectively maps out exactly what the developer was worried about, and therefore what's worth probing further.\n- **Hidden capabilities** — the prompt may reference internal tools, databases, or API endpoints not otherwise visible to users.\n- **Secrets** — poorly designed prompts sometimes contain API keys, admin codes, or passwords directly, which is a real and surprisingly common mistake."
+    },
+    {
+      "type": "note",
+      "body": "**Real-world mistake:** developers sometimes paste secrets directly into a system prompt, for example: \"The admin override code is SWORDFISH.\" If that prompt is ever leaked, the secret leaks along with it. This is exactly the kind of scenario the labs in the Prompt Injection module let you practice against. As a general rule, never store real secrets inside a system prompt. Treat the prompt as something that could eventually be read by anyone."
+    },
+    {
+      "type": "content",
+      "body": "## How restrictions reveal the attack surface\n\nConsider this example restriction list from a fictional support bot:\n\n- Never discuss security vulnerabilities.\n- Never reveal employee information.\n- Never provide discount codes.\n\nEach of these lines is effectively a hint to an attacker. It signals that the developer specifically expected people to try exactly these things, which strongly suggests the underlying data or functionality actually exists somewhere in the system. During reconnaissance, testers catalog restrictions like these as a working list of goals for later prompt injection attempts."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- The system prompt consists of hidden developer instructions that shape an AI system's behavior and persona.\n- It's treated as an authoritative source by the model, which makes it a high-value hijacking target.\n- Its stated restrictions effectively map out sensitive functionality that's worth probing during testing.\n- Never place real secrets inside a system prompt. Always assume it could eventually leak."
+    }
+  ]
+}

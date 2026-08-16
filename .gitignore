@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtualenv
+venv/
+.env
+
+# Docker
+*.log
+
+# VSCode
+.vscode/
+
+# JetBrains
+.idea/
+
+# Backup files
+*.bak
+*.bak*
+
+# OS
+.DS_Store
+Thumbs.db

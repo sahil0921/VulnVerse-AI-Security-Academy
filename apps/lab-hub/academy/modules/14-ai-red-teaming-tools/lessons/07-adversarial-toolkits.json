@@ -1,0 +1,19 @@
+{
+  "slug": "07-adversarial-toolkits",
+  "title": "ART & CleverHans (Adversarial ML Toolkits)",
+  "type": "content",
+  "difficulty": "Advanced",
+  "reading_time": "9 min read",
+  "sections": [
+    {"type": "content", "body": "## What These Tools Are\n\nART and CleverHans predate the LLM boom — they were built for attacking classic ML models (image classifiers, spam filters, malware detectors) with **evasion, poisoning, and extraction** attacks. They're still directly relevant to AI red teaming because plenty of production AI systems still rely on these classic model types (content moderation classifiers, fraud detectors, spam filters) either standalone or as a guardrail layer in front of an LLM."},
+    {"type": "content", "body": "## ART (Adversarial Robustness Toolbox) — IBM\n\nART is the more comprehensive of the two: it supports evasion, poisoning, extraction, and inference attacks across many ML frameworks (PyTorch, TensorFlow, scikit-learn, XGBoost) and many model types (not just images — also tabular and NLP)."},
+    {"type": "code", "language": "bash", "body": "pip install adversarial-robustness-toolbox\n\n# With framework-specific extras\npip install \"adversarial-robustness-toolbox[pytorch]\""},
+    {"type": "code", "language": "python", "body": "from art.estimators.classification import SklearnClassifier\nfrom art.attacks.evasion import FastGradientMethod\n\n# Wrap an existing scikit-learn classifier (e.g. a spam filter, like in the Evasion module)\nart_classifier = SklearnClassifier(model=my_trained_model)\n\nattack = FastGradientMethod(estimator=art_classifier, eps=0.2)\nx_adv = attack.generate(x=x_test)\n\npreds_before = my_trained_model.predict(x_test)\npreds_after = my_trained_model.predict(x_adv)\nprint(\"Flipped:\", (preds_before != preds_after).sum(), \"/\", len(x_test))"},
+    {"type": "content", "body": "## Example ART Output\n\n```\nFlipped: 187 / 200\n\nEvasion success rate: 93.5%\nMean perturbation (L2): 0.184\n```\n\nThis tells you 93.5% of correctly-classified inputs were flipped to the wrong label with a small, bounded perturbation — a concrete robustness metric you can put directly in a report."},
+    {"type": "content", "body": "## CleverHans — CleverHans Lab\n\nCleverHans is older and more research-oriented than ART — a lighter-weight library focused specifically on generating adversarial examples (FGSM, PGD, Carlini-Wagner, and other published attack algorithms) for benchmarking model robustness."},
+    {"type": "code", "language": "bash", "body": "pip install cleverhans"},
+    {"type": "code", "language": "python", "body": "import torch\nfrom cleverhans.torch.attacks.fast_gradient_method import fast_gradient_method\n\nx_adv = fast_gradient_method(model_fn, x_test, eps=0.05, norm=float('inf'))\npreds_adv = model_fn(x_adv).argmax(dim=1)\nprint(\"Accuracy under attack:\", (preds_adv == y_test).float().mean().item())"},
+    {"type": "note", "body": "ART and CleverHans overlap heavily in the algorithms they implement (FGSM, PGD, etc.). Use ART when you need broad framework/model-type support and production-style workflows; use CleverHans when you specifically need a lean, research-paper-accurate reference implementation of a named attack algorithm."},
+    {"type": "content", "body": "## When to Reach for These\n\nUse ART or CleverHans whenever the AI system under test includes a **classic classifier component** — a moderation filter, an anomaly detector, a fraud model — not just a chat-style LLM. This directly connects back to the white-box and black-box evasion techniques you practiced in the AI Evasion module, just with a mature library instead of hand-rolled attack code."}
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "slug": "10-defenses",
+  "title": "Defenses & Mitigations",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Defenses & Mitigations\n\nYou now understand how MCP gets attacked. This lesson brings all the defenses together into a clear, layered strategy. No single control is ever enough on its own, defense in depth is the actual goal here.\n\n## The one big idea\n\nEvery MCP attack covered in this module exploits a broken trust relationship somewhere:\n\n- The LLM trusts its tools.\n- The tools trust their own inputs.\n- The user trusts the LLM.\n\nReal defense means verifying trust at every single link, instead of simply assuming it holds."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[User trusts LLM] --> B[LLM trusts tools]\n    B --> C[Tools trust inputs]\n    C --> D[Break any link = compromise]\n    style D fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Defense layer 1: least privilege\n\nGive every tool the minimum access its real job actually needs.\n\n- A \"read customer names\" tool gets read-only access to one specific table, not owner rights over the whole database.\n- A file tool sees only one folder, not the entire disk.\n- Servers run as a low-privilege user, never as root.\n\nThis approach shrinks the potential damage a compromised tool can actually cause.\n\n## Defense layer 2: input validation everywhere\n\nValidate data at every single tool boundary, not just at the initial entry point.\n\n- Resolve file paths with realpath, then check the allowed prefix against the resolved result.\n- Use parameterized queries, and never build SQL directly from raw strings.\n- Use sandboxed template engines, and never pass raw Jinja2 user data directly.\n- Avoid shell=True entirely, and use safe command APIs instead.\n\nTreat all input as untrusted, including data coming from other tools within the same system."
+    },
+    {
+      "type": "note",
+      "body": "**Critical rule:** data coming from another MCP tool is still untrusted input. Tool chaining attacks succeed precisely because teams tend to forget this exact point."
+    },
+    {
+      "type": "content",
+      "body": "## Defense layer 3: human approval for sensitive actions\n\nHigh-impact actions should genuinely require a human to confirm before proceeding.\n\n- Deleting data, sending money, or running commands should always ask the user for confirmation first.\n- Never let the LLM enforce authorization entirely on its own. If the AI decides who's allowed to do what, an attacker just has to say \"I am an admin\" to bypass it.\n- Enforce permissions in code instead, tied directly to the real authenticated user, never left to the prompt alone."
+    },
+    {
+      "type": "content",
+      "body": "## Defense layer 4: verify what you connect to\n\n- Pin and verify MCP servers. Confirm the source and URL carefully before connecting to anything.\n- Treat third-party servers as potentially malicious by default.\n- Scan tool descriptions for hidden instructions before ever loading them.\n- Require code review with multiple approvers for any change made to tool code or descriptions.\n\n## Defense layer 5: secure the transport\n\n- Use HTTPS/TLS for remote servers, since MCP itself has no built-in encryption.\n- Check the Origin header on HTTP servers to help block DNS rebinding attacks.\n- Bind local servers to localhost only, unless remote access is genuinely needed for the use case.\n- Add proper authentication on any servers that expose genuinely sensitive capabilities."
+    },
+    {
+      "type": "content",
+      "body": "## Defense layer 6: monitor and detect\n\nAssume that some attacks will inevitably get through. Detection buys you valuable time to respond before serious damage is done.\n\n| Watch for | Possible attack |\n|---|---|\n| Sudden tool description length jump | Description poisoning |\n| Rapid list calls | Recon / enumeration |\n| Outbound connections to odd hosts | Reverse shell / exfiltration |\n| __globals__, popen, /dev/tcp in data | SSTI / RCE attempt |\n| Repeated \"store exactly, don't interpret\" prompts | Payload splitting |\n| A formatting request that also triggers a UI tool | UI phishing chain |\n\n## Defense summary table\n\n| Attack | Primary defense |\n|---|---|\n| Description poisoning | Review + scan descriptions |\n| Git history mining | Rotate secrets, keep them out of git |\n| UI phishing | Strict CSP, block postMessage |\n| Over-privilege | Least privilege, scoped roles |\n| Path traversal | Resolve then check (realpath) |\n| Tool chaining / SSTI | Sandbox engines, validate boundaries |\n| Reverse shell | Egress filtering, non-root |"
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- MCP security ultimately comes down to verifying trust at every single link in the chain.\n- Apply least privilege consistently, so a compromise steals as little as possible.\n- Validate all inputs, including data coming from other tools, not just user-facing input.\n- Require human approval for sensitive actions, and enforce authorization in code, never in the prompt.\n- Verify your servers, secure the transport layer, and monitor closely for attack signals.\n- No single control is ever enough on its own; layer them together as defense in depth."
+    }
+  ]
+}

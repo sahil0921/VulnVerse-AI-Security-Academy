@@ -1,0 +1,887 @@
+{
+  "slug": "module-01-exam",
+  "title": "Exam: AI & ML Fundamentals",
+  "type": "quiz",
+  "questions": [
+    {
+      "q": "What is the primary difference between traditional rule-based programming and Machine Learning?",
+      "options": [
+        "Rule-based programs are always faster",
+        "In ML, the system learns patterns from data instead of following manually written rules",
+        "ML only works with images, not text",
+        "ML requires more storage space"
+      ],
+      "answer": 1,
+      "explanation": "Machine Learning shifts from humans writing every rule by hand to systems learning patterns directly from examples in data."
+    },
+    {
+      "q": "A spam filter that checks 'if the email contains the word lottery, mark it as spam' is an example of what approach?",
+      "options": [
+        "A neural network",
+        "Unsupervised learning",
+        "Reinforcement learning",
+        "A fixed, manually written rule"
+      ],
+      "answer": 3,
+      "explanation": "This is a classic hand-written rule — the exact approach ML was designed to replace, since spammers could simply avoid flagged words."
+    },
+    {
+      "q": "Which architecture, introduced in 2017, became the foundation for almost every modern LLM?",
+      "options": [
+        "Decision Tree",
+        "Support Vector Machine",
+        "Transformer",
+        "Convolutional Neural Network"
+      ],
+      "answer": 2,
+      "explanation": "The Transformer architecture, with its 'attention' mechanism, underlies nearly all modern large language models."
+    },
+    {
+      "q": "What key mechanism does the Transformer architecture use to determine which words in a sentence are most relevant to each other?",
+      "options": [
+        "Attention",
+        "Tokenization",
+        "Gradient descent",
+        "Backpropagation only"
+      ],
+      "answer": 0,
+      "explanation": "Attention lets the model weigh which earlier words matter most when generating the next word, enabling coherent, context-aware output."
+    },
+    {
+      "q": "In the sentence 'The dog chased the ball because it was fast,' what does the attention mechanism help the model correctly resolve?",
+      "options": [
+        "That 'it' refers to the dog, not the ball",
+        "The temperature setting",
+        "The token count",
+        "The spelling of 'chased'"
+      ],
+      "answer": 0,
+      "explanation": "Attention allows the model to correctly link pronouns and references to the right earlier word based on context."
+    },
+    {
+      "q": "A model's 'weights' or 'parameters' are best described as:",
+      "options": [
+        "The millions or billions of internal numeric values adjusted during training that store what the model learned",
+        "The temperature setting for inference",
+        "The name of the algorithm used",
+        "The dataset used for training"
+      ],
+      "answer": 0,
+      "explanation": "Weights/parameters are the internal numeric values a model tunes during training — they are what actually store its learned patterns."
+    },
+    {
+      "q": "What does it mean when an LLM is described as having '7B' parameters?",
+      "options": [
+        "It processes 7 billion tokens per second",
+        "It has 7 billion internal weight values",
+        "It was trained for 7 billion seconds",
+        "It cost 7 billion dollars to build"
+      ],
+      "answer": 1,
+      "explanation": "Parameter count (e.g. 7B = 7 billion) refers to the number of learned weight values inside the model."
+    },
+    {
+      "q": "What is 'fine-tuning' in the context of model training?",
+      "options": [
+        "Taking an already-trained model and training it further on a smaller, specific dataset to specialize its behavior",
+        "Converting a model into a vector database",
+        "Adjusting the temperature setting at inference time",
+        "Deleting unused parameters from a model"
+      ],
+      "answer": 0,
+      "explanation": "Fine-tuning specializes a general model for a specific task by continuing training on a smaller, targeted dataset."
+    },
+    {
+      "q": "From a security perspective, why is fine-tuning data a meaningful attack surface?",
+      "options": [
+        "Fine-tuning always makes models slower",
+        "Fine-tuning removes all guardrails automatically",
+        "Poisoned fine-tuning data can plant hidden backdoors in the model's behavior",
+        "Fine-tuning data is never stored anywhere"
+      ],
+      "answer": 2,
+      "explanation": "If an attacker can influence the fine-tuning dataset, they can implant hidden triggers or backdoors that affect the model's future behavior."
+    },
+    {
+      "q": "What is 'inference' in the context of a deployed AI model?",
+      "options": [
+        "Deleting a model after it is no longer needed",
+        "Measuring the loss function during training",
+        "The process of collecting training data",
+        "Using an already-trained model to produce an answer to a new input"
+      ],
+      "answer": 3,
+      "explanation": "Inference is when a trained model is actually used to generate a response — this is the stage almost every attack in AI security targets."
+    },
+    {
+      "q": "Why do almost all AI security attacks target the inference stage rather than the training stage directly?",
+      "options": [
+        "Because inference is always encrypted",
+        "Because training never involves any data",
+        "Because attackers cannot access APIs",
+        "Because inference is where untrusted input, including attacker input, directly reaches the model"
+      ],
+      "answer": 3,
+      "explanation": "Inference is the point where regular users — and attackers — can directly interact with the model, making it the primary entry point for most attacks."
+    },
+    {
+      "q": "What is a 'token' in the context of how LLMs process text?",
+      "options": [
+        "A type of neural network layer",
+        "A unit of GPU memory",
+        "A small chunk of text, roughly ¾ of a word on average, that the model actually processes",
+        "A password used to access the model's API"
+      ],
+      "answer": 2,
+      "explanation": "LLMs don't process whole words directly — they break text into smaller pieces called tokens, and every input/output is measured in tokens."
+    },
+    {
+      "q": "Why might an attacker write 'p a s s w o r d' with spaces instead of 'password' when trying to bypass a content filter?",
+      "options": [
+        "Because the model cannot read spaced text at all",
+        "Because splitting or spacing out a word can bypass filters that only check for exact, whole-word token matches",
+        "To make the request more polite",
+        "Because spaces make text load faster"
+      ],
+      "answer": 1,
+      "explanation": "Tokenization quirks mean an unusual spacing or splitting of a flagged word can slip past filters designed to catch the exact whole-word string."
+    },
+    {
+      "q": "What is the 'context window' of a language model?",
+      "options": [
+        "The number of users who can query the model simultaneously",
+        "The time limit for a single API request",
+        "The maximum number of tokens a model can process or 'see' at once in a single conversation",
+        "The physical screen size used to display the chat"
+      ],
+      "answer": 2,
+      "explanation": "The context window is the model's short-term memory limit — anything outside this token limit is effectively forgotten."
+    },
+    {
+      "q": "In a very long conversation that exceeds a model's context window, what typically happens to the earliest messages?",
+      "options": [
+        "They are permanently stored in a separate database automatically",
+        "They fall outside the window and are effectively forgotten by the model",
+        "They are converted into system prompts",
+        "They are automatically flagged as malicious"
+      ],
+      "answer": 1,
+      "explanation": "Once a conversation exceeds the context window, the oldest content is pushed out and the model no longer 'sees' it."
+    },
+    {
+      "q": "What is a 'system prompt'?",
+      "options": [
+        "A setting that controls GPU temperature",
+        "A message typed by the end user",
+        "The final answer produced by the model",
+        "Hidden instructions given to the model before the user's message, defining its role, rules, and boundaries"
+      ],
+      "answer": 3,
+      "explanation": "The system prompt is usually invisible to the end user and sets the model's role, rules, and behavioral boundaries."
+    },
+    {
+      "q": "Why should real secrets like API keys or passwords never be placed inside a system prompt?",
+      "options": [
+        "This information can potentially be leaked through the model's output",
+        "Models cannot process text containing numbers",
+        "System prompts are automatically deleted every hour",
+        "System prompts are limited to 10 characters"
+      ],
+      "answer": 0,
+      "explanation": "A model's output can often be manipulated into revealing its system prompt, so embedded secrets risk exposure."
+    },
+    {
+      "q": "What does the 'temperature' setting control in an LLM's output?",
+      "options": [
+        "How random or predictable the model's output is",
+        "The size of the training dataset",
+        "The physical heat generated by GPU hardware",
+        "The number of tokens in the context window"
+      ],
+      "answer": 0,
+      "explanation": "Temperature controls randomness — low temperature gives consistent, predictable output; high temperature gives more varied, creative output."
+    },
+    {
+      "q": "Why might a low-temperature system be easier for an attacker to reliably exploit compared to a high-temperature one?",
+      "options": [
+        "Low temperature only works with image models",
+        "Low temperature increases the context window size",
+        "Low temperature makes the model more deterministic, so a working exploit is more likely to reproduce consistently",
+        "Low temperature disables all security filters"
+      ],
+      "answer": 2,
+      "explanation": "Because low-temperature output is more consistent and predictable, an attacker's crafted exploit is more likely to work the same way every time."
+    },
+    {
+      "q": "What is the difference between zero-shot and few-shot prompting?",
+      "options": [
+        "Zero-shot uses images, few-shot uses text only",
+        "Zero-shot asks a model to do a task with no examples; few-shot provides a couple of examples first to guide behavior",
+        "Zero-shot is always faster than few-shot regardless of content",
+        "There is no meaningful difference"
+      ],
+      "answer": 1,
+      "explanation": "Zero-shot gives no examples; few-shot includes example(s) in the prompt to steer the model's response pattern."
+    },
+    {
+      "q": "What is a 'few-shot jailbreak'?",
+      "options": [
+        "A jailbreak that only works on models with no context window",
+        "A jailbreak that requires physical server access",
+        "A defense technique used to block prompt injection",
+        "Using example(s) inside a malicious prompt to 'teach' the model to imitate an unsafe response pattern"
+      ],
+      "answer": 3,
+      "explanation": "By including a few crafted examples of the desired unsafe behavior, an attacker can guide the model to imitate that pattern in its next response."
+    },
+    {
+      "q": "What does an 'epoch' refer to in model training?",
+      "options": [
+        "A single prediction made during inference",
+        "A unit of measurement for embeddings",
+        "The moment a model is deployed to production",
+        "One complete pass of the entire training dataset through the model"
+      ],
+      "answer": 3,
+      "explanation": "An epoch is one full pass through the entire training dataset during the training process."
+    },
+    {
+      "q": "What is a 'loss function' used for during training?",
+      "options": [
+        "To encrypt the model's weights",
+        "To count the number of tokens in a conversation",
+        "To generate the system prompt automatically",
+        "To measure how wrong the model's prediction was compared to the correct answer"
+      ],
+      "answer": 3,
+      "explanation": "The loss function quantifies the gap between the model's prediction and the correct answer; training aims to shrink this value over time."
+    },
+    {
+      "q": "What optimization method do models typically use to adjust their weights to reduce the loss function?",
+      "options": [
+        "Context windowing",
+        "Prompt chaining",
+        "Token splitting",
+        "Gradient descent"
+      ],
+      "answer": 3,
+      "explanation": "Gradient descent gradually adjusts a model's weights in the direction that reduces the loss function."
+    },
+    {
+      "q": "What is 'overfitting'?",
+      "options": [
+        "When a model refuses too many user requests",
+        "When a model is too large to run on standard hardware",
+        "When a model memorizes its training data too closely and performs poorly on new, unseen data",
+        "When a model's temperature setting is set to zero"
+      ],
+      "answer": 2,
+      "explanation": "Overfitting occurs when a model learns the training data too specifically rather than generalizing, hurting performance on new data."
+    },
+    {
+      "q": "Why is an overfit model a privacy concern from a security standpoint?",
+      "options": [
+        "Overfit models are more likely to leak memorized training data verbatim, including private records",
+        "Overfitting always disables the system prompt",
+        "Overfit models run slower and leak GPU heat data",
+        "Overfit models cannot process any user input"
+      ],
+      "answer": 0,
+      "explanation": "Because an overfit model has memorized specific training examples rather than general patterns, it's more likely to regurgitate exact private data it saw during training."
+    },
+    {
+      "q": "What is 'underfitting'?",
+      "options": [
+        "When training data is stored in a vector database",
+        "When a model's context window is too large",
+        "When a model has too many parameters",
+        "When a model performs poorly across the board because it failed to learn enough from the training data"
+      ],
+      "answer": 3,
+      "explanation": "Underfitting is the opposite problem from overfitting — the model hasn't learned enough patterns to perform well even on familiar-style data."
+    },
+    {
+      "q": "What does RLHF stand for, and what is it used for?",
+      "options": [
+        "Reinforcement Learning from Human Feedback; used to align model behavior, such as staying polite and refusing harmful requests",
+        "Recursive Loss Handling Framework; used for debugging",
+        "Rapid Learning for High Frequency data; used for speeding up training",
+        "Random Layer Hidden Function; used to randomize model weights"
+      ],
+      "answer": 0,
+      "explanation": "RLHF has human reviewers rate model responses, training the model to favor highly-rated responses — this stage largely shapes safety behavior."
+    },
+    {
+      "q": "Which of these is a real, documented example of supervised learning?",
+      "options": [
+        "A model generating random text with no training data at all",
+        "A spam filter trained on thousands of emails already labeled 'spam' or 'not spam'",
+        "A model finding customer segments with no labels provided",
+        "An AI learning to play a game purely through trial-and-error rewards"
+      ],
+      "answer": 1,
+      "explanation": "Supervised learning uses labeled examples — spam/not-spam labels are a textbook example of this approach."
+    },
+    {
+      "q": "In supervised learning, what happens if an attacker manages to poison the labeled training data (e.g. mislabeling spam as safe)?",
+      "options": [
+        "The model automatically detects and corrects the mislabeling",
+        "The model learns the wrong pattern and makes incorrect decisions later",
+        "Nothing changes because labels don't affect training",
+        "The model stops training entirely"
+      ],
+      "answer": 1,
+      "explanation": "Poisoned labels teach the model incorrect associations, directly corrupting its future decision-making on similar inputs."
+    },
+    {
+      "q": "What defines unsupervised learning?",
+      "options": [
+        "The model only works with pre-labeled spam emails",
+        "The model is given data with no correct answers attached and must find patterns or groupings on its own",
+        "The model requires a system prompt to function",
+        "The model receives a reward or penalty for every action it takes"
+      ],
+      "answer": 1,
+      "explanation": "Unsupervised learning finds structure in unlabeled data, such as grouping customers by behavior without predefined categories."
+    },
+    {
+      "q": "In unsupervised learning, how might an attacker exploit the lack of labels?",
+      "options": [
+        "By encrypting the entire dataset",
+        "By increasing the context window size",
+        "By deleting the model's parameters",
+        "By hiding malicious activity inside a large, legitimate-looking group so it blends in and isn't flagged as unusual"
+      ],
+      "answer": 3,
+      "explanation": "Since unsupervised systems group data by similarity without ground-truth labels, malicious activity can be camouflaged within a large legitimate cluster."
+    },
+    {
+      "q": "What defines reinforcement learning?",
+      "options": [
+        "The model takes actions and receives rewards or penalties, learning over many attempts which actions lead to better outcomes",
+        "The model is trained only on labeled spam/not-spam data",
+        "The model requires no training data whatsoever",
+        "The model only processes images, never text"
+      ],
+      "answer": 0,
+      "explanation": "Reinforcement learning is a trial-and-reward process — the model learns which actions maximize reward over repeated attempts."
+    },
+    {
+      "q": "Most modern LLMs are trained using which combination of learning approaches?",
+      "options": [
+        "Only supervised learning",
+        "Only unsupervised learning with no other stages",
+        "Only reinforcement learning",
+        "A combination of unsupervised pre-training, supervised fine-tuning, and reinforcement learning (RLHF)"
+      ],
+      "answer": 3,
+      "explanation": "Modern LLMs typically combine large-scale unsupervised pre-training, supervised fine-tuning, and RLHF-based alignment."
+    },
+    {
+      "q": "A neural network's 'hidden layers' are best described as:",
+      "options": [
+        "The layers between input and output that process data step by step, passing results forward",
+        "A separate database storing user passwords",
+        "Layers that are encrypted and cannot be inspected by anyone",
+        "Layers that only exist in reinforcement learning models"
+      ],
+      "answer": 0,
+      "explanation": "Hidden layers sit between the input and output layers, progressively transforming the data through learned computations."
+    },
+    {
+      "q": "Why are a model's parameters considered a valuable, security-relevant asset?",
+      "options": [
+        "Because parameters are always publicly available by default",
+        "Because parameters cannot be stored in a file",
+        "Because parameters only matter for image models",
+        "Because stealing them (model theft) or tampering with them (model poisoning) are real, documented attack techniques"
+      ],
+      "answer": 3,
+      "explanation": "Since parameters represent everything a model learned, unauthorized copying (theft) or tampering (poisoning) are genuine security risks."
+    },
+    {
+      "q": "What is an 'embedding'?",
+      "options": [
+        "A numeric representation (a vector) that captures the meaning of text, image, or audio",
+        "A password stored inside the system prompt",
+        "The name of a specific neural network layer",
+        "A type of guardrail used to block harmful output"
+      ],
+      "answer": 0,
+      "explanation": "An embedding converts content into a list of numbers where similar meanings produce numerically similar vectors."
+    },
+    {
+      "q": "Why are the words 'dog' and 'puppy' expected to have numerically close embeddings?",
+      "options": [
+        "Because they are the same length in characters",
+        "Because they always appear in the same sentence",
+        "Because their meanings are closely related, and embeddings capture semantic similarity",
+        "Because embeddings are assigned alphabetically"
+      ],
+      "answer": 2,
+      "explanation": "Embeddings encode meaning — semantically related words end up numerically close together in the embedding space."
+    },
+    {
+      "q": "What is a documented security risk associated with embeddings?",
+      "options": [
+        "Embeddings automatically expose a model's system prompt",
+        "Embeddings can sometimes be reversed to recover the original sensitive text they were generated from",
+        "Embeddings only exist for image data",
+        "Embeddings cannot be stored in a database"
+      ],
+      "answer": 1,
+      "explanation": "Embedding inversion attacks can reconstruct the original text from its numeric vector representation, exposing potentially sensitive data."
+    },
+    {
+      "q": "What is a Vector Database (Vector DB) primarily used for?",
+      "options": [
+        "Encrypting model weights",
+        "Storing embeddings and quickly finding the ones most similar to a given query",
+        "Running gradient descent calculations",
+        "Storing system prompts only"
+      ],
+      "answer": 1,
+      "explanation": "A vector database is built to store embeddings and perform fast similarity search, enabling 'search by meaning.'"
+    },
+    {
+      "q": "What is Retrieval-Augmented Generation (RAG)?",
+      "options": [
+        "A technique for encrypting user input",
+        "A method for compressing model weights",
+        "A technique where the model retrieves relevant documents from a knowledge base before answering, instead of relying only on training memory",
+        "A type of reinforcement learning reward function"
+      ],
+      "answer": 2,
+      "explanation": "RAG retrieves relevant external documents (often from a vector DB) as extra context, rather than relying solely on what the model memorized during training."
+    },
+    {
+      "q": "In a RAG chatbot for customer support, what is a realistic security risk related to the retrieval step?",
+      "options": [
+        "The vector database running out of storage",
+        "Poisoning the documents so the model retrieves and trusts malicious content",
+        "The bot retrieving documents too quickly",
+        "The model refusing to answer any questions"
+      ],
+      "answer": 1,
+      "explanation": "If an attacker can plant malicious content in the knowledge base, the RAG system may retrieve and treat it as trustworthy context."
+    },
+    {
+      "q": "What defines an 'AI Agent' as opposed to a standard chatbot?",
+      "options": [
+        "An agent always requires human approval before responding",
+        "An agent is an LLM given the ability to take actions, such as calling tools, browsing, or running code, often in a loop",
+        "An agent never uses a system prompt",
+        "An agent can only answer yes/no questions"
+      ],
+      "answer": 1,
+      "explanation": "Unlike a simple Q&A chatbot, an agent can act on the world — calling tools, running code, browsing — to accomplish a goal."
+    },
+    {
+      "q": "What is 'function calling' or 'tool use' in the context of LLMs?",
+      "options": [
+        "A type of embedding used only for images",
+        "The model refusing to process a request",
+        "A method for reducing the size of the context window",
+        "The mechanism by which an LLM decides to call an external function and receives the result back into its context"
+      ],
+      "answer": 3,
+      "explanation": "Function calling lets an LLM invoke external functions (e.g. sending an email, querying a database) and use the returned result to continue reasoning."
+    },
+    {
+      "q": "What does the Model Context Protocol (MCP) primarily enable?",
+      "options": [
+        "A consistent, standardized way for LLMs to connect to external tools, data sources, and services",
+        "Encrypting all model weights automatically",
+        "Blocking all external network access by default",
+        "Reducing a model's parameter count"
+      ],
+      "answer": 0,
+      "explanation": "MCP acts like a standardized 'USB port' connecting AI models to real-world tools and data sources consistently."
+    },
+    {
+      "q": "What is a Multi-Agent System?",
+      "options": [
+        "A model that can only process one request at a time",
+        "A single model with multiple system prompts",
+        "A vector database with multiple indexes",
+        "Multiple AI agents that communicate and delegate tasks to each other to complete a larger goal"
+      ],
+      "answer": 3,
+      "explanation": "Rather than one agent doing everything, a multi-agent system splits work across multiple communicating, delegating agents."
+    },
+    {
+      "q": "What is a realistic security concern specific to multi-agent systems?",
+      "options": [
+        "Multi-agent systems are immune to prompt injection",
+        "A compromised agent could feed poisoned instructions to another agent that trusts it",
+        "Multi-agent systems never process any external data",
+        "Agents cannot communicate with each other at all"
+      ],
+      "answer": 1,
+      "explanation": "If one agent in the pipeline is compromised, it can pass malicious instructions downstream to agents that implicitly trust it."
+    },
+    {
+      "q": "What is the difference between short-term and long-term agent memory?",
+      "options": [
+        "Short-term memory persists only within a conversation, while long-term memory is saved persistently across sessions",
+        "Short-term memory only stores images",
+        "Short-term memory is stored on a different continent than long-term memory",
+        "There is no meaningful difference between them"
+      ],
+      "answer": 0,
+      "explanation": "Short-term memory lasts for the current conversation; long-term memory persists across sessions and future interactions."
+    },
+    {
+      "q": "Why is untrusted content ending up in an agent's long-term memory a security concern?",
+      "options": [
+        "It only affects the agent's temperature setting",
+        "It has no security implications at all",
+        "It can influence all future interactions with the agent, not just the current one",
+        "It automatically deletes the agent's system prompt"
+      ],
+      "answer": 2,
+      "explanation": "Long-term memory persists across sessions, so poisoned content written there can silently affect the agent's behavior in every future interaction."
+    },
+    {
+      "q": "What is 'orchestration' in a multi-step AI workflow?",
+      "options": [
+        "The logic that decides which agent, tool, or model gets called next, and in what order",
+        "A method for compressing embeddings",
+        "A type of guardrail used only for output filtering",
+        "The process of training a model from scratch"
+      ],
+      "answer": 0,
+      "explanation": "Orchestration governs the sequencing and delegation of steps across agents, tools, and models within a workflow."
+    },
+    {
+      "q": "What is a 'trust boundary'?",
+      "options": [
+        "The physical location of a data center",
+        "The line separating what a system controls and trusts from what it does not control",
+        "A setting that adjusts model creativity",
+        "The maximum number of tokens a model can process"
+      ],
+      "answer": 1,
+      "explanation": "A trust boundary marks the divide between trusted internal components and untrusted external input or data."
+    },
+    {
+      "q": "Why can't an LLM naturally tell the difference between a developer's instructions and a user's submitted text?",
+      "options": [
+        "Because to the model, both are simply text with no inherent trust label attached",
+        "Because user text is always shorter than developer text",
+        "Because developer instructions are always encrypted",
+        "Because the model deliberately ignores developer instructions"
+      ],
+      "answer": 0,
+      "explanation": "Without explicit safeguards, an LLM treats developer instructions and user input as the same kind of text, which is why prompt injection works."
+    },
+    {
+      "q": "What is 'indirect prompt injection'?",
+      "options": [
+        "Typing malicious instructions directly into the chat interface",
+        "A method for training a model faster",
+        "A defense mechanism that blocks all external content",
+        "A hidden instruction embedded in a web page, document, or file that hijacks the model's behavior when it later reads that content"
+      ],
+      "answer": 3,
+      "explanation": "Indirect prompt injection hides malicious instructions inside external content (web pages, documents, emails) that the model processes later, rather than typing them directly."
+    },
+    {
+      "q": "Which of these represents the 'Model to Tools' trust boundary?",
+      "options": [
+        "A user typing a question into a chatbot",
+        "A developer writing the system prompt",
+        "The model's context window filling up",
+        "A model's output being validated before it is used to run code or query a database"
+      ],
+      "answer": 3,
+      "explanation": "When a model can trigger actions (running code, querying a database), its output must be treated as untrusted and validated before execution."
+    },
+    {
+      "q": "What is the 'golden rule' emphasized regarding trust boundaries?",
+      "options": [
+        "System prompts never need to cross a trust boundary",
+        "Never trust input simply because it reached your system — every trust boundary needs its own validation",
+        "Trust boundaries only apply to image-based systems",
+        "Always trust the model's output because it was generated by AI"
+      ],
+      "answer": 1,
+      "explanation": "The core lesson is that reaching a system isn't the same as being trustworthy — every boundary crossing needs explicit validation."
+    },
+    {
+      "q": "According to the material, what is the root cause connecting nearly every AI attack covered in the course?",
+      "options": [
+        "Insufficient GPU memory",
+        "Training on too much data",
+        "Crossing a trust boundary that the developer failed to secure properly",
+        "Using too high a temperature setting"
+      ],
+      "answer": 2,
+      "explanation": "Nearly every attack technique in the course ultimately involves exploiting a trust boundary that wasn't properly validated."
+    },
+    {
+      "q": "What is the 'attack surface' of an AI system?",
+      "options": [
+        "The physical size of the server rack",
+        "Every possible point where an attacker could interact with or exploit the system",
+        "The number of employees who built the system",
+        "The total token count of the training data"
+      ],
+      "answer": 1,
+      "explanation": "The attack surface encompasses all entry points — inputs, tools, data sources, APIs — an attacker could potentially target."
+    },
+    {
+      "q": "Which of these is NOT listed as a primary component of an AI system's attack surface?",
+      "options": [
+        "The training data",
+        "The office building's physical address",
+        "The model output",
+        "The input/prompt"
+      ],
+      "answer": 1,
+      "explanation": "The attack surface covers technical entry points like input, training data, external data, output, the model file, embeddings, tools, and infrastructure — not a physical office address."
+    },
+    {
+      "q": "Which category of attack surface covers reversing embeddings to recover private text or exporting an entire stored dataset?",
+      "options": [
+        "The training data",
+        "Connected tools and agents",
+        "Embeddings and vector databases",
+        "The model output"
+      ],
+      "answer": 2,
+      "explanation": "Embeddings and vector databases are their own attack surface category, covering attacks like inversion and bulk export."
+    },
+    {
+      "q": "Which attack surface category covers SSRF, IAM privilege escalation, and container escape?",
+      "options": [
+        "Training data",
+        "The input/prompt",
+        "The model file",
+        "The infrastructure (cloud servers, containers, permission systems)"
+      ],
+      "answer": 3,
+      "explanation": "Infrastructure-layer attacks like SSRF, IAM privesc, and container escape target the underlying cloud/hosting environment, not the model itself."
+    },
+    {
+      "q": "When starting analysis of a new AI system's attack surface, which question is NOT one of the suggested starting points?",
+      "options": [
+        "Where does the system trust input that it shouldn't?",
+        "What color is the company's logo?",
+        "Is the output validated before being used?",
+        "Where does data enter the system?"
+      ],
+      "answer": 1,
+      "explanation": "The suggested attacker mindset questions focus on data entry points, trust gaps, capabilities, and output validation — not branding details."
+    },
+    {
+      "q": "Why is the misconception 'the AI actually understands what it's saying' incorrect?",
+      "options": [
+        "Because LLMs require human approval for every sentence",
+        "Because LLMs only work with numbers, never words",
+        "Because LLMs predict the most likely next word based on learned patterns, with no real understanding or awareness of truth",
+        "Because LLMs cannot generate any text at all"
+      ],
+      "answer": 2,
+      "explanation": "LLMs are pattern-prediction systems without genuine comprehension, which is exactly why they can confidently state false information (hallucination)."
+    },
+    {
+      "q": "Why is 'if the model refuses a request once, it's safe' considered a dangerous misconception?",
+      "options": [
+        "Because a model might refuse a request phrased one way, then comply with the same underlying request phrased differently",
+        "Because refused requests are automatically logged and blocked forever",
+        "Because refusals are always permanent and cannot be bypassed",
+        "Because refusals only happen in unsupervised learning"
+      ],
+      "answer": 0,
+      "explanation": "AI safety behavior is often inconsistent — rephrasing a request can bypass a refusal that seemed to hold the first time."
+    },
+    {
+      "q": "Why is 'the system prompt is a secret' a misconception worth correcting?",
+      "options": [
+        "Because system prompts don't actually exist in most models",
+        "Because the system prompt can very often be extracted with the right input, so real secrets should never be placed there",
+        "Because system prompts only apply to reinforcement learning models",
+        "Because system prompts are always publicly published by developers"
+      ],
+      "answer": 1,
+      "explanation": "Despite being hidden by default, system prompts are frequently extractable through prompt injection, so credentials should never live inside them."
+    },
+    {
+      "q": "According to the material, what actually fixes AI security problems more reliably than safety training alone?",
+      "options": [
+        "Training the model on more internet text",
+        "Increasing the model's temperature to maximum",
+        "Removing the system prompt entirely",
+        "Proper system design, including input validation, limiting allowed actions, and checking output"
+      ],
+      "answer": 3,
+      "explanation": "Safety training helps but can be bypassed; durable security comes from surrounding system design — validation, least privilege, and output checks."
+    },
+    {
+      "q": "What is the 'principle of least privilege' as applied to AI systems?",
+      "options": [
+        "Removing all guardrails to improve performance",
+        "Giving the AI only the minimum access it needs to perform its function",
+        "Giving the AI maximum access to ensure it never fails a task",
+        "Only applying privilege rules to human employees, not AI systems"
+      ],
+      "answer": 1,
+      "explanation": "Least privilege means restricting an AI's capabilities to only what's strictly necessary, limiting potential damage if it's ever manipulated."
+    },
+    {
+      "q": "Which best practice specifically addresses preventing XSS, SQL injection, and code injection from AI-generated output?",
+      "options": [
+        "Treating all output as untrusted and properly escaping/validating it before use",
+        "Disabling the system prompt entirely",
+        "Increasing the context window size",
+        "Lowering the temperature to zero"
+      ],
+      "answer": 0,
+      "explanation": "Never trusting AI output by default — escaping it for browsers, avoiding raw SQL insertion, never executing it as commands — prevents these downstream injection classes."
+    },
+    {
+      "q": "What is the purpose of an 'input guard' versus an 'output guard' in a guardrail architecture?",
+      "options": [
+        "Output guards run before the model, input guards run after",
+        "An input guard blocks obvious attack patterns before they reach the model; an output guard blocks harmful responses before they reach the user",
+        "Input guards only work on images; output guards only work on text",
+        "Input guards and output guards perform identical functions"
+      ],
+      "answer": 1,
+      "explanation": "Input guards filter incoming requests before the model sees them; output guards filter the model's response before it reaches the user."
+    },
+    {
+      "q": "What does 'defense in depth' mean as a security concept?",
+      "options": [
+        "Relying on a single, extremely strong defensive layer",
+        "Using the deepest possible neural network architecture",
+        "Stacking multiple layers of protection together so that if one layer fails, another catches the attack",
+        "Only defending the training data, never the inference stage"
+      ],
+      "answer": 2,
+      "explanation": "Defense in depth means no single control is relied upon exclusively — multiple layered defenses provide backup if one fails."
+    },
+    {
+      "q": "Why does the best practices material recommend logging and monitoring AI system activity?",
+      "options": [
+        "You cannot defend against attacks you cannot see",
+        "Logging is required by law in every country with no exceptions",
+        "Logging automatically blocks all attacks without human review",
+        "Monitoring is only useful for training data, not inference"
+      ],
+      "answer": 0,
+      "explanation": "Recording inputs, outputs, and watching for unusual patterns is essential because undetected attacks cannot be defended against."
+    },
+    {
+      "q": "Which best practice specifically targets protecting against training data poisoning and model theft?",
+      "options": [
+        "Increasing the temperature setting",
+        "Securing the data pipeline — controlling who can modify training data and protecting the model file itself",
+        "Reducing the context window size",
+        "Adding output guards only"
+      ],
+      "answer": 1,
+      "explanation": "Securing the data pipeline restricts who can add/modify training data (preventing poisoning) and protects the stored model file (preventing theft/tampering)."
+    },
+    {
+      "q": "A student is asked: 'Why can a model sound completely confident while giving an incorrect answer?' What is the correct explanation?",
+      "options": [
+        "Because the model predicts the most likely next token based on patterns, with no real understanding of truth — this is called hallucination",
+        "Because the model only hallucinates when asked about images",
+        "Because the model is deliberately lying to users",
+        "Because the model's temperature is always set to 2"
+      ],
+      "answer": 0,
+      "explanation": "Hallucination happens because prediction-based generation has no grounding in factual truth, so confident-sounding false statements are possible."
+    },
+    {
+      "q": "SCENARIO: A developer places a customer's account balance and password reset token directly into the system prompt so the support bot can reference them. What is the primary risk here?",
+      "options": [
+        "The model will refuse to answer any questions",
+        "There is no risk because system prompts are always encrypted",
+        "The system prompt will run out of storage space",
+        "This information can potentially be leaked through the model's output, since system prompts are often extractable"
+      ],
+      "answer": 3,
+      "explanation": "Since system prompts can often be extracted via prompt injection, embedding sensitive credentials there risks direct exposure."
+    },
+    {
+      "q": "SCENARIO: A security tester notices an AI agent has full write access to a production database, even though its task only requires reading customer names. What best practice is being violated?",
+      "options": [
+        "Fine-tuning best practices",
+        "Defense in depth",
+        "Temperature calibration",
+        "The principle of least privilege"
+      ],
+      "answer": 3,
+      "explanation": "Granting write access when only read access is needed violates least privilege and increases potential damage if the agent is manipulated."
+    },
+    {
+      "q": "SCENARIO: An attacker embeds hidden instructions inside a PDF that a company's AI assistant is asked to summarize. What type of attack is this?",
+      "options": [
+        "Gradient descent manipulation",
+        "Direct prompt injection",
+        "Indirect prompt injection",
+        "Model extraction"
+      ],
+      "answer": 2,
+      "explanation": "Since the malicious instruction is hidden inside external content (the PDF) rather than typed directly by the user, this is indirect prompt injection."
+    },
+    {
+      "q": "SCENARIO: A chatbot gives different, contradictory answers to the exact same question asked twice in separate conversations. Which setting most likely explains this behavior?",
+      "options": [
+        "The absence of a system prompt",
+        "The model being trained only on structured data",
+        "The context window being set to zero",
+        "A high temperature setting introducing randomness into output"
+      ],
+      "answer": 3,
+      "explanation": "Higher temperature settings introduce more randomness, which can cause varied answers to the same question across different sessions."
+    },
+    {
+      "q": "SCENARIO: An AI red teamer wants to find the fastest way to identify a new AI system's likely weaknesses. What approach does the material recommend?",
+      "options": [
+        "Map the attack surface by asking where data enters, where trust boundaries are weak, what actions the AI can take, and whether output is validated",
+        "Assume all AI systems have identical vulnerabilities",
+        "Only test the training data and ignore inference entirely",
+        "Immediately attempt to steal the model's weight file"
+      ],
+      "answer": 0,
+      "explanation": "Systematically mapping the attack surface — entry points, trust gaps, capabilities, and output handling — reveals the most likely targets efficiently."
+    },
+    {
+      "q": "BEST APPROACH: You need to test whether a support chatbot's underlying instructions can be extracted. Which of these is the most direct first attempt?",
+      "options": [
+        "Immediately attempt a container escape on the hosting infrastructure",
+        "Poison the model's training data from scratch",
+        "Wait for the vendor to publish the source code",
+        "Ask the chatbot to repeat everything above its current message, or reveal its initial instructions"
+      ],
+      "answer": 3,
+      "explanation": "Directly asking the model to repeat or reveal its preceding instructions is the most common and often surprisingly effective first technique for system prompt extraction."
+    },
+    {
+      "q": "BEST APPROACH: You want to test whether an AI's content filter can be bypassed using tokenization quirks. What technique should you try?",
+      "options": [
+        "Ask the model to increase its temperature setting",
+        "Request a longer context window from the vendor",
+        "Split or space out the flagged word (e.g. 'p a s s w o r d') to avoid an exact whole-word match",
+        "Disable the model's GPU acceleration"
+      ],
+      "answer": 2,
+      "explanation": "Filters that check for exact whole-word token matches can often be bypassed by splitting or spacing the flagged term differently."
+    },
+    {
+      "q": "BEST APPROACH: An engagement requires testing whether a RAG-based knowledge assistant trusts retrieved content appropriately. What should you attempt?",
+      "options": [
+        "Reduce the model's parameter count",
+        "Only test the model's system prompt, never the knowledge base",
+        "Disable the vector database entirely before testing",
+        "Attempt to poison or plant malicious content in the documents the RAG system retrieves from"
+      ],
+      "answer": 3,
+      "explanation": "Testing whether the RAG pipeline trusts retrieved documents without validation involves attempting to inject or poison content in the knowledge base itself."
+    }
+  ]
+}

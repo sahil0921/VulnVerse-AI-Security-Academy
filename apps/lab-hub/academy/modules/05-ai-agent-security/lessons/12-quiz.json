@@ -1,0 +1,272 @@
+{
+  "slug": "12-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 24,
+  "questions": [
+    {
+      "q": "What is the main difference between a normal chatbot and an AI agent?",
+      "options": [
+        "An agent runs on a bigger language model",
+        "An agent never makes mistakes",
+        "An agent can take real actions using tools, not just produce text",
+        "An agent responds faster than a chatbot"
+      ],
+      "answer": 2,
+      "explanation": "A chatbot only produces text. An agent can call tools to actually do things — send emails, query databases, run code — in the real world."
+    },
+    {
+      "q": "What is the typical 'loop' an AI agent follows while completing a task?",
+      "options": [
+        "Plan, act, observe the result, then repeat until the task is done",
+        "Load the model, shut down, restart",
+        "Ask the user a question every single step",
+        "Run once and always stop after one action"
+      ],
+      "answer": 0,
+      "explanation": "Agents repeatedly plan a next step, take an action, observe the result, and decide the next step — continuing until the task is complete or a limit is reached."
+    },
+    {
+      "q": "In an agent's architecture, which part actually executes a tool after the LLM requests it?",
+      "options": [
+        "The memory store",
+        "The user, manually",
+        "The LLM itself, directly",
+        "The orchestrator code, which reads the request and runs the real function"
+      ],
+      "answer": 3,
+      "explanation": "The LLM only outputs a request to call a tool. Separate orchestrator code reads that request and actually runs the corresponding function."
+    },
+    {
+      "q": "Why is the LLM itself not considered a reliable security boundary?",
+      "options": [
+        "It can be manipulated through crafted prompts or inputs into ignoring its instructions",
+        "It uses too much electricity",
+        "It cannot process more than one request at a time",
+        "It is always slower than traditional software"
+      ],
+      "answer": 0,
+      "explanation": "No matter how well-instructed, an LLM can potentially be tricked by clever inputs. Real security has to come from code-level controls around the model, not the model's own judgment."
+    },
+    {
+      "q": "What risk appears when a tool call has no ownership check on the data it accesses?",
+      "options": [
+        "The tool becomes slower",
+        "The agent could read or modify another user's data, not just the current user's",
+        "The tool stops working entirely",
+        "Nothing — ownership checks are unnecessary"
+      ],
+      "answer": 1,
+      "explanation": "Without checking that the requested record belongs to the current user, a manipulated agent could access or change data belonging to someone else."
+    },
+    {
+      "q": "Why should tool inputs be validated in code rather than trusted from the LLM's output?",
+      "options": [
+        "Because the LLM might send an unexpected, malformed, or out-of-range value if manipulated",
+        "Because code validation is required by law",
+        "Because the LLM cannot generate text with numbers in it",
+        "Because tool inputs are never seen by the LLM"
+      ],
+      "answer": 0,
+      "explanation": "The LLM can be tricked into requesting harmful or invalid values. Code-level validation (type, range, format checks) catches this regardless of what the model was persuaded to send."
+    },
+    {
+      "q": "Why are output filters a weak defense for stopping secret leaks on their own?",
+      "options": [
+        "They only work on images, not text",
+        "They can be bypassed by transforming the secret — spacing it out, encoding it, or reversing it",
+        "They block too much legitimate text to be usable",
+        "They are too slow to run in real time"
+      ],
+      "answer": 1,
+      "explanation": "A filter looking for an exact string can be evaded by disguising the same data — e.g. adding spaces between characters, base64-encoding it, or reversing it — while still letting an attacker reconstruct it afterward."
+    },
+    {
+      "q": "Which of these is an example of an output-filter evasion technique?",
+      "options": [
+        "Sending the secret through Base64 encoding so the raw string never appears in the output",
+        "Asking the model to repeat the question back",
+        "Increasing the model's temperature setting",
+        "Using a longer system prompt"
+      ],
+      "answer": 0,
+      "explanation": "Encoding, splitting with spaces, or reversing a secret string are common ways to smuggle it past a filter that only checks for an exact, unmodified match."
+    },
+    {
+      "q": "What makes 'document chaining' harder to detect than a single hidden instruction in one file?",
+      "options": [
+        "It requires the attacker to have admin access",
+        "It only works on PDF files",
+        "The payload is split across multiple documents, so scanning any one document alone looks harmless",
+        "The payload is always encrypted"
+      ],
+      "answer": 2,
+      "explanation": "Each individual document can look completely clean. Only when the agent reads several of them together does the full malicious instruction assemble — so per-document scanning misses it."
+    },
+    {
+      "q": "What is a practical defense against document chaining attacks?",
+      "options": [
+        "Only ever load one document per conversation",
+        "Treat everything retrieved from documents as untrusted data, even after combining multiple sources",
+        "Trust documents from internal file shares completely",
+        "Disable document reading entirely"
+      ],
+      "answer": 1,
+      "explanation": "Since a malicious instruction can be assembled from several 'clean-looking' documents, the safest approach is to treat all combined document content as untrusted, not just each file in isolation."
+    },
+    {
+      "q": "Why is a browsing agent especially risky compared to other agents?",
+      "options": [
+        "It can only read text, never images",
+        "Browsing always requires storing cookies",
+        "Any web page in the world becomes attacker-controllable input, including hidden or invisible text",
+        "Web pages load too slowly and cause timeouts"
+      ],
+      "answer": 2,
+      "explanation": "A browsing agent reads whatever is on a page — including text hidden with CSS or off-screen positioning that a human wouldn't notice but the model still reads as instructions."
+    },
+    {
+      "q": "What is a sensible defense for an agent that browses untrusted web pages?",
+      "options": [
+        "Give it access to every tool at all times so it can react quickly",
+        "Strip out sensitive or dangerous tools while it's processing page content, and treat that content as untrusted",
+        "Let it store its browsing history in plain text with no restrictions",
+        "Trust any page ranked highly by a search engine"
+      ],
+      "answer": 1,
+      "explanation": "While reading untrusted page content, the agent shouldn't have dangerous tools available — so even if the page contains a hidden instruction, there's nothing harmful it can trigger."
+    },
+    {
+      "q": "How can a 'read-only' code review agent end up executing attacker-controlled code?",
+      "options": [
+        "By counting the lines in the submitted file",
+        "By displaying the code with syntax highlighting",
+        "By importing or running the submitted code to analyze it, since Python can execute code just by importing it",
+        "By saving the file to disk without opening it"
+      ],
+      "answer": 2,
+      "explanation": "Some analysis approaches import or execute the code being reviewed. In Python, importing a module can run code immediately — turning a 'read-only' review into accidental code execution."
+    },
+    {
+      "q": "What is the safest way to analyze untrusted submitted code?",
+      "options": [
+        "Run it directly on the production server for realistic results",
+        "Analyze it inside an isolated sandbox with no access to secrets or the network",
+        "Ask the submitter to confirm the code is safe first",
+        "Skip analysis entirely and merge it if it compiles"
+      ],
+      "answer": 1,
+      "explanation": "Untrusted code should only ever run (if it must run at all) inside a disposable, isolated sandbox — with no secrets, no meaningful network access, and no path back to production systems."
+    },
+    {
+      "q": "Which practice best prevents memory enumeration attacks?",
+      "options": [
+        "Deleting all memory after every single message",
+        "Using sequential session IDs so they're easy to audit",
+        "Storing memory in plain, unencrypted text files",
+        "Using long random session IDs and checking ownership on every access"
+      ],
+      "answer": 3,
+      "explanation": "Predictable session IDs can be guessed and enumerated by an attacker. Long random IDs combined with an ownership check on every read stop someone from simply guessing their way into another user's memory."
+    },
+    {
+      "q": "Why are sequential or predictable session IDs dangerous for agent memory?",
+      "options": [
+        "They make the database run slower",
+        "An attacker can simply increment or guess IDs to access other users' stored memory",
+        "They take up more storage space",
+        "They are incompatible with most databases"
+      ],
+      "answer": 1,
+      "explanation": "If session IDs follow a predictable pattern, an attacker can iterate through possible values and potentially read memory that belongs to other users."
+    },
+    {
+      "q": "What is 'typosquatting' in the context of an agent's software supply chain?",
+      "options": [
+        "Publishing a malicious package under a name that closely resembles a popular legitimate one",
+        "Writing code with too many spelling mistakes",
+        "A model that mistypes its own outputs",
+        "An attack that only affects developer chat messages"
+      ],
+      "answer": 0,
+      "explanation": "Typosquatting relies on a package name being visually close enough to a real one that a developer installs the fake version by mistake, often via a typo or a bad copy-paste."
+    },
+    {
+      "q": "Why is loading a model file saved in Python's pickle format risky?",
+      "options": [
+        "Pickle files are always larger than other formats",
+        "Pickle can store instructions that execute arbitrary code the moment the file is loaded",
+        "Pickle files cannot store numerical weights",
+        "Pickle only works with older Python versions"
+      ],
+      "answer": 1,
+      "explanation": "Pickle doesn't just store data — it can also store code that runs automatically during deserialization, meaning a malicious model file can achieve code execution just by being loaded."
+    },
+    {
+      "q": "How does a dependency confusion attack typically succeed?",
+      "options": [
+        "The attacker publishes a public package with the same name as a private internal one, using a higher version number so build tools prefer it",
+        "The attacker directly hacks the developer's laptop",
+        "The attacker renames a legitimate package to something completely different",
+        "The attacker deletes the real package from the registry"
+      ],
+      "answer": 0,
+      "explanation": "Many build tools default to pulling whichever version number is highest across public and private registries. An attacker exploits this by publishing a public package with the same name and a higher version than the real internal one."
+    },
+    {
+      "q": "What makes tool description poisoning dangerous for an agent?",
+      "options": [
+        "It requires the attacker to gain direct code execution first",
+        "It only affects agents that use voice input",
+        "Hidden instructions inside a tool's description text are read by the agent as trusted instructions, with no code execution needed",
+        "It can only be performed by someone with database access"
+      ],
+      "answer": 2,
+      "explanation": "The agent treats a tool's description as part of its own instructions. An attacker can hide commands directly in that text — no exploit or code execution required, just words the model reads and obeys."
+    },
+    {
+      "q": "What is the single most important defense layer for securing AI agents?",
+      "options": [
+        "Using the largest possible language model",
+        "Writing very detailed rules inside the system prompt",
+        "Least privilege — giving every tool and agent the minimum access it actually needs",
+        "Trusting tool outputs since they come from your own systems"
+      ],
+      "answer": 2,
+      "explanation": "Least privilege limits the damage even if the model is fully manipulated — if a tool physically cannot reach data or actions beyond its scope, there's nothing an attacker can trick it into misusing."
+    },
+    {
+      "q": "What is the purpose of requiring human approval for high-impact agent actions?",
+      "options": [
+        "It makes the agent respond faster",
+        "It removes the need for any other security controls",
+        "It turns a potentially automatic, catastrophic action into just a request a person can reject",
+        "It is only useful for actions involving images"
+      ],
+      "answer": 2,
+      "explanation": "Even if the agent is fully tricked into proposing a harmful action, a human-in-the-loop approval step means it still can't be completed without a person confirming it."
+    },
+    {
+      "q": "What is the main benefit of sandboxing risky operations like code execution or document parsing?",
+      "options": [
+        "It makes the agent's responses more creative",
+        "Even if an attacker escapes into the sandbox, there is nothing valuable to steal and nowhere further to go",
+        "It removes the need for logging",
+        "It speeds up every tool call"
+      ],
+      "answer": 1,
+      "explanation": "A sandbox with no secrets, no meaningful network access, and disposable containers means a successful compromise still leads nowhere useful for the attacker."
+    },
+    {
+      "q": "What is the 'golden rule' emphasized across the agent security defenses?",
+      "options": [
+        "Enforce security in code and the orchestrator — never rely on the prompt alone",
+        "Always use the newest available model version",
+        "Trust the model's own judgment about what is safe",
+        "Keep the system prompt as short as possible"
+      ],
+      "answer": 0,
+      "explanation": "A rule in the system prompt is only a suggestion a clever attacker can talk the model out of. A check enforced in actual code is a hard barrier the model cannot bypass no matter how it's manipulated."
+    }
+  ]
+}

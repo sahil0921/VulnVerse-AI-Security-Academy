@@ -1,0 +1,46 @@
+{
+  "slug": "08-vec2text",
+  "title": "Vec2Text Supervised Inversion",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Vec2Text: Supervised Inversion\n\nVec2Text is the heavyweight, most powerful method for embedding inversion covered in this module. It trains its own dedicated model, built specifically to reverse one known embedding model, turning vectors back into text with the best quality of any method covered so far.\n\nThere's a real trade-off though: it needs actual GPU training time before you can attack anything at all. But once that training is done, each individual chunk you attack afterward is fast. And it works fully offline, meaning you don't need to keep talking to the target system while running the attack.\n\n## The two-stage design\n\nVec2Text has two parts working one after the other: an inverter, followed by a corrector.\n\n| Stage | Job |\n| --- | --- |\n| Inverter | Makes a rough first guess at the text, based on the embedding. |\n| Corrector | Keeps improving that guess, step by step, until it's close to correct. |\n\n**A simple comparison:** the inverter is like a sculptor's rough block of stone, the basic shape is there, but it's crude. The corrector is the fine chiseling that follows afterward. Each pass checks how far the current shape is from the goal and adjusts a little closer. After 20 to 50 passes, the shape closely matches the target text.\n\nHere's what one correction pass actually does: it takes the current guess, turns it back into an embedding, and compares that embedding to the real target embedding. The difference between the two is called the residual, simply how far off the current guess still is. The corrector uses that gap to make a slightly better guess on the next pass."
+    },
+    {
+      "type": "content",
+      "body": "## Why it needs so much preparation\n\nThe inverter and corrector are both neural networks. Like any neural network, they need to learn before they're actually useful. They learn by studying huge numbers of examples, pairs of real text and its corresponding embedding, which the attacker generates ahead of time on their own computer.\n\nThe original Vec2Text research trained on millions of these pairs, using multiple GPUs running for several days. The result: it can reconstruct short pieces of text, around 32 words, almost word-for-word.\n\nOne important limit worth remembering: a trained Vec2Text model only works against one specific embedding model. If you train it against Model A, it can't invert text from Model B at all, you'd need a completely separate trained version for each embedding model you want to attack."
+    },
+    {
+      "type": "content",
+      "body": "## Making it practical on a single GPU\n\nMost red teamers don't have access to a research lab's worth of GPUs. Three changes make Vec2Text realistic to use on just one GPU, within a normal engagement timeframe:\n\n1. **Train on enterprise-style text, not general text.** Instead of training on encyclopedia articles or novels, train mostly on synthetic examples that resemble real corporate content, such as password reset messages, service account descriptions, API key formats, and internal runbooks. This teaches the model the specific vocabulary of secrets, rather than general English.\n2. **Use Vec2Text for recon, not the final extraction.** Just like the ALGEN method from the earlier lesson, Vec2Text is best at recovering the overall structure of a chunk, not high-entropy secrets like a random password itself. A separate tool then brute-forces the actual password, once that structure is known.\n3. **Let the recon guide your template choice.** Whatever text Vec2Text recovers gets matched against known document categories, such as \"password reset email\" or \"API key notice.\" This narrows down which template to try next, making the final brute-force step significantly more accurate."
+    },
+    {
+      "type": "content",
+      "body": "## Progressive fill-and-lock\n\nWhen you need to recover several pieces of hidden information at once, say a URL, a username, and a password, all inside one chunk, it helps to go in a specific order.\n\nFirst, recover the easy, predictable pieces, things like a URL or a username, which don't have much randomness in them. Once you're confident about those, lock them in place as fixed, known values. Then re-run the attack on the harder piece, the password, but this time with the easy pieces already filled in.\n\nWhy this helps: locking in the known values removes a lot of noise from the overall picture. With less uncertainty about the rest of the text, it becomes much easier to isolate exactly how the password itself is affecting the embedding, which noticeably improves how confident you can be in the final result."
+    },
+    {
+      "type": "content",
+      "body": "## When Vec2Text is worth using\n\n| Use Vec2Text when... | Avoid it when... |\n| --- | --- |\n| You know the exact embedding model in advance | You don't know which embedding model was used |\n| You have several days to prepare beforehand | The engagement is short or came up suddenly |\n| You need to attack many chunks from the same model | You only need one quick, one-off result |\n| You need the highest possible reconstruction quality | You don't have a GPU available |"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Conceptual view of the Vec2Text corrector loop.\n# The real system uses a trained T5-based inverter + corrector.\nimport numpy as np\nfrom sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer(\"all-MiniLM-L6-v2\")\ntarget = np.load(\"embeddings.npy\")[0]\ntarget = target / np.linalg.norm(target)\n\ndef embed(text):\n    v = model.encode([text], normalize_embeddings=True)[0]\n    return v\n\n# Inverter's rough first guess (in reality, produced by a neural net)\nhypothesis = \"Please go to the portal and reset the password\"\n\nfor step in range(3):\n    v = embed(hypothesis)\n    residual = target - v                 # how far off is our current guess?\n    gap = float(np.linalg.norm(residual))\n    print(f\"step {step}: hypothesis={hypothesis!r}  gap={gap:.4f}\")\n    # A trained corrector uses 'residual' to propose a better hypothesis.\n    # Here we just show the measurement that drives each refinement step.\n    hypothesis = \"Please navigate to the login portal and reset your password\""
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Target embedding\"] --> B[\"Inverter: rough text guess\"]\n    B --> C[\"Re-embed the guess\"]\n    C --> D[\"Measure residual gap\"]\n    D --> E[\"Corrector refines text\"]\n    E --> F{\"Gap small enough?\"}\n    F -- \"No\" --> C\n    F -- \"Yes\" --> G[\"Recon-guided template match\"]\n    G --> H[\"Progressive fill-and-lock slot filling\"]\n    H --> I[\"Recovered secret\"]"
+    },
+    {
+      "type": "note",
+      "body": "**A modern shortcut:** with today's frontier LLMs, a red teamer can often generate a working implementation of a research paper like Vec2Text in minutes, instead of days. You no longer have to wait for the original researchers to release their code, you can prototype and adapt attack tooling quickly for each new engagement."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Vec2Text uses two parts: an inverter that makes a rough first guess, and a corrector that refines it over many passes.\n- The residual is simply the gap between the current guess and the real target, and it's what tells the corrector how to improve on each pass.\n- Vec2Text only works on the one specific embedding model it was trained against, it doesn't transfer to a different model.\n- Training takes real time and GPU power upfront, but once trained, each new chunk is fast to attack, and no live connection to the target is needed.\n- On a single GPU, it works best as a recon tool, recovering structure and templates, while a separate step brute-forces the actual high-entropy secret, like a password.\n- Fill-and-lock: recover easy, low-randomness values first, lock them in, then use that context to make the harder values easier to isolate.\n- Use Vec2Text when you know the embedding model, have prep time, and need to attack many chunks, but skip it for quick, one-off, or unknown-model situations."
+    }
+  ]
+}

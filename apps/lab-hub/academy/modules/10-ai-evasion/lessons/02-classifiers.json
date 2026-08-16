@@ -1,0 +1,51 @@
+{
+  "slug": "02-classifiers",
+  "title": "ML Classifiers Overview",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Understanding ML Classifiers\n\nBefore you can attack a classifier, you must understand what one *is*.\n\nA **classifier** is a model that sorts an input into one of several buckets (called *classes*).\n\n- **Analogy:** A mailroom worker who reads each letter and drops it into either the \"Keep\" tray or the \"Junk\" tray. The worker isn't reading for enjoyment — they're making a fast decision based on a few signals, like the sender's name or whether it looks like an ad.\n- **Example:** A spam filter reads a message and decides **spam** or **ham** (ham = a legitimate message).\n\nEvery classifier makes its decision by crossing a **decision boundary** — the invisible line separating one class from another. Everything on one side gets labeled spam; everything on the other side gets labeled ham."
+    },
+    {
+      "type": "content",
+      "body": "## How a Classifier Turns Text Into Numbers\n\nModels cannot read words directly. They only read numbers. So text must first be turned into **features** — measurable pieces of information the model can actually work with.\n\n- **Feature** = a measurable signal extracted from the input. *Example:* how many times the word \"free\" appears.\n\nThe simplest method is **bag-of-words**:\n\n1. Build a vocabulary of all known words.\n2. For each message, count how often each word appears.\n3. Ignore word order entirely.\n\nSo \"buy free tickets\" becomes something like `{buy: 1, free: 1, tickets: 1}`. The model never knows the order the words appeared in — only how many times each one showed up. This is exactly the weakness evasion techniques exploit later in this module: if order doesn't matter to the model, you can often rearrange or break up suspicious words without changing the count-based features much.\n\n**Real systems usually go a step further than plain word counts:**\n\n- **TF-IDF** (Term Frequency–Inverse Document Frequency) — instead of just counting a word, it also asks \"how *rare* is this word across all messages?\" A word like \"the\" appears everywhere and gets a low weight; a rare word like \"viagra\" gets a much higher weight, because rare words are more useful for telling classes apart.\n- **N-grams** — instead of counting single words, count pairs or triples of consecutive words (\"free tickets\", \"buy free tickets\"). This recovers *some* word-order information that plain bag-of-words throws away, though it can still be defeated by inserting words in between.\n- **Non-text features** — many spam filters don't rely on words alone. They also count things like message length, number of links, ratio of capital letters, or number of exclamation marks — signals that are harder to disguise just by rewording a sentence."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Raw Message] --> B[Tokenize into words]\n    B --> C[Count word frequencies / TF-IDF / n-grams]\n    C --> D[Feature Vector of numbers]\n    D --> E[Classifier]\n    E --> F{Decision Boundary}\n    F -->|Spam| G[Block]\n    F -->|Ham| H[Allow]"
+    },
+    {
+      "type": "content",
+      "body": "## Common Classifier Types\n\n| Classifier | How it decides | Strength | Evasion weakness |\n|---|---|---|---|\n| **Naive Bayes** | Multiplies word probabilities | Fast, simple, needs little data | Assumes words are independent |\n| **Logistic Regression** | Weighted sum of features | Interpretable weights | Linear boundary is easy to shift |\n| **Support Vector Machine** | Finds the widest margin line | Strong on clean data | Sensitive to crafted feature edits |\n| **Neural Networks** | Layered non-linear math | Very powerful | Vulnerable to adversarial perturbations |\n\nThis module focuses on **Naive Bayes** because its math is transparent — you can literally watch each word push the decision one way or the other, which makes it the clearest classifier to learn evasion techniques on before moving to harder, less transparent models."
+    },
+    {
+      "type": "content",
+      "body": "## Training a Simple Classifier\n\nHere's what actually building one of these looks like in practice, using a small, illustrative dataset. This is the same basic pattern real spam filters are built on, just at a tiny scale:"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# train_spam_classifier.py -- a minimal, illustrative Naive Bayes spam filter\n\nfrom sklearn.feature_extraction.text import CountVectorizer\nfrom sklearn.naive_bayes import MultinomialNB\n\nmessages = [\n    \"buy free tickets now\",\n    \"free viagra click here\",\n    \"meeting rescheduled to 3pm\",\n    \"can you review my report\",\n]\nlabels = [\"spam\", \"spam\", \"ham\", \"ham\"]\n\n# Step 1: turn text into a bag-of-words feature vector\nvectorizer = CountVectorizer()\nX = vectorizer.fit_transform(messages)\n\n# Step 2: train the classifier on those features\nclassifier = MultinomialNB()\nclassifier.fit(X, labels)\n\n# Step 3: classify a new message\nnew_message = [\"free tickets available now\"]\nfeature_vector = vectorizer.transform(new_message)\nprediction = classifier.predict(feature_vector)\nprint(prediction)  # ['spam']"
+    },
+    {
+      "type": "content",
+      "body": "## White-Box vs Black-Box Knowledge\n\nHow much an attacker knows changes the whole strategy.\n\n| | White-Box | Black-Box |\n|---|---|---|\n| Model internals | Fully visible | Hidden |\n| What you see | Weights, probabilities, features | Only the final label / score |\n| Attack style | Direct calculation | Trial and error via queries |\n| Cost | Cheap and precise | Limited by a query budget |\n\n- **White-box** is like having the answer key to a test — you can calculate exactly what change is needed.\n- **Black-box** is like guessing answers but being told \"warmer\" or \"colder\" after each guess — you learn only from the outcome, not the reasoning.\n\nYou will practice **both** in this module."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# A minimal classifier decision, shown plainly\n# predict_proba returns [probability_ham, probability_spam]\n\nprobabilities = classifier.predict_proba(feature_vector)[0]\nham_prob, spam_prob = probabilities[0], probabilities[1]\n\n# The decision boundary sits at 0.5\nif spam_prob > ham_prob:\n    decision = \"spam\"   # blocked\nelse:\n    decision = \"ham\"    # allowed\n\n# Evasion goal: push spam_prob just below ham_prob.\n# You do NOT need to make it 0.01 - crossing 0.5 is enough."
+    },
+    {
+      "type": "note",
+      "body": "**The critical insight for attackers:** the classifier only cares *which side of 0.5* the probability lands on. A message at `[0.501 ham, 0.499 spam]` evades just as successfully as one at `[0.99 ham, 0.01 spam]`. You only need to cross the line — not shatter it."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- A **classifier** sorts inputs into classes by crossing a **decision boundary**.\n- Text becomes numbers through **features** — bag-of-words counts, TF-IDF weighting, n-grams, or non-text signals like message length and link count.\n- Plain bag-of-words **ignores word order** entirely — a core weakness evasion techniques exploit.\n- **Naive Bayes** is transparent and ideal for learning attacks before moving to harder models.\n- **White-box** = full visibility into weights and probabilities; **black-box** = query-only guessing based on outcomes.\n- Evasion only needs to push the score **across 0.5**, not to an extreme."
+    }
+  ]
+}

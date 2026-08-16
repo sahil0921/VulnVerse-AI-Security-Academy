@@ -1,0 +1,77 @@
+{
+  "slug": "06-escalation-paths",
+  "title": "Planning Escalation Paths",
+  "type": "content",
+  "readingtime": "11 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## From Boundaries to Paths\n\nSo far you can map components, rank crown jewels, and identify trust boundaries. Now we connect them into **escalation paths** — step-by-step routes an attacker takes to move from a starting foothold all the way to a crown jewel.\n\nAn escalation path is a chain of trust-boundary crossings. Each step gains a little more access, and the steps together form a complete attack.\n\n**An analogy.** A burglar rarely reaches the safe in one move. They climb the fence (step 1), pick the back-door lock (step 2), disable the alarm (step 3), then crack the safe (step 4). Each step builds on the last. An escalation path is that sequence, written down."
+    },
+    {
+      "type": "content",
+      "body": "## Why Plan Paths Explicitly?\n\nWriting paths down does three things:\n\n1. **Reveals the shortest route.** You see which chain reaches the crown jewel with the fewest steps.\n2. **Exposes dependencies.** Each step depends on something being true. If one link is false, the whole path breaks — better to know early.\n3. **Guides both attack and defense.** Attackers execute the path; defenders break it by cutting any single link.\n\nA defender's best move is often to snap one link in the chain. You don't have to block every step — just make one impossible."
+    },
+    {
+      "type": "content",
+      "body": "## Anatomy of a Path\n\nEach escalation path has a few standard parts:\n\n- **Starting point** — where the attacker begins (a foothold, a token, network access).\n- **Steps** — each boundary crossing, in order.\n- **Dependencies** — assumptions that must hold for the path to work.\n- **Objective** — the crown jewel at the end.\n- **Detection risk** — how likely each step is to trigger an alarm.\n\nThe dependencies are crucial. A path is only as strong as its shakiest assumption."
+    },
+    {
+      "type": "content",
+      "body": "## Path 1 for Sentri: Direct Tool Abuse\n\nRecall Sentri's crown jewel #1: the **cloud credentials** in the secrets manager. Here's a direct path to reach them.\n\n**Objective:** Cloud credentials.\n\n**Starting point:** We already extracted the Action Agent's identity token from Kubernetes secrets.\n\n**Steps:**\n\n1. Use the Action Agent token to call the tool server (crosses TB-4).\n2. Invoke a tool that pulls cloud credentials from the secrets manager (crosses TB-5).\n3. Use those credentials to control cloud infrastructure (crosses TB-8, a new external boundary into the cloud provider itself).\n\n**Dependencies:**\n\n- The Action Agent's token must authorize the cloud tool. *(Unvalidated — we've only tested one other tool.)*\n- The tool server must not inspect the *contents* of our tool request. *(Unvalidated.)*"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Action Agent\\ntoken (held)\"] --> B[\"Call tool server\\nTB-4\"]\n    B --> C[\"Pull cloud creds\\nTB-5\"]\n    C --> D[\"Control cloud\\ninfrastructure\\nTB-8\"]\n    D --> E[\"Crown Jewel #1\\nCloud credentials\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Path 2 for Sentri: Knowledge Poisoning\n\nA second, sneakier path uses the unauthenticated vector database. Instead of calling tools directly, we *influence the agent* into calling them for us.\n\n**Objective:** Cloud credentials (indirectly).\n\n**Starting point:** Write access to a staging knowledge base that agents might read.\n\n**Steps:**\n\n1. Plant a poisoned runbook in the knowledge base (crosses TB-3).\n2. The Action Agent retrieves the poisoned content as \"context\" (crosses TB-7).\n3. Following the poisoned instructions, the agent calls the cloud tool itself (crosses TB-4).\n4. The tool pulls cloud credentials (crosses TB-5).\n\n**Dependencies:**\n\n- The poisoned content must be retrieved by the *Action* Agent specifically, because only its token authorizes the cloud tool.\n- The agent must act on the poisoned instructions."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Plant poisoned\\nrunbook\\nTB-3\"] --> B[\"Action Agent\\nretrieves it\\nTB-7\"]\n    B --> C[\"Agent calls\\ncloud tool\\nTB-4\"]\n    C --> D[\"Tool pulls creds\\nTB-5\"]\n    D --> E[\"Crown Jewel #1\\nCloud credentials\"]"
+    },
+    {
+      "type": "note",
+      "body": "**Path 2 has a clever advantage.** In Path 1, *we* craft the malicious tool request, which might look suspicious. In Path 2, the *agent itself* generates the request based on our poisoned context. That request looks completely normal — it matches the agent's usual behavior. Sometimes the sneakier, longer path is safer because it hides inside legitimate activity."
+    },
+    {
+      "type": "content",
+      "body": "## Path 3: Intelligence Extraction (a Support Path)\n\nNot every path targets a crown jewel directly. Some paths gather *intelligence* that makes the other paths safer.\n\n**Objective:** Learn the defender's detection rules.\n\n**Steps:**\n\n1. Query the unauthenticated vector database (crosses TB-3).\n2. Read the `detection_rules` collection.\n\nThis path is executable immediately and gives us crown jewel #2 (detection rules). Knowing what's monitored lets us run Paths 1 and 2 more quietly. A support path doesn't win the engagement alone — it makes winning easier and safer."
+    },
+    {
+      "type": "content",
+      "body": "## Comparing the Paths\n\nWith three paths on the table, we compare them to decide what to do.\n\n| Path | Objective | Steps | Detection risk | Blocked by |\n|---|---|---|---|---|\n| **1 — Direct tool abuse** | Cloud creds | 3 | Low (if requests unmonitored) | Untested token scope |\n| **2 — Knowledge poisoning** | Cloud creds | 4 | Low (agent-generated requests) | Uncertain retrieval targeting |\n| **3 — Intel extraction** | Detection rules | 2 | Medium (bulk read may alert) | Nothing — ready now |\n\nPath 3 runs first because it's ready and it informs the others. Paths 1 and 2 are held until we validate their dependencies."
+    },
+    {
+      "type": "content",
+      "body": "## Attack Trees: Visualizing Choices\n\nWhen many paths lead to one goal, an **attack tree** shows them all at once. The root is the goal; branches are alternative ways to reach it. Defenders love attack trees because cutting one branch's shared node can block several paths at once."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    G[\"Goal: Obtain\\nCloud Credentials\"]\n    G --> P1[\"Path 1:\\nDirect tool abuse\"]\n    G --> P2[\"Path 2:\\nKnowledge poisoning\"]\n    P1 --> N1[\"Need: valid\\nAction token\"]\n    P1 --> N2[\"Need: unmonitored\\ntool requests\"]\n    P2 --> N3[\"Need: agent reads\\npoisoned content\"]\n    P2 --> N4[\"Need: agent acts\\non instructions\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Dependencies Are Go/No-Go Gates\n\nEach dependency is a **gate**. Before committing to a path, you test its gate. If the gate fails, the path is dead — and that's valuable to learn early.\n\nFor Path 2, the key gate is: *does the Action Agent actually read from the knowledge base we can poison?* If it only reads a different, protected knowledge base, Path 2 collapses. We test this **before** spending hours crafting poison.\n\n**Learning that a path is closed is a win, not a loss.** It stops you wasting time and lets you redirect toward paths that actually work."
+    },
+    {
+      "type": "content",
+      "body": "## When a Path Dies, a New One Is Often Born\n\nHere's the beautiful part of iterative threat modeling. Suppose we test Path 2's gate and discover the Action Agent only reads the *production* knowledge base, not our staging one. Path 2 seems dead.\n\nBut the failed test taught us something new: **we now know how the agent chooses its knowledge source.** If that choice is controlled by a configuration setting we could modify, a brand-new path appears:\n\n1. Gain a foothold in the agent's configuration.\n2. Change its knowledge source to one we control.\n3. Path 2 becomes viable again.\n\nA dead path generated fresh intelligence, which spawned a new hypothesis, which opened a new path. This is why threat modeling loops forever."
+    },
+    {
+      "type": "content",
+      "body": "## Kill Chains: The Big-Picture View\n\nSecurity teams often describe a full attack as a **kill chain** — the ordered stages from first contact to final objective. A simplified kill chain looks like:\n\n**Recon → Initial Access → Escalation → Lateral Movement → Objective**\n\nEscalation paths are the detailed, technical version of the middle stages. The kill chain is the zoomed-out story; escalation paths are the step-by-step routes inside it. Both views are useful: the kill chain communicates to executives, the escalation path guides the engineer."
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes\n\n- **Skipping dependency gates.** Committing to a path before testing its assumptions wastes days.\n- **Only planning one path.** If your single path dies, you're stuck. Always have alternatives.\n- **Ignoring support paths.** Intelligence-gathering paths make everything else safer.\n- **Forgetting detection risk.** The shortest path isn't best if it sets off every alarm.\n- **Treating the plan as a script.** A plan is a decision tree; prune branches as reality arrives."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- An **escalation path** is a chain of trust-boundary crossings from foothold to crown jewel — chain boundaries into paths, and defenders win by cutting a single link.\n- Each path has a start, steps, **dependencies**, an objective, and a **detection risk**. The sneaky, longer path can be safer if it hides in normal activity.\n- **Attack trees** show many paths to one goal; cutting a shared node blocks several at once.\n- Dependencies are **go/no-go gates** — test each one early, since a closed path is still useful knowledge.\n- A **dead path** often reveals new intelligence and spawns a new path.\n- **Kill chains** give the zoomed-out story; escalation paths give the technical detail. Always plan multiple paths and at least one intel-support path.\n\nNext, we connect our findings to a shared attacker language: **MITRE ATLAS**."
+    }
+  ]
+}

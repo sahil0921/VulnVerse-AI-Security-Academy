@@ -1,0 +1,60 @@
+{
+  "slug": "06-steganography",
+  "title": "Pickle & Tensor Steganography",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Pickle & Tensor Steganography\n\nSo far we've attacked what a model learns. Now we attack the model file itself, the actual thing you download, save, and load.\n\nThere are two separate ideas here that work together:\n\n1. Pickle deserialization — how a model file can execute code the moment it's loaded.\n2. Tensor steganography — how hidden data can be smuggled inside a model's own numbers.\n\n**A simple comparison:** steganography is like hiding a secret message inside a painting by slightly changing a few brushstrokes that no one would ever notice. The pickle vulnerability, meanwhile, is like a booby-trapped picture frame that runs a command the moment you hang the painting on the wall."
+    },
+    {
+      "type": "content",
+      "body": "## Part 1: the pickle problem\n\nMany model files are saved using Python's pickle format, such as `.pkl`, and internally by PyTorch's `.pt` and `.pth` formats. Pickle is powerful but genuinely dangerous: it can store instructions to run code the moment the file is loaded.\n\nWhen you call `pickle.load()` or `torch.load(..., weights_only=False)`, any code hidden inside that file executes automatically. You didn't run a program, you just loaded a file. That alone is enough for an attacker.\n\nThis means loading an untrusted model file can hand an attacker a shell on your machine, just from opening it."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import os\nimport pickle\n\n# VULNERABLE: a malicious pickle that runs code on load\nclass Malicious:\n    def __reduce__(self):\n        # __reduce__ tells pickle how to rebuild this object.\n        # An attacker replaces rebuilding with running a command.\n        return (os.system, (\"id\",))   # runs 'id' the moment it loads\n\n# When a victim does this, the command executes instantly:\n# with open('model.pkl', 'rb') as f:\n#     model = pickle.load(f)   # <-- attacker's code runs here"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import torch\n\n# VULNERABLE: torch.load with weights_only=False acts like pickle.load\nmodel = torch.load(\"downloaded_model.pt\", weights_only=False)  # DANGEROUS\n\n# SECURE: weights_only=True refuses to run arbitrary code.\n# It only loads plain numbers (tensors), not executable objects.\nmodel = torch.load(\"downloaded_model.pt\", weights_only=True)   # SAFE\n\n# In modern PyTorch, weights_only=True is the default -\n# but old code and old habits still explicitly set it to False."
+    },
+    {
+      "type": "note",
+      "body": "**The single most important defense in this lesson:** never load a model file from an untrusted source with `weights_only=False`, or with plain `pickle.load`. Prefer the safetensors format instead, which stores only numbers and simply cannot execute code."
+    },
+    {
+      "type": "content",
+      "body": "## Part 2: hiding data inside the model's numbers\n\nA neural network is made up of millions, or even billions, of numbers called parameters, stored in tensors, which are just multi-dimensional arrays of numbers. These numbers are usually stored as 32-bit floating-point values.\n\nTensor steganography hides secret data inside these numbers by making changes so tiny that the model's actual behavior doesn't noticeably change at all.\n\nHow a float32 is built:\n\n| Part | Bits | Role |\n|------|------|------|\n| Sign | 1 | Positive or negative |\n| Exponent | 8 | The scale/magnitude |\n| Mantissa | 23 | The precise digits |\n\nThe last few bits of the mantissa are called the least significant bits (LSBs). Changing them alters the number by only a microscopic amount."
+    },
+    {
+      "type": "content",
+      "body": "## Why LSBs are the perfect hiding place\n\n- Flipping the very last mantissa bit of `0.15625` changes it by roughly `0.000000015`, which is utterly negligible for a model weight.\n- Flipping a high-order mantissa bit instead changes it by `0.0625`, big enough to actually break the model and reveal that tampering occurred.\n\nSo attackers only ever touch the LSBs. Across millions of weights, they can hide entire kilobytes of payload this way, enough to smuggle in a full reverse-shell script, with no visible effect on the model's accuracy whatsoever."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Secret payload bytes] --> B[Split into bits]\n    B --> C[Overwrite LSBs of many float weights]\n    C --> D[Model still works normally]\n    D --> E[On load, pickle extracts + runs payload]\n    style C fill:#a855f7,color:#fff\n    style E fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\n\n# Simplified LSB encoding: hide bytes in the low bits of float weights\ndef encode_lsb(tensor, payload_bytes, num_lsb=2):\n    flat = tensor.flatten().copy()\n    # Turn payload into a stream of bits\n    bits = np.unpackbits(np.frombuffer(payload_bytes, dtype=np.uint8))\n\n    # View each float's raw bits as an integer we can edit\n    ints = flat.view(np.uint32)\n    mask = ~np.uint32((1 << num_lsb) - 1)   # clears the low bits\n\n    bit_idx = 0\n    for i in range(len(ints)):\n        if bit_idx >= len(bits):\n            break\n        chunk = 0\n        for b in range(num_lsb):\n            if bit_idx < len(bits):\n                chunk = (chunk << 1) | bits[bit_idx]\n                bit_idx += 1\n        ints[i] = (ints[i] & mask) | chunk   # write payload into LSBs\n    return flat.view(np.float32)\n\n# The weights barely change - but now they secretly carry a payload."
+    },
+    {
+      "type": "content",
+      "body": "## How the two combine into a full attack\n\n1. The attacker hides a payload, such as a reverse shell, inside the LSBs of a large weight tensor.\n2. They wrap the model in a malicious object whose `__reduce__` method, upon load, extracts the hidden bytes and runs them.\n3. Everything, the payload, the extractor, and the trigger, lives together inside a single model file.\n4. The victim downloads the model, calls `torch.load(...)`, and the attacker gets a shell on their machine.\n\nThe steganography provides the hiding place here; the pickle vulnerability provides the actual execution."
+    },
+    {
+      "type": "content",
+      "body": "## How defenders protect model files\n\n- **Use safe formats** — prefer safetensors over pickle-based formats, since it stores only numbers and nothing executable.\n- **Set weights_only=True** — always, whenever using `torch.load`.\n- **Scan models** — tools like picklescan and modelscan detect malicious pickle opcodes before loading.\n- **Verify integrity** — check hashes and signatures on any downloaded models before use.\n- **Sandbox loading** — load untrusted models inside an isolated container with no network access and no secrets.\n- **Trusted registries** — pull models only from verified internal or properly signed sources."
+    },
+    {
+      "type": "content",
+      "body": "## Vulnerable vs secure\n\n| Vulnerable | Secure |\n|------------|--------|\n| torch.load(f, weights_only=False) | torch.load(f, weights_only=True) |\n| Loads pickle from the internet | Uses safetensors + signature check |\n| Loads directly on a production host | Loads in a sandbox first |\n| No model scanning | Scans with modelscan/picklescan |\n\n## Summary\n\n- Model files can carry both hidden data and genuinely executable code.\n- Pickle deserialization runs attacker code automatically on load.\n- Tensor steganography hides payloads inside the LSBs of model weights.\n- Together, they turn something as simple as \"just loading a model\" into full remote code execution.\n\n## Key Takeaways\n\n- Loading a model effectively means running code, if pickle is involved anywhere in the process.\n- Prefer safetensors and always set weights_only=True.\n- Scan and sandbox any model you didn't train yourself before trusting it."
+    }
+  ]
+}

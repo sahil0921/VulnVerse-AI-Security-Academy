@@ -1,0 +1,46 @@
+{
+  "slug": "08-abuse-detection",
+  "title": "Abuse Detection Evasion",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Abuse Detection Evasion\n\nMany AI systems act as guards. They detect hate speech, spam, fraud, misinformation, or toxic content before it reaches users. Abuse detection evasion is the art of slipping harmful content past these AI guards without triggering them.\n\n**A simple comparison:** a bouncer at a club has a list of banned people. An evader shows up in disguise, a wig, sunglasses, a fake name, so the bouncer doesn't recognize them, even though it's the exact same person underneath.\n\nThe attacker keeps the harmful meaning intact, but changes the surface just enough to fool the detector."
+    },
+    {
+      "type": "content",
+      "body": "## Why detectors are foolable\n\nMost abuse detectors are themselves ML models. They learned their patterns from past examples. If an attacker presents content that looks noticeably different from anything in the training data, even if it means the exact same thing, the model may simply fail to recognize it.\n\nThis is closely related to evasion attacks, covered in full depth in the dedicated AI Evasion module. Here, we focus specifically on the content-level tricks used against text-based abuse detectors."
+    },
+    {
+      "type": "content",
+      "body": "## Common evasion techniques\n\n| Technique | What it does | Example |\n|-----------|-------------|---------|\n| Character swapping | Replace letters with lookalikes | hate → h@te, hΑte (Greek A) |\n| Spacing / insertion | Break up flagged words | spam → s p a m or s.p.a.m |\n| Misspelling | Deliberate typos | viagra → v1agr4 |\n| Paraphrasing | Reword to keep meaning, change words | Rewriting a slur as an insinuation |\n| Encoding | Hide text in another format | Base64, leetspeak, homoglyphs |\n| Context stuffing | Bury bad content in benign text | A toxic line inside a long, polite paragraph |"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Harmful content] --> B[Apply surface changes]\n    B --> C{AI Detector}\n    C -->|meaning changed?| D[NO - same meaning]\n    C -->|surface changed?| E[YES - looks new]\n    E --> F[Detector fails to flag it]\n    D --> F\n    style F fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## A concrete example: hate-speech evasion\n\nA social platform uses an AI classifier to block hateful comments before they're posted. An attacker wants a banned message to get through anyway.\n\n- **Original message** — flagged and blocked instantly by the detector.\n- **Homoglyph swap** — replaces normal letters with visually identical Unicode characters from other alphabets. To a human reader it looks exactly the same, but to the model, these are entirely unfamiliar tokens it's never seen before.\n- **Paraphrase** — conveys the exact same hateful meaning using completely different words the detector never learned to flag.\n\nThe message reaches real users while the detector confidently reports that everything is fine."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Attackers use homoglyphs (lookalike characters) to evade text filters.\n# Defenders can NORMALISE text to undo this before detection.\n\nimport unicodedata\n\n# VULNERABLE detector: checks raw text only\ndef naive_detect(text, banned):\n    return any(word in text.lower() for word in banned)\n\n# 'h\\u0430te' uses a Cyrillic 'a' - looks identical, bypasses naive_detect\n\n# SECURE detector: normalise + map homoglyphs first\ndef normalise(text):\n    # NFKC collapses many lookalike/compatibility characters\n    text = unicodedata.normalize(\"NFKC\", text)\n    # Map common homoglyphs back to ASCII\n    homoglyphs = {\"\\u0430\": \"a\", \"\\u0435\": \"e\", \"\\u043e\": \"o\"}\n    for fake, real in homoglyphs.items():\n        text = text.replace(fake, real)\n    return text.lower()\n\ndef robust_detect(text, banned):\n    clean = normalise(text)\n    clean = clean.replace(\" \", \"\").replace(\".\", \"\")  # undo spacing tricks\n    return any(word in clean for word in banned)"
+    },
+    {
+      "type": "note",
+      "body": "**Defense principle:** normalize before you detect. Most evasion works by exploiting the gap between how text looks and how it's actually stored internally. Collapse that gap, meaning normalize Unicode, strip separators, and correct obvious obfuscation, and many of these tricks simply fall apart."
+    },
+    {
+      "type": "content",
+      "body": "## How defenders strengthen abuse detection\n\n- **Text normalization** — Unicode normalization, homoglyph mapping, and whitespace stripping applied before any checks run.\n- **Semantic (meaning-based) detection** — use embeddings so the underlying meaning gets checked, not just the literal letters, making it much harder to evade through simple rewording.\n- **Adversarial training** — train the detector directly on evasion examples so it actively learns to recognize the disguises.\n- **Multiple layers** — combine keyword filters, ML classifiers, and semantic checks together, so the attacker has to beat all of them at once, not just one.\n- **Human review for edge cases** — route genuinely borderline content to actual people for a final decision."
+    },
+    {
+      "type": "content",
+      "body": "## Vulnerable vs secure\n\n| Vulnerable | Secure |\n|------------|--------|\n| Raw keyword matching | Normalise then match |\n| Single detection model | Layered detection |\n| Trained only on clean data | Trained on evasion examples too |\n| Surface-level checks | Meaning-based (embedding) checks |\n\n## Summary\n\n- Abuse detection evasion disguises harmful content to slip past AI guards.\n- Techniques include homoglyphs, spacing, misspelling, and paraphrasing.\n- The underlying meaning stays the same; only the surface changes.\n- Normalization, semantic detection, and adversarial training are the key defenses.\n\n## Key Takeaways\n\n- Attackers change the surface of the content, not its actual meaning.\n- Always normalize input before running any detection on it.\n- Layered, meaning-aware detection is far harder to evade than simple keyword matching."
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "slug": "11-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Best Practices\n\nThis lesson is your quick-reference guide. It turns everything from this module into practical checklists you can apply to real AI systems — whether you are attacking (finding gaps) or defending (closing them).\n\n## How to Think About AI Infrastructure\n\nBefore the checklists, internalize this mindset:\n\n> **Every component is an attack surface. Every credential is a stepping stone. Every permission is a potential path.**\n\nGood security professionals map the *whole* system, follow credentials wherever they lead, and always assume any single control might fail."
+    },
+    {
+      "type": "content",
+      "body": "## The Attacker's Methodology\n\nWhen assessing AI infrastructure, work in a systematic order. Random poking wastes time and creates noise.\n\n1. **Recon** — Map the architecture. What cloud? What services? What's exposed?\n2. **Initial access** — Find a foothold (SSRF, exposed endpoint, phished credential).\n3. **Enumerate** — Check what your current identity can do. Read policies, list resources.\n4. **Escalate** — Find the path from weak access to strong access.\n5. **Hunt credentials** — Search storage, logs, params, registries, images.\n6. **Move laterally** — Use found credentials and identity chaining to reach more systems.\n7. **Achieve impact** — Access data, extract models, or demonstrate control.\n8. **Document** — Record every finding clearly for the report.\n\n**Golden rule:** Enumerate before you act. Reading is quiet; acting is loud."
+    },
+    {
+      "type": "content",
+      "body": "## Cloud Security Checklist\n\n- [ ] Enforce **IMDSv2** on all instances\n- [ ] No `*` wildcards in IAM actions or resources\n- [ ] No broad `*FullAccess` managed policies on workloads\n- [ ] Scope permissions with **conditions** (tags, service, ARN patterns)\n- [ ] Separate cloud **accounts** per project or environment\n- [ ] Block SSRF: URL allowlists, block internal IP ranges\n- [ ] Enable **CloudTrail** logging everywhere\n- [ ] Alert on unusual `AssumeRole` and credential-listing activity"
+    },
+    {
+      "type": "content",
+      "body": "## Secrets Management Checklist\n\n- [ ] Use a dedicated **secrets manager** (never hardcode)\n- [ ] Encrypt all stored secrets (`SecureString`, not plain text)\n- [ ] **Never log** secrets — disable DEBUG in production\n- [ ] **Rotate** secrets regularly\n- [ ] Scan code and images for hardcoded secrets in **CI/CD**\n- [ ] Purge old **versions** of files and parameters\n- [ ] Don't bake secrets into **container images**"
+    },
+    {
+      "type": "content",
+      "body": "## Kubernetes Security Checklist\n\n- [ ] Use **Roles** (namespaced) over **ClusterRoles** where possible\n- [ ] Scope RBAC to **named resources** (`resourceNames`)\n- [ ] Never grant **`create pods`** to workload identities\n- [ ] Never grant **cluster-wide secret read** to workloads\n- [ ] Set `automountServiceAccountToken: false` where not needed\n- [ ] Use **bound, short-lived** service account tokens\n- [ ] Apply **Pod Security Standards** (no privileged, no host mounts)\n- [ ] Run containers as **non-root** with **read-only** root filesystem\n- [ ] Apply **Network Policies** to limit pod-to-pod traffic\n- [ ] Enable **Kubernetes audit logs**"
+    },
+    {
+      "type": "content",
+      "body": "## Container & GPU Checklist\n\n- [ ] **Scan** every image for vulnerabilities and secrets\n- [ ] **Sign** images and verify signatures before running\n- [ ] Generate and store an **SBOM** for each image\n- [ ] Keep the **NVIDIA Container Toolkit** and **runc** patched\n- [ ] Disable unused GPU runtime **hooks**\n- [ ] Use **MIG** (or equivalent) for shared/multi-tenant GPUs\n- [ ] Minimize **shared volumes** between containers\n- [ ] Clean up **init container** leftovers (temp credentials)\n- [ ] Don't give users sudo to Docker/image-build wrappers"
+    },
+    {
+      "type": "content",
+      "body": "## Monitoring & Response Checklist\n\n- [ ] Centralize logs in a **SIEM**\n- [ ] Alert on **bulk enumeration** (recursive listings, mass secret reads)\n- [ ] Alert on **privilege escalation** signals (role chains)\n- [ ] Alert on **new pod creation** by unusual identities\n- [ ] Monitor model endpoints for **abuse** (traffic spikes, extraction patterns)\n- [ ] Maintain an **incident response** runbook\n- [ ] Practice with **tabletop exercises**\n- [ ] Plan for **high availability** and **disaster recovery**"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    R[Recon] --> A[Access]\n    A --> E[Enumerate]\n    E --> P[Escalate]\n    P --> H[Hunt Credentials]\n    H --> M[Move Laterally]\n    M --> I[Impact]\n    I --> D[Document]\n    style R fill:#4f8cff,color:#fff\n    style I fill:#ef4444,color:#fff\n    style D fill:#22c55e,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes to Avoid\n\nThese appear again and again in real AI systems. Learn to spot them instantly.\n\n| Mistake | Why it's dangerous | Fix |\n|---|---|---|\n| Wildcard IAM policies | Enables escalation & cross-project access | Scope to specific resources |\n| `0.0.0.0/0` on model ports | Exposes models to the internet | Restrict to internal CIDR |\n| Hardcoded secrets in images | Anyone with the image gets the secret | Use a secrets manager |\n| DEBUG logging in production | Leaks secrets into logs forever | Log actions, not secrets |\n| ClusterRole for everything | Cluster-wide blast radius | Use namespaced Roles |\n| Auto-mounted tokens everywhere | Easy lateral movement | Disable where not needed |\n| Unpatched GPU runtime | Container escape to host | Patch regularly |"
+    },
+    {
+      "type": "note",
+      "body": "**For your reports:** a finding is only valuable if it's clear and actionable. For each issue, state: (1) what you found, (2) how you found it, (3) the real-world impact, and (4) the specific fix. Vague findings get ignored; precise findings get fixed."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Follow a **systematic methodology**: recon → access → enumerate → escalate → hunt → move → impact → document.\n- **Enumerate before acting** — reading is quiet, acting is loud.\n- Use the **checklists** for cloud, secrets, Kubernetes, containers/GPUs, and monitoring.\n- Memorize the **common mistakes** so you can spot them in seconds.\n- Great findings are **clear, evidenced, and actionable**.\n\nYou now have a complete mental toolkit for AI infrastructure security. Next, test your knowledge in the **Knowledge Check**, then apply it in the **Hands-on Labs**."
+    }
+  ]
+}

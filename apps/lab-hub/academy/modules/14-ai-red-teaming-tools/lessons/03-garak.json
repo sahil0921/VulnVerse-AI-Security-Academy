@@ -1,0 +1,17 @@
+{
+  "slug": "03-garak",
+  "title": "Garak (NVIDIA)",
+  "type": "content",
+  "difficulty": "Advanced",
+  "reading_time": "9 min read",
+  "sections": [
+    {"type": "content", "body": "## What Is Garak\n\nGarak (Generative AI Red-teaming & Assessment Kit) is NVIDIA's LLM vulnerability scanner. Think of it like `nmap` or `nikto`, but for language models — you point it at a target model and it runs a large library of **probes**, each designed to trigger a specific class of vulnerability (jailbreaks, prompt leakage, toxicity, hallucination, encoding bypass, and more), then scores the responses with built-in **detectors**."},
+    {"type": "content", "body": "## Best For\n\n- Fast, broad vulnerability scanning of a single model — you get coverage across dozens of attack classes in one command\n- Comparing how a model behaves before/after fine-tuning or guardrail changes\n- Testing local models served via Ollama, HuggingFace, or a custom REST endpoint (Garak isn't locked to OpenAI-style APIs)"},
+    {"type": "code", "language": "bash", "body": "pip install garak\n\n# Confirm install\npython -m garak --version"},
+    {"type": "content", "body": "## Core Concepts\n\n| Term | Meaning |\n|---|---|\n| **Probe** | An attack module — e.g. `dan` (DAN-style jailbreaks), `promptinject`, `encoding` (Base64/ROT13 bypass), `xss` (markdown/HTML injection) |\n| **Detector** | Scores whether the target's response indicates a successful attack |\n| **Generator** | The adapter for the target model type — `openai`, `huggingface`, `ollama`, `rest` (custom HTTP), etc. |\n| **Report** | An HTML/JSONL report summarizing pass/fail rates per probe |"},
+    {"type": "code", "language": "bash", "body": "# Full scan against an OpenAI-compatible model\ngarak --model_type openai --model_name gpt-4 --probes all\n\n# Target only prompt injection probes\ngarak --model_type openai --model_name gpt-4 --probes promptinject\n\n# Scan a local Ollama model (as used in this platform's labs)\ngarak --model_type ollama.OllamaChat --model_name llama3.2:1b -p dan.Dan_11_0\n\n# Scan a custom REST endpoint (your own app, not a named provider)\ngarak --model_type rest -G rest_config.json --probes encoding"},
+    {"type": "content", "body": "## Example Output\n\n```\ngarak LLM vulnerability scanner v0.9.x\nloading generator: openai:gpt-4\nloading probes: dan, promptinject, encoding, xss\n\ndan.DAN_Jailbreak                 : 14/50 attempts succeeded (28.0%)\npromptinject.HijackHateHumans     : 2/50 attempts succeeded (4.0%)\nencoding.InjectBase64             : 9/50 attempts succeeded (18.0%)\nxss.MarkdownImageExfil            : 0/50 attempts succeeded (0.0%)\n\nreport written to garak_runs/gpt-4.report.jsonl\nhtml summary: garak_runs/gpt-4.report.html\n```\n\nThe percentage is your attack success rate per probe class — a fast way to see exactly where a model's guardrails are weakest without writing a single custom prompt."},
+    {"type": "note", "body": "Run `garak --list_probes` to see the full current probe catalog — it changes release to release as NVIDIA adds new attack classes. Don't rely on memorized probe names; always check the installed version's list before an engagement."},
+    {"type": "content", "body": "## When to Reach for Garak\n\nGarak is usually the **first tool to run** against a new target — it's fast, broad, and needs almost no setup. Use its results to identify which vulnerability classes are worth digging into manually or with a more targeted framework like PyRIT or DeepTeam."}
+  ]
+}

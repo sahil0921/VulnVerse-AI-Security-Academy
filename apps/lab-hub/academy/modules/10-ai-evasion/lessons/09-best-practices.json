@@ -1,0 +1,41 @@
+{
+  "slug": "09-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Best Practices for Evasion Testing & Defense\n\nThis final theory lesson brings everything together into practical guidance, for both the red team, meaning testing, and the blue team, meaning defending. Use this as your checklist when assessing a real AI classifier."
+    },
+    {
+      "type": "content",
+      "body": "## For the red team (testing evasion)\n\n1. **Start white-box if you can.** If the client gives you access to the model, use it. It's faster and reveals the theoretical worst case scenario.\n2. **Always confirm black-box too.** Real attackers rarely have direct model access. Prove the attack also works with query-only access, since that better reflects real-world risk.\n3. **Respect the query budget.** Plan your 40-40-20 split before you start firing off requests.\n4. **Measure the effectiveness curve.** Report evasion rate versus words added, not just a single number. The curve tells the client exactly where their filter collapses.\n5. **Keep evidence.** Log baseline scores, augmented messages, and final labels throughout. Reproducibility is what makes a report genuinely credible.\n6. **Stay in scope.** Evasion testing is powerful, so only run it against systems you're explicitly authorized to test."
+    },
+    {
+      "type": "content",
+      "body": "## For the blue team (defending)\n\n1. **Assume additive models are exploitable.** If you run Naive Bayes or a plain linear classifier on bag-of-words, treat GoodWords as a genuinely live threat.\n2. **Add context features.** N-grams and interaction terms break the independence assumption attackers rely on entirely.\n3. **Cap per-word influence.** Stop any single word from dragging the overall score too far in one direction.\n4. **Layer models.** Ensembles are much harder to fool with just one word set.\n5. **Train on attacks.** Feed adversarial examples into training so the model learns the trick directly.\n6. **Monitor relentlessly.** Log borderline decisions and repeated near-identical queries. You can't fix what you can't see."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Assess classifier] --> B[Test white-box]\n    A --> C[Test black-box]\n    B --> D[Report curve and evidence]\n    C --> D\n    D --> E[Recommend layered defenses]\n    E --> F[Context features]\n    E --> G[Model hardening]\n    E --> H[Monitoring and detection]"
+    },
+    {
+      "type": "content",
+      "body": "## Common mistakes to avoid\n\n| Mistake | Why it hurts | Do this instead |\n|---|---|---|\n| Testing only white-box | Overstates or misstates real risk | Confirm black-box too |\n| Reporting one evasion number | Hides where the filter fails | Report the full curve |\n| Ignoring query budget | Attack looks unrealistic or noisy | Plan and track spend |\n| Relying on obscurity | Attackers discover words by query | Fix the architecture |\n| One defense only | Attackers route around it | Defense-in-depth |\n| No monitoring | Attacks scale undetected | Log and alert on probing |"
+    },
+    {
+      "type": "content",
+      "body": "## Mapping to real frameworks\n\nEvasion attacks map cleanly onto established industry threat models. When writing reports, tie your findings to recognized categories so stakeholders can immediately understand the risk:\n\n- **MITRE ATLAS** — the adversarial-ML knowledge base; evasion falls under the ML Model Access and Evade ML Model techniques.\n- **OWASP** — covers improper handling of model output and input validation gaps.\n- **NIST AI RMF** — evasion is treated as a core robustness concern under trustworthy-AI guidance.\n\nSpeaking the language of these established frameworks turns a clever technical trick into a genuinely business-relevant finding."
+    },
+    {
+      "type": "note",
+      "body": "**The one-sentence summary of this whole module:** evasion succeeds because simple classifiers add up independent word evidence, so an attacker who piles on the right words can effectively outvote the truth. Defenders must break that independence, cap influence, layer their models, and actually watch the logs."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Test both white-box and black-box; report the full effectiveness curve, not just one number.\n- Respect query budgets and keep reproducible evidence throughout your testing.\n- Defenders should add context features, cap word influence, use ensembles, and train directly on attacks.\n- Monitoring is non-negotiable, detect probing even when you can't fully block it.\n- Map your findings to MITRE ATLAS, OWASP, and NIST AI RMF for real-world business impact.\n\nYou're now ready for the Knowledge Check, followed by the Hands-on Labs and the two-phase skills assessment."
+    }
+  ]
+}

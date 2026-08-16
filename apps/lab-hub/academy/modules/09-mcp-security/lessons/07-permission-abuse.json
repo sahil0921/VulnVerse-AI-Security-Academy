@@ -1,0 +1,51 @@
+{
+  "slug": "07-permission-abuse",
+  "title": "Permission Abuse & Traversal",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Permission Abuse & Traversal\n\nMCP tools run with the permissions of the server process itself, not the permissions of the user who actually triggered them. This gap between what a tool advertises and what it can actually reach is a huge source of real-world vulnerabilities.\n\n## The core problem: over-privileged tools\n\nA tool described as \"query customer records\" might connect to the database as the owner of every single table, including tables holding passwords, credit cards, and API secrets.\n\nThe description says \"limited.\" The reality is \"full access.\"\n\n**A simple comparison:** imagine a receptionist whose job is simply to \"hand out visitor badges.\" But you accidentally gave them the master key to every room in the building. Their job is limited, but their actual keys are not. An attacker who convinces the receptionist to help gets the master key too."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Tool says: query customers] --> B[Real permission: owns all tables]\n    B --> C[customer_pii]\n    B --> D[api_keys]\n    B --> E[financial_records]\n    style B fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Attack 1: excessive database permissions\n\nWith only chat access, an attacker can probe a database tool step by step:\n\n1. \"What tables exist?\" reveals customer_pii, api_keys, and financial_records.\n2. \"Show me the customer PII table.\" returns SSNs, emails, and birth dates.\n3. \"Show the API keys table.\" returns live production keys directly.\n4. \"What role does this tool use?\" confirms it owns absolutely everything.\n\nNo exploit code is needed here at all, just natural language directed at an over-privileged tool.\n\n## Attack 2: path traversal (broken sandbox)\n\nMany file tools try to stay confined inside an allowed folder, such as `/data/documents/`. The order in which checks are performed decides whether that sandbox actually holds."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: checks the prefix BEFORE normalizing the path\ndef read_document(path: str) -> str:\n    allowed = \"/data/documents/\"\n    # Check happens on the raw string first\n    if not path.startswith(allowed):\n        raise ValueError(\"Access denied\")\n    # Path is resolved AFTER the check - too late!\n    with open(path) as f:\n        return f.read()\n\n# Attacker input:\n# /data/documents/../.secrets/credentials.json\n# - starts with /data/documents/  -> passes the check\n# - after resolving '..' -> /data/.secrets/credentials.json\n# Sandbox escaped."
+    },
+    {
+      "type": "content",
+      "body": "### Why it fails\n\nThe string `/data/documents/../.secrets/credentials.json` starts with the allowed prefix, so the check passes without issue. But `..` means \"go up one folder.\" After the operating system resolves it, the real path becomes `/data/.secrets/credentials.json`, well outside the intended sandbox.\n\nThis exact class of bug received real CVE identifiers, CVE-2025-53109 and CVE-2025-53110, in an official MCP filesystem package."
+    },
+    {
+      "type": "note",
+      "body": "**The rule:** always resolve, meaning normalize, the path first, and only then check the prefix against it. Checking a raw, unresolved string first is the underlying mistake."
+    },
+    {
+      "type": "content",
+      "body": "## Attack 3: symlink escape\n\nEven servers that do normalize paths can still be fooled by symbolic links, meaning shortcuts that point to a completely different location.\n\nThe problem comes from using logical normalization (normpath) instead of physical resolution (realpath):\n\n- normpath just cleans up the text of a path, handling things like `../`. It does not follow symlinks at all.\n- realpath follows every symlink through to the true physical file.\n\nIf a folder like `/data/projects/vendor-docs/` is secretly a symlink pointing to `/data/secrets/`, a normpath-based check still sees `/data/projects/...` and allows it through, while the real underlying file actually lives in secrets."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: normpath does not follow symlinks\nimport os\nsafe = os.path.normpath(path)          # cosmetic only\nif not safe.startswith(\"/data/projects\"):\n    raise ValueError(\"denied\")\n\n# SECURE: realpath follows symlinks to the true location\nreal = os.path.realpath(path)          # resolves symlinks\nif not real.startswith(\"/data/projects\" + os.sep):\n    raise ValueError(\"denied\")\n# Now a symlink pointing to /data/secrets is caught."
+    },
+    {
+      "type": "content",
+      "body": "## Vulnerable vs secure\n\n| Vulnerable | Secure |\n|---|---|\n| Tool runs as table owner | Tool runs as scoped read-only role |\n| Prefix check on raw string | Normalize/resolve then check |\n| Uses normpath (ignores symlinks) | Uses realpath (follows symlinks) |\n| One tool = broad access | Least privilege per tool |\n\n## How to defend\n\n- **Least privilege** — give each tool the minimum permission its real job actually needs. A \"read customers\" tool should get read-only access to only the customer table, nothing more.\n- **Resolve before you check** — use realpath, then verify the prefix against the resolved result.\n- **Separate database roles** per tool, rather than relying on one broad super-role for everything.\n- **Deny by default** and explicitly allowlist specific paths.\n- **Patch** MCP packages promptly, since these particular traversal CVEs are already fixed upstream."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- MCP tools run with the server's own permissions, often far more than what's actually advertised to the user.\n- Over-privileged database tools can leak PII, keys, and financial data directly through normal chat.\n- Path traversal works whenever the prefix is checked before the path is fully resolved.\n- Symlink escapes work whenever servers rely on normpath instead of realpath.\n- Fix both with least privilege and a strict resolve-then-check approach to path validation."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "slug": "07-algen",
+  "title": "ALGEN Canary Injection",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# ALGEN: Few-Shot Inversion Without Knowing the Model\n\nEvery attack covered so far assumed you know the embedding model in use. But what if you don't, and can't find out through OSINT either?\n\nALGEN, a few-shot inversion approach, is the answer. Its real superpower: it can invert embeddings even when the target's embedding model is completely unknown.\n\n## The two-part idea\n\nALGEN works in two distinct stages:\n\n1. **Train a decoder** on your own hardware. This decoder learns to turn embeddings back into text, but only within your own embedding space. It knows nothing about the target yet.\n2. **Compute an alignment**, a small mathematical bridge, specifically a linear matrix, that translates the target's embedding space into your decoder's space.\n\n**A simple comparison:** your decoder speaks \"French,\" meaning your own embedding space. The target speaks \"Spanish,\" meaning its embedding space. The alignment matrix is a small phrasebook that converts Spanish into French so your decoder can actually read it.\n\nThe alignment only needs a small number of real text-embedding pairs from the target, with quality plateauing around 1,000 to 3,000 pairs. Computing the alignment itself takes only seconds once you have the data."
+    },
+    {
+      "type": "content",
+      "body": "## Canary injection: the clever twist\n\nHow do you get real text-embedding pairs from the target's exact model without knowing what that model even is? You inject canaries.\n\nA canary is a known piece of text you deliberately insert into the target's vector database, so the target system itself embeds it for you.\n\nYou write text you already know, put it into the vector store, then export the vectors the target actually produced. Now you have perfect (text, vector) pairs computed by the exact target model in its exact environment, with no model identification needed, and no drift from doing the embedding yourself separately.\n\nThe same canary texts double as decoder training data, so a single dataset serves both purposes at once."
+    },
+    {
+      "type": "content",
+      "body": "## ALGEN as a keyword finder, not a text recoverer\n\nHere's the realistic part. ALGEN's decoder often produces approximate, wrong-topic text. It might output a CI/CD pipeline description when the real chunk was actually a password reset. So we change ALGEN's job entirely:\n\n- Old goal: reconstruct the full text exactly.\n- New goal: extract semantic fingerprints, such as domain fragments like login.example, or keywords like password and authenticate.\n\nThose fingerprints then feed directly into inference probing: you ask the RAG chatbot targeted questions built from those keywords, and the chatbot retrieves and reveals the actual document content in its response."
+    },
+    {
+      "type": "content",
+      "body": "## Beating output guardrails\n\nWhat if the RAG system redacts secrets, replacing the password with `[REDACTED]`? That redaction marker is actually good news for an attacker, it tells you exactly where a `{PASSWORD}` slot lives. You then run membership inference against the stolen vector, which still encodes the original, unredacted text, to recover the real value.\n\nThis is the key lesson here: output guardrails cannot protect data when the stolen embedding itself already encodes the unredacted text."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# ALGEN alignment: bridge the TARGET embedding space to YOUR decoder space\n# using canary (text, target_vector) pairs.\nimport numpy as np\n\n# Canary texts you injected, embedded BY THE TARGET (exported):\ntarget_vecs = np.load(\"export/canary_embeddings.npy\")   # (N, d_target)\n\n# The SAME canary texts embedded in YOUR decoder's space:\nyour_vecs = np.load(\"local/canary_embeddings.npy\")       # (N, d_local)\n\n# Solve for a linear alignment matrix W: target -> local\n# (ridge regression keeps it stable)\nlam = 0.1\nd = target_vecs.shape[1]\nW = np.linalg.solve(\n    target_vecs.T @ target_vecs + lam * np.eye(d),\n    target_vecs.T @ your_vecs,\n)\n\n# Now any stolen target vector can be mapped into your decoder's space:\nstolen = np.load(\"export/embeddings.npy\")\naligned = stolen @ W\n# 'aligned' is fed to your trained decoder to produce approximate text\n# whose KEYWORDS drive the next RAG-probing step."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Inject canary texts\"] --> B[\"Target embeds them\"]\n    B --> C[\"Export canary vectors\"]\n    C --> D[\"Train alignment matrix\"]\n    D --> E[\"Map stolen vector into decoder space\"]\n    E --> F[\"Decoder outputs approximate text\"]\n    F --> G[\"Extract keywords\"]\n    G --> H[\"Probe RAG with targeted questions\"]\n    H --> I[\"Redaction marks become PASSWORD slots\"]\n    I --> J[\"Membership inference recovers value\"]"
+    },
+    {
+      "type": "note",
+      "body": "**Cleanup and ethics:** canary injection is genuinely invasive, since it writes directly to the target's database. Always remove your canaries afterward. If you lack delete permissions, document every inserted document and chunk carefully and report it to the client. For stealth, 3,000 to 5,000 canaries give nearly the same alignment quality with a smaller footprint; spacing insertions out over several hours helps mimic normal ingestion patterns."
+    }
+  ]
+}

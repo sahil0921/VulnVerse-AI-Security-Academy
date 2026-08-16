@@ -1,0 +1,82 @@
+{
+  "slug": "03-naive-bayes",
+  "title": "Naive Bayes Internals",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Inside Naive Bayes\n\nTo attack a Naive Bayes classifier well, you must understand exactly how it thinks. Good news: it is one of the simplest models in all of machine learning.\n\n**Naive Bayes** answers one question: *Given the words in this message, what is the probability it is spam versus ham?* It then picks whichever class has the higher probability.\n\nThe word **naive** is a clue to its biggest weakness — and to how we will attack it."
+    },
+    {
+      "type": "content",
+      "body": "## Bayes' Theorem in Plain Words\n\nNaive Bayes uses **Bayes' theorem** to flip a hard question into an easy one. Here is the formula:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "P(C | D)  =  P(D | C) x P(C)\n             -------------------\n                   P(D)"
+    },
+    {
+      "type": "content",
+      "body": "Read it like this:\n\n- **P(C | D)** = probability the message is class C (spam), given the document D. **This is what we want to know.**\n- **P(D | C)** = how likely these exact words are, *if* the message were spam.\n- **P(C)** = how common spam is overall (called the *prior*).\n- **P(D)** = the same value regardless of which class we're checking, so it can be ignored when comparing spam vs ham — it cancels out.\n\n**Analogy:** A doctor sees a patient's symptoms (D) and wants to know \"how likely is this disease (C)?\" The direct question is hard to answer. So instead, they flip it around: \"*if* you had the disease, how likely are these exact symptoms?\" — because that's a much easier thing to have actually measured from past patients."
+    },
+    {
+      "type": "content",
+      "body": "## The \"Naive\" Independence Assumption\n\nNaive Bayes assumes **every word is completely independent** of every other word, given the class. In plain terms: it never asks whether two words make sense *together* — it just looks at each word on its own.\n\nThis means the probability of the whole message is just every individual word's probability multiplied together:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "P(D | C)  =  P(word_1 | C) x P(word_2 | C) x P(word_3 | C) x ... x P(word_n | C)\n\n(the probability of the whole message equals every word's\n probability multiplied together, one after another)"
+    },
+    {
+      "type": "content",
+      "body": "- **Analogy:** It treats a sentence like a bag of loose coins tipped out on a table. It counts how many of each coin there are, but has no idea what order they were dropped in.\n- **Why this matters for attacks:** the model cannot tell that \"free money now\" followed by \"meeting thanks tomorrow\" makes no logical sense as a single message. It just adds up each word's individual vote, with zero regard for whether the combination is coherent."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TB\n    A[Message words] --> B[Look up each word's spam score]\n    A --> C[Look up each word's ham score]\n    B --> D[Sum spam scores in log space]\n    C --> E[Sum ham scores in log space]\n    D --> F{Compare totals}\n    E --> F\n    F -->|Spam total higher| G[Label: Spam]\n    F -->|Ham total higher| H[Label: Ham]"
+    },
+    {
+      "type": "content",
+      "body": "## Why the Model Works in \"Log Space\"\n\nMultiplying many small probabilities together (each one is a fraction less than 1) quickly produces a number so tiny the computer rounds it down to zero. To avoid this, Naive Bayes uses **logarithms** — a mathematical trick that turns multiplication into simple addition instead:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "log P(D | C)  =  log P(word_1 | C) + log P(word_2 | C) + ... + log P(word_n | C)\n\n(taking the log of each word's probability, then adding them\n up, gives the same ranking as multiplying the original\n probabilities — but without the numbers shrinking to zero)"
+    },
+    {
+      "type": "content",
+      "body": "This is the single most important fact for an attacker to understand:\n\n> **Because scores are added together, every extra word simply shifts the running total by a fixed amount.**\n\nEach word you add to a message is just one more number added to the sum. Add enough words that lean strongly \"ham,\" and the ham total eventually overtakes the spam total — even if you never remove or change a single word of the original spam content."
+    },
+    {
+      "type": "content",
+      "body": "## Goodness Score: Ranking Words for Attack\n\nTo know exactly which words are most useful for an attack, we rank every word by how strongly it signals ham over spam. This is called the **goodness score**:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "goodness(word)  =        P(word | ham)\n                    -----------------------\n                    P(word | spam) + epsilon"
+    },
+    {
+      "type": "content",
+      "body": "- The small **epsilon** value in the bottom just prevents a division-by-zero error, for cases where a word never once appeared in any spam message during training.\n- A **high** goodness score means the word shows up often in ham but rarely (or never) in spam — exactly the kind of word you'd want to add to evade detection.\n\n**Example:** the word *meeting* might appear constantly in real, legitimate messages and almost never in spam, giving it a high goodness score. Words like *free* or *winner* score very low, since they lean heavily toward spam instead."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\n\n# feature_log_prob_ holds log P(word | class) for each class\n# Row 0 = ham, Row 1 = spam (label order depends on training)\nham_log_probs  = classifier.feature_log_prob_[0]\nspam_log_probs = classifier.feature_log_prob_[1]\nvocabulary     = vectorizer.get_feature_names_out()\n\nepsilon = 1e-10\ngoodness_scores = []\n\nfor i, word in enumerate(vocabulary):\n    ham_prob  = np.exp(ham_log_probs[i])   # convert log value back to a real probability\n    spam_prob = np.exp(spam_log_probs[i])\n    goodness  = ham_prob / (spam_prob + epsilon)\n    goodness_scores.append((word, goodness))\n\n# Highest goodness = best words to append to a spam message\ngoodness_scores.sort(key=lambda x: x[1], reverse=True)\nprint(goodness_scores[:10])"
+    },
+    {
+      "type": "note",
+      "body": "**Smoothing makes attacks easier.** A technique called *Laplace smoothing* gives every word a small non-zero probability, even words the model never saw during training. This means the model never fully \"rejects\" a strange mix of words outright. That leniency is exactly what lets an attacker pile on a pile of unrelated ham words without ever triggering a hard rejection."
+    },
+    {
+      "type": "content",
+      "body": "## Why Naive Bayes Is So Exploitable\n\nFour design choices combine to make it a near-perfect target:\n\n1. **Independence assumption** — no penalty at all for nonsensical word combinations.\n2. **Additive log scoring** — every added word simply shifts the running total, predictably.\n3. **Static learned probabilities** — once trained, the model's word probabilities don't change, so an attacker can study a fixed, unmoving target.\n4. **Smoothing** — no hard rejection of unusual or mixed-up input.\n\n## Key Takeaways\n\n- Naive Bayes picks whichever class has the higher probability, calculated using Bayes' theorem.\n- It **naively** assumes every word is independent of every other word, completely ignoring meaning and word order.\n- Scores are **added together in log space**, so every single word nudges the final decision one way or the other.\n- The **goodness score** ranks words by how strongly they signal ham over spam — the higher the score, the better the word is for evasion.\n- These four design choices together are precisely what the upcoming GoodWords attack (next lesson) takes advantage of."
+    }
+  ]
+}

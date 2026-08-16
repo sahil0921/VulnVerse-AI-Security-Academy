@@ -1,0 +1,228 @@
+{
+  "slug": "12-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 20,
+  "questions": [
+    {
+      "q": "In MCP architecture, which component is created by the Host and maintains a strict one-to-one connection with a single Server?",
+      "options": [
+        "The Tool",
+        "The Resource",
+        "The Client",
+        "The Prompt"
+      ],
+      "answer": 2,
+      "explanation": "The Client is created by the Host and holds a dedicated connection to exactly one MCP Server. If the Host connects to three servers, it creates three separate Clients."
+    },
+    {
+      "q": "Which MCP server capability is the highest security risk because the model itself decides when to invoke it?",
+      "options": [
+        "Prompts (user-controlled)",
+        "Transport (stdio)",
+        "Resources (application-controlled, read-only)",
+        "Tools (model-controlled actions)"
+      ],
+      "answer": 3,
+      "explanation": "Tools are the highest risk because the model itself decides when to call them based on the conversation. Since the model can be manipulated, an attacker who influences it can effectively control which tools run."
+    },
+    {
+      "q": "What is the key difference between a Resource and a Tool in MCP?",
+      "options": [
+        "Resources are controlled by the model; Tools are controlled by the application",
+        "Resources provide read-only data for context; Tools are actions the model can trigger",
+        "There is no functional difference between them",
+        "Resources require authentication; Tools never do"
+      ],
+      "answer": 1,
+      "explanation": "Resources are read-only data fetched by the application to give the AI context, while Tools are actions, such as writing a file or sending an email, that the model itself decides to call."
+    },
+    {
+      "q": "Why can a deleted secret still be recovered through an MCP git server?",
+      "options": [
+        "The git server caches all files in memory",
+        "MCP automatically backs up deleted files",
+        "Git preserves every previous version in its history; deletion is just a new commit",
+        "The LLM memorizes file contents permanently"
+      ],
+      "answer": 2,
+      "explanation": "Git's entire purpose is to remember every change ever made. Deleting a file just records a new version; the old version, including any secrets, remains in history indefinitely."
+    },
+    {
+      "q": "In git history mining via MCP, what is a strong signal that a secret might be recoverable?",
+      "options": [
+        "A commit message like 'remove production secrets' or 'delete config'",
+        "A commit message that says 'fix typo'",
+        "A repository with no commit history at all",
+        "A file that was never committed to the repository"
+      ],
+      "answer": 0,
+      "explanation": "Commit messages referencing secret removal are a strong tell that the secret exists exactly one commit earlier in the history, making it an easy target to recover."
+    },
+    {
+      "q": "In tool description poisoning, why does the user typically NOT notice the malicious instructions?",
+      "options": [
+        "The instructions are encrypted end-to-end",
+        "The description is injected into the model's hidden context, while the user only sees the tool name",
+        "The Host displays a warning that users ignore",
+        "The attack only works when the user is offline"
+      ],
+      "answer": 1,
+      "explanation": "Tool descriptions get injected directly into the model's context but are never shown to the user, who only sees the tool's name. This makes the description field a perfect hiding place."
+    },
+    {
+      "q": "What makes tool description poisoning a supply chain concern?",
+      "options": [
+        "It requires physical access to the server hardware",
+        "One poisoned shared server compromises every user who connects to it",
+        "It only affects a single user at a time",
+        "It can only be delivered via email"
+      ],
+      "answer": 1,
+      "explanation": "Since a poisoned description lives on a shared MCP server, every single user who connects to that server is affected simultaneously, making it a classic supply chain attack pattern."
+    },
+    {
+      "q": "Why is an MCP App phishing attack (fake login inside the chat) more effective than a traditional phishing email?",
+      "options": [
+        "It bypasses the user's antivirus software",
+        "It appears inside the trusted AI assistant with no URL bar to inspect, and the user initiated the interaction",
+        "It uses a stronger encryption algorithm",
+        "It can only be seen by administrators"
+      ],
+      "answer": 1,
+      "explanation": "Unlike email phishing, there's no URL bar or sender address to inspect, and the user themselves started the interaction, making a fake login rendered inside the trusted AI chat feel completely legitimate."
+    },
+    {
+      "q": "How does stolen data typically escape a sandboxed MCP App iframe?",
+      "options": [
+        "Through direct file system access",
+        "Via postMessage through the AppBridge, disguised as a call to a legitimate tool",
+        "The iframe has no sandboxing at all",
+        "Through the browser's cookie storage"
+      ],
+      "answer": 1,
+      "explanation": "Since the iframe is sandboxed and can't make normal network requests, attackers abuse postMessage through the AppBridge, calling a legitimate tool like 'save_snippet' with stolen data disguised as its content."
+    },
+    {
+      "q": "A file tool checks that a path starts with '/data/documents/' BEFORE resolving it, so '/data/documents/../.secrets/creds.json' succeeds. What is the correct fix?",
+      "options": [
+        "Reject any path containing a dot",
+        "Move all secrets into the documents folder",
+        "Normalize/resolve the path with realpath first, then check the prefix",
+        "Only allow paths shorter than 50 characters"
+      ],
+      "answer": 2,
+      "explanation": "The check must happen on the resolved path, not the raw string. Resolving with realpath first reveals the true destination, so the prefix check catches the traversal attempt correctly."
+    },
+    {
+      "q": "Why can a symlink escape a path check that uses normpath instead of realpath?",
+      "options": [
+        "normpath only cleans up path text like '../' but does not follow symbolic links to their true destination",
+        "normpath is faster but functionally identical to realpath",
+        "Symlinks are not supported on any operating system",
+        "realpath ignores symlinks while normpath follows them"
+      ],
+      "answer": 0,
+      "explanation": "normpath is purely textual and does not resolve symlinks, so a folder that looks like it's inside the sandbox but is secretly a symlink pointing elsewhere passes the check undetected."
+    },
+    {
+      "q": "In a tool-chaining SSTI attack, why does a payload like '{{ 7*7 }}' often FAIL when sent through the LLM?",
+      "options": [
+        "The payload is too short to trigger the engine",
+        "The template engine cannot process numbers",
+        "MCP blocks all mathematical operations",
+        "The LLM computes 49 itself and passes the result, so the template engine never sees the expression"
+      ],
+      "answer": 3,
+      "explanation": "Since the AI evaluates simple arithmetic on its own before storing the result, the template engine never actually receives the raw expression, making this classic test unreliable through an LLM."
+    },
+    {
+      "q": "Why do attackers use an object like 'lipsum.__globals__' instead of arithmetic to confirm SSTI through an LLM?",
+      "options": [
+        "It runs faster than arithmetic expressions",
+        "The AI cannot compute or fake that output itself, so it stores the expression verbatim",
+        "It only works in JavaScript, not Python",
+        "It requires no special syntax at all"
+      ],
+      "answer": 1,
+      "explanation": "Since the AI has no way to evaluate an engine-specific object like this on its own, it stores the raw expression unchanged, allowing it to survive until it reaches the actual vulnerable template renderer."
+    },
+    {
+      "q": "What technique do attackers use to bypass an LLM's refusal to write obvious payloads like reverse shell commands?",
+      "options": [
+        "Asking the AI politely a second time",
+        "Splitting and encoding the payload across multiple fragments and sessions so no single piece looks malicious",
+        "Using a different programming language entirely",
+        "Disabling the AI's internet connection"
+      ],
+      "answer": 1,
+      "explanation": "By splitting a payload into encoded fragments, using verbatim storage framing, and spreading it across separate sessions, attackers ensure no single piece the AI sees resembles a known malicious pattern."
+    },
+    {
+      "q": "Why is a reverse shell called 'reverse'?",
+      "options": [
+        "It runs commands backwards, executing the last one first",
+        "The victim server connects back to the attacker, rather than the attacker connecting to the victim",
+        "It reverses the output text displayed to the attacker",
+        "It only works on reversed IP addresses"
+      ],
+      "answer": 1,
+      "explanation": "Normally an attacker connects to a server, but firewalls often block incoming connections. A reverse shell flips this: the victim initiates an outbound connection to the attacker, which is usually allowed through."
+    },
+    {
+      "q": "What is the primary reason egress filtering helps defend against reverse shells?",
+      "options": [
+        "It encrypts all outbound network traffic automatically",
+        "It blocks servers from making arbitrary outbound connections, preventing the victim from calling back to the attacker",
+        "It speeds up legitimate outbound requests",
+        "It only affects incoming connections, not outgoing ones"
+      ],
+      "answer": 1,
+      "explanation": "Since a reverse shell depends on the victim server making an outbound connection to the attacker, restricting what outbound connections a server can make directly blocks this exact attack path."
+    },
+    {
+      "q": "Why does an over-privileged database tool represent a serious risk even without any coding exploit?",
+      "options": [
+        "An attacker can extract sensitive data using plain natural language, since the tool's real access far exceeds what it advertises",
+        "It only matters if the attacker has admin credentials already",
+        "Database tools cannot be queried through chat interfaces",
+        "It requires physical access to the database server"
+      ],
+      "answer": 0,
+      "explanation": "If a tool described as 'query customer records' actually has owner-level access to every table, an attacker can simply ask in plain English to see sensitive tables like api_keys, no exploit code needed."
+    },
+    {
+      "q": "What is the recommended defense against an AI accidentally authorizing a privileged action based on a user's claim like 'I am an administrator'?",
+      "options": [
+        "Trust the claim if it's phrased politely",
+        "Enforce authorization in code, tied to the real authenticated session, never in the prompt",
+        "Ask the AI to double-check by asking the same question again",
+        "Ignore all requests that mention the word 'administrator'"
+      ],
+      "answer": 1,
+      "explanation": "Prompt-based restrictions are trivially bypassed by claims of authority. Real authorization must be enforced in code against the actual authenticated user and role, not left up to the model's judgment."
+    },
+    {
+      "q": "Which single principle best summarizes the root cause of nearly every MCP attack covered in this module?",
+      "options": [
+        "Weak password hashing",
+        "Slow network connections",
+        "Broken trust relationships between the user, the LLM, the tools, and their inputs",
+        "Outdated TLS certificates"
+      ],
+      "answer": 2,
+      "explanation": "Every attack in this module exploits some link in the trust chain: the user trusting the LLM, the LLM trusting its tools, or tools trusting their inputs. Defense means verifying trust at every link instead of assuming it."
+    },
+    {
+      "q": "According to the module's defense-in-depth approach, why is no single control considered sufficient on its own?",
+      "options": [
+        "Because a determined attacker can potentially defeat any one layer, so multiple layers must work together",
+        "Because MCP requires exactly seven layers of defense to function at all",
+        "Because single controls are always more expensive than layered ones",
+        "Because layering has no real security benefit, it just looks more thorough"
+      ],
+      "answer": 0,
+      "explanation": "Defense in depth combines least privilege, input validation, human approval, server verification, secure transport, and monitoring together, so that defeating one layer alone isn't enough to succeed."
+    }
+  ]
+}

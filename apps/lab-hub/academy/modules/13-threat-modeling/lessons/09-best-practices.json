@@ -1,0 +1,99 @@
+{
+  "slug": "09-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "12 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## Bringing It All Together\n\nYou now have the full toolkit: reconstruction, assumption registers, crown jewels, trust boundaries, escalation paths, ATLAS mapping, and intelligence briefs. This lesson steps back to cover the **principles and frameworks** that make the whole discipline work, plus the habits that separate great threat modelers from mediocre ones.\n\nWe'll also fill in a few important frameworks you should recognize by name: **STRIDE, PASTA, DREAD, LINDDUN**, and the ideas of **secure design, shift-left, and defense in depth**."
+    },
+    {
+      "type": "content",
+      "body": "## Secure Design Principles\n\n**Security by design** means building security in from the very start, not bolting it on after launch. A system designed with security in mind is far cheaper and stronger than one patched later.\n\n**Shift-left security** is the practice of doing security work *earlier* in the development timeline — moving it \"left\" on the project schedule. Threat modeling is the ultimate shift-left activity: it happens on the whiteboard, before code exists.\n\n**An analogy.** It's far easier to design a house with fire exits than to cut new doors into finished walls. Secure design and shift-left mean drawing the fire exits into the blueprint."
+    },
+    {
+      "type": "content",
+      "body": "## STRIDE: A Framework for Finding Threats\n\n**STRIDE** is the most popular framework for the \"what can go wrong?\" question. It's a checklist of six threat categories. For each part of your system, you ask: *is it vulnerable to any of these six?*\n\n| Letter | Threat | Plain meaning | AI example |\n|---|---|---|---|\n| **S** | Spoofing | Pretending to be someone else | Using a stolen agent token |\n| **T** | Tampering | Changing data or code | Poisoning the vector database |\n| **R** | Repudiation | Denying an action with no proof | Vault can't tell which agent acted |\n| **I** | Information Disclosure | Leaking secrets | Extracting the system prompt |\n| **D** | Denial of Service | Making the system unavailable | Flooding the model with requests |\n| **E** | Elevation of Privilege | Gaining more power than allowed | Low agent invokes an admin-only tool |\n\nWalk each component through all six letters. STRIDE makes sure you don't overlook a whole category of threat."
+    },
+    {
+      "type": "content",
+      "body": "## Applying STRIDE to Sentri\n\nLet's run one Sentri component — the **vector database** — through STRIDE.\n\n- **Spoofing:** No auth, so anyone inside can pretend to be a legitimate reader. **Threat present.**\n- **Tampering:** Writable staging DB means poisoning is possible. **Threat present.**\n- **Repudiation:** No logging of who read what. **Threat present.**\n- **Information Disclosure:** Unauthenticated read exposes detection rules and runbooks. **Threat present.**\n- **Denial of Service:** A flood of queries could overload it. **Possible.**\n- **Elevation of Privilege:** Poisoned content can steer a privileged agent. **Threat present.**\n\nOne unauthenticated database lights up almost every STRIDE category. That's a strong signal it's a top-priority fix."
+    },
+    {
+      "type": "content",
+      "body": "## Other Frameworks to Know\n\nSTRIDE isn't the only game in town. Recognize these by name and purpose.\n\n| Framework | Focus | Use it when |\n|---|---|---|\n| **STRIDE** | Threat categories | You want a broad, per-component threat checklist |\n| **PASTA** | Risk & business impact | You want a full, business-driven, 7-stage process |\n| **DREAD** | Scoring threats | You want a simple way to rate severity (now mostly historical) |\n| **LINDDUN** | Privacy threats | You want to focus on data privacy specifically |\n\n**PASTA** (Process for Attack Simulation and Threat Analysis) is a heavyweight, business-centered method — it starts from business objectives and works down to technical threats. **DREAD** is an older scoring system (Damage, Reproducibility, Exploitability, Affected users, Discoverability); it's largely historical now because scores were subjective, but you'll still hear it referenced. **LINDDUN** is STRIDE's privacy-focused cousin, great for systems handling personal data."
+    },
+    {
+      "type": "note",
+      "body": "**Don't collect frameworks like trophies.** The goal is not to run every framework on every system. Pick the one that fits your need. STRIDE for a quick, broad pass. PASTA when business impact drives everything. LINDDUN when privacy is the main concern. A framework is a tool, not a religion."
+    },
+    {
+      "type": "content",
+      "body": "## Abuse Cases and Misuse Cases\n\nNormal engineering writes **use cases**: *\"The user asks a question and the bot answers.\"* Threat modeling adds two darker cousins.\n\n- **Misuse case** — a legitimate feature used in a harmful way. *\"The user asks the bot to summarize a page, and the page contains hidden malicious instructions.\"*\n- **Abuse case** — a deliberate attack scenario. *\"An attacker floods the bot with prompts designed to leak the system prompt.\"*\n\nWriting abuse and misuse cases forces you to imagine the feature turned against its owner. Every use case should have at least one matching misuse case."
+    },
+    {
+      "type": "content",
+      "body": "## Risk = Likelihood × Impact\n\nOnce you've listed threats, you must **prioritize** them. You can't fix everything at once. The core formula is simple:\n\n**Risk = Likelihood × Impact**\n\n- **Likelihood** — how probable is this threat? (Is it easy to pull off? Is the path clear?)\n- **Impact** — how bad is it if it happens? (Does it hit a crown jewel? Does it harm the business?)\n\nA threat that is both *likely* and *high-impact* is your top priority. A threat that is *unlikely* and *low-impact* can wait. This lets you spend limited time where it matters most."
+    },
+    {
+      "type": "content",
+      "body": "## The Risk Matrix\n\nA **risk matrix** turns the formula into a simple visual grid. Likelihood on one axis, impact on the other. Each threat lands in a cell, and the cell's color tells you how urgently to act.\n\n| | Low Impact | Medium Impact | High Impact |\n|---|---|---|---|\n| **High Likelihood** | Medium | High | Critical |\n| **Medium Likelihood** | Low | Medium | High |\n| **Low Likelihood** | Low | Low | Medium |\n\nFor Sentri, the *unauthenticated vector DB* is **high likelihood** (trivially exploited) and **high impact** (leaks crown jewels) — landing it in the **Critical** cell. That's where you start."
+    },
+    {
+      "type": "content",
+      "body": "## The Risk Register\n\nJust as the assumption register tracks guesses, the **risk register** tracks threats and their handling. Each row is one risk.\n\n| ID | Threat | Likelihood | Impact | Risk | Mitigation | Status |\n|---|---|---|---|---|---|---|\n| R-01 | Unauth vector DB read | High | High | Critical | Add authentication | Open |\n| R-02 | Poisoned staging content | Medium | High | High | Validate retrieved content | Open |\n| R-03 | Stolen agent token abuse | Medium | High | High | Scope tokens tightly | Open |\n\nThe risk register is a core professional deliverable. It tells the client exactly what risks exist, how serious each is, and what to do about them."
+    },
+    {
+      "type": "content",
+      "body": "## Mitigation and Defense in Depth\n\nOnce you know your top risks, you plan **mitigations** — the controls that reduce them.\n\n**Defense in depth** is the principle of using *multiple layers* of defense, so that if one fails, another still protects you. Never rely on a single control.\n\n- Layer 1: Authenticate the vector database.\n- Layer 2: Validate content the agents retrieve.\n- Layer 3: Monitor for unusual bulk reads.\n- Layer 4: Scope agent tokens so a stolen one does little.\n\nAn attacker now has to defeat *every* layer, not just one. That's dramatically harder."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Attacker\"] --> L1[\"Layer 1:\\nAuthentication\"]\n    L1 --> L2[\"Layer 2:\\nContent validation\"]\n    L2 --> L3[\"Layer 3:\\nMonitoring\"]\n    L3 --> L4[\"Layer 4:\\nToken scoping\"]\n    L4 --> J[\"Crown Jewel\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Compensating Controls and Residual Risk\n\nSometimes you can't apply the ideal fix. Maybe adding authentication to the vector DB would break a legacy integration this quarter. In that case you use a **compensating control** — an alternative that reduces the risk another way (e.g., network-isolate the DB so only agents can reach it).\n\nAfter all controls are in place, whatever risk *remains* is called **residual risk**. You can rarely reach zero risk. The goal is to reduce residual risk to a level the business accepts *knowingly*. Documenting residual risk is honest and professional — it tells the client exactly what danger they're choosing to live with."
+    },
+    {
+      "type": "content",
+      "body": "## Design Reviews and Threat Modeling Workshops\n\nThreat modeling works best as a **team activity**, not a solo one.\n\n- A **secure design review** examines an architecture *before* it ships, hunting for flaws on paper.\n- A **threat modeling workshop** gathers engineers, security folks, and product owners to brainstorm threats together.\n\nDifferent people spot different threats. The developer knows the code's weak spots; the security engineer knows attacker tricks; the product owner knows what data really matters. Running these sessions early — shifting left — catches the most dangerous flaws when they're cheapest to fix."
+    },
+    {
+      "type": "content",
+      "body": "## Vulnerable vs. Secure: A Quick Code Example\n\nThreat modeling often points at a risky code pattern. Here's a tiny example for Sentri's tool server.\n\n**Vulnerable version** — the tool trusts the agent completely:"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: any authenticated agent can call any tool\ndef invoke_tool(agent_token, tool_name, params):\n    if verify_token(agent_token):        # only checks 'is this a valid token'\n        return TOOLS[tool_name](**params) # ...then runs ANY tool\n    raise PermissionError(\"invalid token\")"
+    },
+    {
+      "type": "content",
+      "body": "**Why it's vulnerable:** it checks *that* the token is valid, but not *what that specific agent is allowed to do*. A stolen low-privilege token can invoke a high-privilege tool like `rotate_secret`. This is an **Elevation of Privilege** threat (the E in STRIDE).\n\n**How an attacker abuses it:** steal any agent token, then call the most powerful tool available.\n\n**The secure version** — the tool checks the agent's specific permissions:"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# SECURE: check that THIS agent is allowed THIS tool\ndef invoke_tool(agent_token, tool_name, params):\n    claims = verify_token(agent_token)\n    if not claims:\n        raise PermissionError(\"invalid token\")\n    if tool_name not in claims[\"allowed_tools\"]:   # per-agent scoping\n        raise PermissionError(\"agent not authorized for this tool\")\n    return TOOLS[tool_name](**params)"
+    },
+    {
+      "type": "content",
+      "body": "**Why the secure version is better:** even with a stolen token, an attacker can only use the tools that *specific* agent was allowed. A stolen Triage token can't rotate secrets. This is **per-agent tool scoping**, and it turns one compromised token from a full breach into a minor one. Threat modeling is what makes you notice the difference between these two functions *before* they ship."
+    },
+    {
+      "type": "content",
+      "body": "## Golden Best Practices\n\nThe habits that make threat modeling truly effective:\n\n1. **Start early (shift left).** The cheapest fixes happen before code exists.\n2. **Make it living.** Update the model as the system and your knowledge change.\n3. **Stay honest.** Never treat a guess as a fact; label everything.\n4. **Prioritize ruthlessly.** Use risk = likelihood × impact to focus.\n5. **Layer defenses.** Defense in depth beats any single control.\n6. **Do it as a team.** Different perspectives catch different threats.\n7. **Document residual risk.** Tell the business what danger remains.\n8. **Map to a framework.** STRIDE, ATLAS, and risk registers make findings clear and comparable."
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes\n\n- **Doing it once and forgetting it.** A stale model rots.\n- **Collecting frameworks instead of using them.** Pick the right tool for the job.\n- **Skipping prioritization.** Trying to fix everything means fixing nothing well.\n- **Relying on a single control.** One layer always fails eventually.\n- **Hiding residual risk.** The business must know what it's accepting.\n- **Working alone.** Threat modeling is a team sport."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **Secure design** and **shift-left** mean building security in from the start — the whiteboard is the cheapest place to fix a flaw.\n- **STRIDE** is a six-category checklist for finding threats; **PASTA, DREAD, LINDDUN** serve other needs. Use STRIDE for a broad pass, and reach for other frameworks when they fit.\n- **Abuse and misuse cases** imagine features turned against their owner.\n- **Risk = Likelihood × Impact**, visualized in a **risk matrix** and tracked in a **risk register** — prioritize with this formula, then layer your defenses.\n- **Defense in depth**, **compensating controls**, and **residual risk** shape your mitigation plan — always document the residual risk the business chooses to accept.\n- **Design reviews** and **workshops** make threat modeling a team activity, and it reveals **vulnerable code patterns** before they ship.\n\nYou now hold the full threat-modeling toolkit — test it in the quiz and labs next."
+    }
+  ]
+}

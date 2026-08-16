@@ -1,0 +1,51 @@
+{
+  "slug": "05-exposed-endpoints",
+  "title": "Exposed Inference Endpoints",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Exposed Inference Endpoints\n\nSo far we have worked *inside* a cloud account. Now we flip the view: what if an AI system is accidentally left open to the *entire internet*? This is one of the highest-impact findings in any assessment.\n\n## What Is an Inference Endpoint?\n\n**Inference** is when an AI model does its job — takes an input and produces an output (a prediction, an answer, a classification).\n\nAn **inference endpoint** is the network address where you send requests to get those outputs. It is basically the \"front door\" to the running model.\n\n**Analogy:** The model is a vending machine. The inference endpoint is the coin slot and buttons. You put in a request (coin), you get out a prediction (snack).\n\n## Why Exposure Is Dangerous\n\nMany model servers ship with **no authentication by default**. The developers assume the server sits safely inside a private network. But a misconfigured firewall or security group can expose it to the world.\n\nWhen that happens, *anyone* can:\n\n- **Use the model for free** (cost abuse — you pay their bills)\n- **Steal the model's behavior** (model extraction)\n- **Reverse-engineer decisions** (e.g., how a bank scores loans)\n- **Find version numbers** and attack known vulnerabilities"
+    },
+    {
+      "type": "content",
+      "body": "## Common Exposed AI Servers\n\nThese are the model-serving tools you will encounter. All can be exposed if misconfigured.\n\n| Server | Typical Port | What it does |\n|---|---|---|\n| **vLLM** | 8000 | Fast LLM serving, OpenAI-compatible API |\n| **Ollama** | 11434 | Run LLMs locally/self-hosted |\n| **Text Generation Inference** | 80/8080 | Hugging Face model serving |\n| **Triton** | 8000/8001 | NVIDIA multi-model serving |\n| **TorchServe** | 8080/8081 | PyTorch model serving |\n\n**Key point:** these are just web servers. If the port is open to `0.0.0.0/0` (the whole internet) and there is no auth, they are wide open."
+    },
+    {
+      "type": "content",
+      "body": "## How Attackers Find Exposed Endpoints\n\n### From Inside a Cloud Account\n\nIf you already have cloud access, you enumerate compute and check firewall rules:\n\n```bash\n# List running instances and their public IPs\naws ec2 describe-instances \\\n  --filters \"Name=instance-state-name,Values=running\" \\\n  --query 'Reservations[].Instances[].{IP:PublicIpAddress,SG:SecurityGroups[0].GroupName}'\n\n# Inspect the security group (firewall) rules\naws ec2 describe-security-groups \\\n  --filters \"Name=group-name,Values=model-server-sg\"\n```\n\nYou are looking for a rule like this — the danger sign:\n\n```\nPort 8000, Protocol tcp, CIDR 0.0.0.0/0   <-- open to the world\n```\n\n### From the Outside\n\nOn the public internet, attackers use tools like Shodan or simple port scans to find these servers, then probe them."
+    },
+    {
+      "type": "content",
+      "body": "## Probing an Exposed Model\n\nOnce you find an open endpoint, you check whether it needs authentication. vLLM offers OpenAI-compatible routes:\n\n```bash\n# Ask what models are loaded (no auth needed if exposed)\ncurl -s http://TARGET_IP:8000/v1/models\n```\n\nIf it responds without credentials, it is open. You will see something like:\n\n```json\n{\n  \"data\": [\n    { \"id\": \"Qwen/Qwen2.5-7B-Instruct\", \"owned_by\": \"vllm\" }\n  ]\n}\n```\n\nCheck the version to research known vulnerabilities:\n\n```bash\ncurl -s http://TARGET_IP:8000/version\n# {\"version\": \"0.7.3\"}\n```\n\nNow you know the exact software build and can search for matching CVEs."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Internet Attacker] -->|no auth needed| B[Open Port 8000]\n    B --> C[vLLM Server]\n    C --> D[Free model usage]\n    C --> E[Model extraction]\n    C --> F[Version leak - CVE research]\n    style B fill:#ef4444,color:#fff\n    style C fill:#f59e0b,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## What Can Go Wrong (Impact)\n\n- **Cost abuse:** GPU inference is expensive. An open LLM can run up huge bills.\n- **Model extraction:** by sending many queries, an attacker can copy the model's behavior into their own model. This steals intellectual property.\n- **Sensitive logic exposure:** if the model makes decisions (loan approval, fraud scoring), attackers can probe it to learn the rules and game the system.\n- **Data leakage:** some endpoints expose prompts, logs, or internal data.\n- **CVE exploitation:** a known vulnerability in a specific version becomes exploitable once the version is revealed."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "body": "# VULNERABLE: security group opens the model port to the whole internet\nSecurityGroupIngress:\n  - IpProtocol: tcp\n    FromPort: 8000\n    ToPort: 8000\n    CidrIp: 0.0.0.0/0        # DANGER: anyone on Earth can connect\n  - IpProtocol: tcp\n    FromPort: 22\n    ToPort: 22\n    CidrIp: 0.0.0.0/0        # SSH also open to the world"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "body": "# SECURE: restrict access to internal networks and add auth in front\nSecurityGroupIngress:\n  - IpProtocol: tcp\n    FromPort: 8000\n    ToPort: 8000\n    CidrIp: 10.0.0.0/16       # only the internal VPC can reach the model\n  - IpProtocol: tcp\n    FromPort: 22\n    ToPort: 22\n    CidrIp: 203.0.113.10/32   # SSH only from one known admin IP\n\n# Additional protections (not shown in SG):\n# - Put an API gateway or reverse proxy in front that enforces API keys\n# - Require an Authorization header on the model server\n# - Use TLS so traffic is encrypted"
+    },
+    {
+      "type": "note",
+      "body": "**A recurring theme:** exposure usually comes from a firewall rule set to `0.0.0.0/0` combined with a server that has no built-in authentication. Fix either one and the risk drops sharply. Fix both and you have defense in depth."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- An **inference endpoint** is the network front door to a running model.\n- Many model servers have **no authentication by default**.\n- A firewall rule of `0.0.0.0/0` exposes them to the whole internet.\n- Impact includes **cost abuse, model extraction, logic exposure, and CVE attacks**.\n- **Defense:** restrict network access, put auth in front, use TLS, and hide version info.\n\nNow we move from single servers into the world of clusters. Next up: **Kubernetes RBAC Abuse.**"
+    }
+  ]
+}

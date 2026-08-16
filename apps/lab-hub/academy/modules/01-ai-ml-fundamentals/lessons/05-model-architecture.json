@@ -1,0 +1,29 @@
+{
+  "slug": "05-model-architecture",
+  "title": "Model Architecture",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "7 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Model Architecture\n\n\"Architecture\" simply refers to **the design or structure of a model**, meaning how its internal parts are arranged. You don't need to know how to build one. You just need a clear picture of what's happening inside.\n\n## The simplest view\n\nEvery model does three things:\n\n1. Takes an **input** (a question, an image, an email)\n2. Processes it through **layers of calculations**\n3. Produces an **output** (an answer, a label, a prediction)\n\nThe useful work happens in the middle layers, which contain patterns the model learned during training."
+    },
+    {
+      "type": "content",
+      "body": "## Neural networks explained simply\n\nA neural network is made up of **neurons** (small computational units) arranged into **layers**.\n\n- The **input layer** receives the data.\n- The **hidden layers** process that data step by step, passing results forward from one layer to the next.\n- The **output layer** produces the final result.\n\nThink of it like an assembly line: raw material enters at one end, each station modifies it slightly, and a finished product comes out the other end.\n\nThe learned values stored inside these neurons are called **parameters** (or **weights**). A model's knowledge is essentially stored in these numbers. Large models like LLMs contain **billions** of parameters."
+    },
+    {
+      "type": "diagram",
+      "src": "graph LR\n    I[Input Layer<br/>your data] --> H1[Hidden Layer 1]\n    H1 --> H2[Hidden Layer 2]\n    H2 --> O[Output Layer<br/>the answer]"
+    },
+    {
+      "type": "content",
+      "body": "## The Transformer architecture\n\nModern LLMs are built on an architecture called the **Transformer**. Its key mechanism is called **attention**, which allows the model to learn which words in a sentence are most relevant to each other.\n\n*Example:* in the sentence \"The dog chased the ball because **it** was fast,\" attention helps the model correctly determine that \"it\" refers to the dog, not the ball.\n\nYou don't need to understand the underlying math. Just remember that attention is what allows the model to understand context, which is why modern chatbots produce responses that feel coherent and relevant."
+    },
+    {
+      "type": "note",
+      "body": "**Security angle:** a model's parameters are valuable assets. Stealing them is known as model theft, and tampering with them is known as model poisoning, both of which are real, documented attack techniques. The architecture also determines what kind of input a model accepts, and every accepted input is a potential entry point for an attacker."
+    }
+  ]
+}

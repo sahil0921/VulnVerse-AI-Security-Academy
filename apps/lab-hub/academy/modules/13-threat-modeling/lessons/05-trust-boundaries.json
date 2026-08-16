@@ -1,0 +1,65 @@
+{
+  "slug": "05-trust-boundaries",
+  "title": "Mapping Trust Boundaries",
+  "type": "content",
+  "readingtime": "11 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## What Is a Trust Boundary?\n\nA **trust boundary** is any line in a system where one component accepts input or instructions from another **without independently checking them**.\n\nPut simply: it's a place where one part *trusts* another. And wherever there's trust, there's a place an attacker can abuse that trust.\n\n**An analogy.** Imagine a nightclub. Outside the front door, everyone is a stranger and gets checked by the bouncer. Once inside, people move freely — the club *trusts* that everyone inside was already checked. The front door is the trust boundary. If someone sneaks past the bouncer, they enjoy all the freedom of the inside. Attackers hunt for exactly these boundaries and the gaps in them.\n\n**Why it matters.** Most serious attacks don't smash through strong walls. They slip across a boundary where trust was assumed but never verified."
+    },
+    {
+      "type": "content",
+      "body": "## Trust Zones: The Regions Between Boundaries\n\nTrust boundaries divide a system into **trust zones** — regions where components share the same privilege level and generally trust each other.\n\n- Inside a zone: components talk freely, little checking.\n- Between zones: a boundary should enforce checks.\n\nThink of a building with security doors. Each floor is a zone. The badge readers on the doors are the boundaries. Your goal in threat modeling is to draw every zone and every door, then ask: *is each door actually locked, or just assumed to be?*"
+    },
+    {
+      "type": "content",
+      "body": "## A New Kind of Boundary in AI Systems\n\nTraditional systems have boundaries enforced by **policy** — a login check, a token validation, a firewall rule. These are clear yes/no gates.\n\nAI systems introduce a strange new kind: boundaries enforced by **inference** — by the AI's own judgment.\n\nCompare the two:\n\n| Boundary type | Enforced by | Example | How it's attacked |\n|---|---|---|---|\n| **Policy-based** | Fixed rules | API rejects an invalid token | Bypass or steal the token |\n| **Inference-based** | The AI's reasoning | An agent decides an alert is \"critical\" | Manipulate the input with clever words |\n\nA policy gate is picked with a lockpick (a stolen token). An inference gate is fooled with words (a crafted prompt). This is why **prompt injection** is so dangerous — it attacks a boundary that has no fixed rule behind it, only the model's changeable judgment."
+    },
+    {
+      "type": "note",
+      "body": "**This is the heart of AI threat modeling.** In a normal app, trust boundaries are enforced by code you can audit. In an AI app, some boundaries are enforced by a model's *opinion*, which can be swayed by input. Always mark which boundaries are policy-based and which are inference-based — they need completely different defenses."
+    },
+    {
+      "type": "content",
+      "body": "## Mapping Sentri's Trust Boundaries\n\nLet's map the trust boundaries in Aetherlink's Sentri platform. We label each one, note what enforces it, and record whether we've validated that enforcement.\n\n| ID | From → To | What's trusted | Enforcement | Status |\n|---|---|---|---|---|\n| TB-1 | User input → Orchestrator | The incoming request | Login check — mechanism unknown | UNVALIDATED |\n| TB-2 | Orchestrator → Agents | The dispatched task | Internal encrypted channel | VALIDATED |\n| TB-3 | Agents → Vector DB | The knowledge content | **None — unauthenticated** | VALIDATED |\n| TB-4 | Agents → Tool Server | The tool request | Per-agent identity tokens | VALIDATED |\n| TB-5 | Tool Server → Secrets Manager | The credential request | Service identity | INFERRED |\n| TB-6 | Triage Agent → Orchestrator | The alert classification | **None — inference-based** | UNVALIDATED |\n| TB-7 | Knowledge Agent → Other Agents | The retrieved answer | **None — advisory trust** | INFERRED |"
+    },
+    {
+      "type": "content",
+      "body": "## Reading the Trust Boundary Table\n\nEach row tells a story. Look at the dangerous ones:\n\n- **TB-3 (Agents → Vector DB):** No authentication. Every agent blindly trusts whatever the knowledge base says is true. If an attacker plants a false document, every agent repeats it.\n- **TB-6 (Triage → Orchestrator):** Enforced only by the AI's *inference*. If a crafted alert fools the Triage Agent into labeling it \"critical,\" the whole downstream workflow reacts — no policy stops it.\n- **TB-7 (Knowledge → Other Agents):** Advisory trust. Agents fold the knowledge base's answers into their reasoning without verifying them.\n\nThese three are where trust was *never enforced*. As you'll see later, the most dangerous attacks flow through exactly these gaps."
+    },
+    {
+      "type": "content",
+      "body": "## Validation Status on Boundaries\n\nJust like assumptions, boundaries carry a validation status:\n\n- **VALIDATED** — you've confirmed how it's enforced (or that it isn't).\n- **INFERRED** — you believe it exists based on architecture, but haven't tested it.\n- **UNVALIDATED** — you suspect it but have no confirmation.\n\nWhen you draw the trust zone map, show validated boundaries as solid lines and unvalidated ones as dashed. This keeps you honest about what you actually know versus what you assume."
+    },
+    {
+      "type": "content",
+      "body": "## The Trust Zone Map\n\nHere is Sentri divided into trust zones. Zone A is the outer edge where user input arrives. Zone B is the reasoning layer of agents and the orchestrator. Zone C is the sensitive data and infrastructure layer holding the crown jewels."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    subgraph ZoneA[\"Zone A: Untrusted Input\"]\n        U[\"User / Alert\\nSources\"]\n    end\n    subgraph ZoneB[\"Zone B: Reasoning Layer\"]\n        O[\"Orchestrator\"]\n        T[\"Triage Agent\"]\n        AC[\"Action Agent\"]\n        K[\"Knowledge Agent\"]\n    end\n    subgraph ZoneC[\"Zone C: Sensitive Layer\"]\n        TS[\"Tool Server\"]\n        SM[\"Secrets Manager\"]\n        VDB[\"Vector DB\"]\n    end\n    U -->|TB-1| O\n    O -->|TB-2| T\n    O -->|TB-2| AC\n    O -->|TB-2| K\n    T -->|TB-6| O\n    K -->|TB-7| AC\n    AC -->|TB-4| TS\n    T -->|TB-3| VDB\n    K -->|TB-3| VDB\n    TS -->|TB-5| SM"
+    },
+    {
+      "type": "content",
+      "body": "## Attack Surface and Entry Points\n\nTwo related ideas fall out naturally from a trust boundary map.\n\n**Attack surface** — the complete set of points where an attacker could try to interact with or influence the system. Every boundary is part of the attack surface.\n\n**Entry points** — the specific places where untrusted input first enters. For Sentri, TB-1 (user input) is the main entry point. Anything that crosses TB-1 has entered the system from the outside.\n\nThe smaller your attack surface and the fewer your entry points, the easier the system is to defend. Every extra tool, extra agent, or extra integration adds surface. Threat modeling helps you see this growth before it becomes unmanageable."
+    },
+    {
+      "type": "content",
+      "body": "## External Dependencies and Internal Components\n\nA full boundary map also separates two more categories.\n\n**Internal components** — parts you own and control: the orchestrator, the agents, your databases.\n\n**External dependencies** — parts you rely on but don't fully control: third-party AI models, cloud APIs, external tool integrations, model supply chains.\n\nExternal dependencies deserve special suspicion. When Sentri's tool server calls a cloud provider's API, it crosses a boundary into something Aetherlink doesn't own. A compromise or outage there ripples inward. Always mark where your system's trust extends beyond your own walls."
+    },
+    {
+      "type": "content",
+      "body": "## The Unenforced-Trust Rule\n\nHere is the single most important lesson of this entire lesson:\n\n**The most dangerous attack paths don't break through strong boundaries. They flow through gaps where trust was never enforced at all.**\n\nAn unauthenticated database. A secrets manager that can't tell which agent is asking. An orchestrator that trusts an AI's classification without checking. These aren't bugs in the traditional sense — they're *design decisions* that quietly favored convenience over security.\n\nYour job as a threat modeler is to find these unenforced boundaries before someone with worse intentions does."
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes\n\n- **Missing inference-based boundaries.** They're invisible if you only look for login checks.\n- **Assuming a boundary is enforced.** \"There's probably auth there\" is not validation.\n- **Forgetting internal boundaries.** Danger doesn't only come from outside; it moves between internal zones too.\n- **Ignoring external dependencies.** Trust that leaves your walls is trust you can't fully control.\n- **Drawing boundaries once.** New components add new boundaries — keep the map current."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- A **trust boundary** is where one component accepts input from another without checking it — wherever there's trust, there's a target.\n- Boundaries divide a system into **trust zones** of shared privilege.\n- AI adds **inference-based boundaries**, enforced by the model's judgment. Policy boundaries are picked with stolen tokens; inference boundaries are fooled with words.\n- Mark each boundary's **enforcement** and **validation status** — solid lines = validated, dashed lines = assumed. Stay honest on your map.\n- **Attack surface** and **entry points** fall out of the boundary map.\n- The deadliest paths flow through **unenforced** trust, not through strong walls — hunt for boundaries where trust was never enforced at all.\n\nNext, we chain boundaries together into **escalation paths**."
+    }
+  ]
+}

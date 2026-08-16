@@ -1,0 +1,25 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to Vector DB Security",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Introduction to Vector DB Security\n\nModern AI applications need to find meaning, not just match exact words. When you ask a support chatbot \"how do I get back into my account?\", it should find a document titled \"Password Reset Procedure\" even though the actual words used are completely different.\n\nThis magic is powered by two things working together: embeddings and vector databases. Together, they form the backbone of almost every RAG (Retrieval-Augmented Generation) system, semantic search engine, and AI knowledge assistant built today.\n\nThis module teaches you how these systems actually work, and more importantly, how attackers break them.\n\n## Why this module matters\n\nFor a long time, developers believed something genuinely dangerous:\n\n> \"Embeddings are just numbers. Even if an attacker steals them, they can't do anything useful with them.\"\n\nThis belief is completely false, and it's the single most important idea in this entire module.\n\nAn embedding is not like a password hash. A hash is deliberately designed to be a one-way function, meaning you can't get the original password back from it. An embedding is the opposite. It's designed to preserve meaning. And wherever meaning is preserved, meaning can eventually be recovered.\n\nThis false sense of security means many vector databases get deployed with weak authentication, no encryption, and open network ports, because the team assumed the data inside was already \"safe\" by default.\n\n## Vector DBs vs traditional databases\n\nTo understand the risk here, it helps to compare vector databases to the relational databases (RDBs) they typically sit alongside.\n\n| Aspect | Relational Databases (SQL) | Vector Databases |\n| --- | --- | --- |\n| Age / maturity | Decades of hardening | New, fast-growing |\n| Access control | Fine-grained, mature | Often basic or optional |\n| Encryption | Standard, well-tested | Sometimes added later |\n| Threat models | Widely understood | Still emerging |\n| Security mindset | Built-in from the start | Often bolted on after release |\n\nRelational databases survived decades of real-world attacks, so their defenses have matured significantly over time. Vector databases were built primarily for speed of similarity search first, with security added later as an afterthought. That gap is exactly where a red teamer operates."
+    },
+    {
+      "type": "content",
+      "body": "## What you will learn\n\nBy the end of this module, you'll be able to:\n\n- Explain what embeddings and vector databases actually are, in plain, accessible language.\n- Understand how semantic search and similarity math actually work under the hood.\n- Identify the attack surface of a vector-based AI system.\n- Perform reconnaissance: export vectors, fingerprint the embedding model, and triage thousands of chunks down to a handful of high-value targets.\n- Understand embedding inversion, membership inference, and attribute inference as distinct attack categories.\n- Recover sensitive data, such as passwords, from stolen embeddings.\n- Recommend real, practical defenses that actually work in production.\n\nThis is an advanced module, but every concept here is built from zero. You don't need any prior machine learning knowledge to follow along."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"User question\"] --> B[\"Embedding model\"]\n    B --> C[\"Query vector\"]\n    C --> D[\"Vector database\"]\n    D --> E[\"Most similar chunks\"]\n    E --> F[\"LLM\"]\n    F --> G[\"Answer to user\"]"
+    },
+    {
+      "type": "note",
+      "body": "**The core myth to unlearn:** embeddings are not one-way hashes. They're reversible enough that an attacker with the raw vectors and the right model can reconstruct sensitive text. Every lesson in this module builds directly on this single fact."
+    }
+  ]
+}

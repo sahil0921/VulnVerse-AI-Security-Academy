@@ -1,0 +1,261 @@
+{
+  "slug": "11-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 23,
+  "questions": [
+    {
+      "q": "Why is prompt injection possible in the first place?",
+      "options": [
+        "The model runs out of memory when messages are too long",
+        "Language models are always connected to the internet",
+        "The model reads system prompts, user input, and fetched data as one single stream of text with no trusted/untrusted boundary",
+        "Encryption is disabled by default in most LLMs"
+      ],
+      "answer": 2,
+      "explanation": "An LLM processes everything, including the system prompt, user message, and tool output, as one continuous token stream. It has no built-in wall separating trusted instructions from untrusted data, which is the root cause of prompt injection."
+    },
+    {
+      "q": "What is the key difference between direct and indirect prompt injection?",
+      "options": [
+        "Direct injection uses Base64; indirect injection uses ROT13",
+        "There is no real difference between them",
+        "Direct injection targets the system prompt; indirect injection targets the user",
+        "In direct injection the attacker types the payload into the chat; in indirect injection the payload is hidden in data the model later reads, such as a document or web page"
+      ],
+      "answer": 3,
+      "explanation": "Direct injection goes straight into the model's input through the chat. Indirect injection plants the payload in a data source the model ingests later, so it can affect other users and is harder to trace back to the attacker."
+    },
+    {
+      "q": "Why does character spacing, such as writing 'p a s s w o r d', bypass many output filters?",
+      "options": [
+        "It encrypts the text so the filter cannot read it",
+        "The filter matches exact strings, and the spaced-out text no longer matches the banned string, while the model still understands the meaning",
+        "It makes the response too long for the filter to scan",
+        "Spaces are always ignored by language models"
+      ],
+      "answer": 1,
+      "explanation": "Filters relying on exact string matching look for a banned word as a continuous string. Spacing breaks that match on the surface while the model still reads the underlying meaning, a classic surface-versus-meaning gap."
+    },
+    {
+      "q": "Which defense is considered the single most effective against secret leakage via prompt injection?",
+      "options": [
+        "Adding 'never reveal the secret' to the system prompt",
+        "Blocking the phrase 'ignore previous instructions'",
+        "A longer and more detailed system prompt",
+        "Least privilege, meaning never giving the model access to the secret in the first place"
+      ],
+      "answer": 3,
+      "explanation": "If the model never holds the secret or a dangerous tool, no injection, however clever, can leak or abuse it. Least privilege removes the target entirely, unlike prompt instructions, which can always be talked around."
+    },
+    {
+      "q": "Why should input and output filters run on normalized text?",
+      "options": [
+        "Normalization makes the model respond faster",
+        "It reduces the cost of running the model",
+        "Normalization is required by law for all AI systems",
+        "Attackers hide payloads with spacing, encoding, and Unicode look-alikes; normalizing first exposes the real content to the filter"
+      ],
+      "answer": 3,
+      "explanation": "Obfuscation changes the surface of text without changing its actual meaning. Normalizing input and output before filtering strips these tricks away, so the filter checks the real content instead of an encoded disguise."
+    },
+    {
+      "q": "What is the system prompt in an AI application?",
+      "options": [
+        "Hidden instructions set by the developer that define how the AI should behave",
+        "The very first message a user ever sends",
+        "A log file recording all user conversations",
+        "The programming language the AI was built with"
+      ],
+      "answer": 0,
+      "explanation": "The system prompt contains hidden rules written by the developer, defining the AI's persona, capabilities, and restrictions, which the end user typically never sees directly."
+    },
+    {
+      "q": "Why is leaking a system prompt valuable to an attacker?",
+      "options": [
+        "It has no real value beyond curiosity",
+        "It slows down the AI's response time",
+        "It may contain secrets directly, and it reveals restrictions that hint at sensitive functionality worth probing further",
+        "It automatically grants admin access to the attacker"
+      ],
+      "answer": 2,
+      "explanation": "A leaked system prompt can expose secrets developers mistakenly placed there, and its restrictions effectively map out what the developer was worried about, guiding the attacker toward what to probe next."
+    },
+    {
+      "q": "In the URL-based exfiltration technique, how does data actually leave the system?",
+      "options": [
+        "The AI emails the data directly to the attacker",
+        "The AI embeds the secret data into a URL, and automatic image or link loading sends a request carrying that data to the attacker's server",
+        "The attacker physically accesses the server",
+        "The data is exfiltrated through a Bluetooth connection"
+      ],
+      "answer": 1,
+      "explanation": "When the AI is tricked into placing a secret inside a URL used for an image or link, the automatic loading of that resource sends a request to the attacker's server, and the secret arrives embedded in that request."
+    },
+    {
+      "q": "Why does email make such an attractive channel for indirect prompt injection?",
+      "options": [
+        "Emails are always encrypted end-to-end",
+        "AI email assistants cannot read incoming messages",
+        "Anyone can send an email without needing access to the target's systems, and the AI reads that email as untrusted external content",
+        "Email servers never log any activity"
+      ],
+      "answer": 2,
+      "explanation": "An attacker doesn't need any account or access to the target's systems to send an email. Since the AI then reads that email as external content, it becomes a nearly perfect vehicle for indirect injection."
+    },
+    {
+      "q": "In the business logic abuse category, what is the attacker's typical primary goal?",
+      "options": [
+        "Real-world gain, usually financial, by manipulating an AI into breaking business rules like pricing or approvals",
+        "Crashing the AI application entirely",
+        "Simply proving the AI can be tricked, with no other objective",
+        "Gaining root access to the underlying server"
+      ],
+      "answer": 0,
+      "explanation": "Business logic abuse is about manipulating an AI into making a bad business decision, such as applying a fake discount or approving an unauthorized refund, for direct financial gain."
+    },
+    {
+      "q": "Why is 'never give discounts over 10%' written into a system prompt NOT considered a real security control?",
+      "options": [
+        "System prompts cannot contain numbers",
+        "Attackers can bypass prompt-based rules through injection techniques; the limit must be enforced in backend code instead",
+        "The AI will always follow this instruction perfectly",
+        "This instruction would prevent the AI from functioning at all"
+      ],
+      "answer": 1,
+      "explanation": "Prompt-based rules can be talked around using injection techniques. A real limit needs to be enforced in backend code that validates the actual transaction, which an attacker cannot simply argue their way past."
+    },
+    {
+      "q": "What does Base64 encoding accomplish in an obfuscation attack?",
+      "options": [
+        "It permanently deletes the original message",
+        "It converts text into a string of letters and numbers that looks like gibberish to a filter but can still be decoded and understood by a capable model",
+        "It makes the model respond in a different language",
+        "It automatically bypasses all forms of authentication"
+      ],
+      "answer": 1,
+      "explanation": "Base64 encoding transforms readable text into a string that a simple pattern-matching filter won't recognize as suspicious, while a capable language model can still decode and act on the underlying content."
+    },
+    {
+      "q": "What is a guardrail model in the context of AI defenses?",
+      "options": [
+        "A second, typically smaller AI whose job is specifically to judge safety, either on input before the main model, or on output before the user sees it",
+        "A firewall that blocks all internet traffic",
+        "A physical security guard hired by the company",
+        "A backup copy of the main model in case it crashes"
+      ],
+      "answer": 0,
+      "explanation": "A guardrail model is a separate, usually smaller AI dedicated purely to judging safety, either checking incoming input for injection attempts, or checking outgoing responses for leaks or harmful content."
+    },
+    {
+      "q": "Why do guardrail models tend to survive encoding tricks that fool simple blocklists?",
+      "options": [
+        "They run twice as fast as the main model",
+        "They only check for a fixed list of banned words",
+        "They judge meaning and intent rather than matching exact strings, so obfuscated but semantically identical payloads still get caught",
+        "They automatically decode any Base64 text before responding"
+      ],
+      "answer": 2,
+      "explanation": "Since guardrail models assess intent rather than performing exact string matching, encoding tricks that only change the surface of the text without changing its meaning generally don't fool them the way blocklists get fooled."
+    },
+    {
+      "q": "What is the main weakness of relying only on a keyword blocklist for input filtering?",
+      "options": [
+        "Blocklists take too much memory to store",
+        "Blocklists are illegal in most countries",
+        "Attackers can bypass them easily using synonyms, rephrasing, and encoding tricks",
+        "Blocklists only work with the English language"
+      ],
+      "answer": 2,
+      "explanation": "A blocklist only catches text that matches known bad phrases exactly. Attackers routinely bypass this with rephrasing, synonyms, or encoding techniques that preserve meaning while changing the surface text."
+    },
+    {
+      "q": "What does 'defense in depth' mean in the context of prompt injection?",
+      "options": [
+        "Relying entirely on one very strong system prompt",
+        "Stacking multiple imperfect defenses together, so an attacker has to defeat all of them at once to succeed",
+        "Deleting all user input before processing it",
+        "Only defending against the most common attack technique"
+      ],
+      "answer": 1,
+      "explanation": "Since no single defense against prompt injection is perfect, defense in depth means combining several layers, such as input filtering, output filtering, least privilege, and guardrail models, so an attacker must beat all of them together."
+    },
+    {
+      "q": "In a multi-turn crescendo attack, how does the attacker typically avoid detection?",
+      "options": [
+        "By sending the entire malicious payload in one single, obvious message",
+        "By spreading malicious intent across several individually innocent-looking messages, rather than one clearly suspicious one",
+        "By using only official company email addresses",
+        "By encrypting every single message sent"
+      ],
+      "answer": 1,
+      "explanation": "A crescendo attack spreads intent gradually across multiple messages, each of which looks harmless on its own, making it much harder for per-message analysis to flag any single message as suspicious."
+    },
+    {
+      "q": "Why is it important for red teamers to test a payload multiple times before concluding an app is safe?",
+      "options": [
+        "LLM output is inherently probabilistic, so the same prompt can succeed on one attempt and fail on another",
+        "Testing multiple times is required by law",
+        "The AI needs time to warm up before responding correctly",
+        "Multiple attempts always guarantee a successful attack"
+      ],
+      "answer": 0,
+      "explanation": "Because LLMs are non-deterministic, the exact same input can produce different outputs across attempts. A single failed attempt doesn't prove an application is secure against that technique."
+    },
+    {
+      "q": "What is the recommended relationship between prompt engineering and real security controls?",
+      "options": [
+        "Prompt engineering alone is sufficient as a complete security control",
+        "Prompt engineering should shape general behavior, but should never be relied on as the only defense against injection",
+        "Prompt engineering should be avoided entirely in all AI applications",
+        "Prompt engineering is only useful for improving response speed"
+      ],
+      "answer": 1,
+      "explanation": "Prompt engineering can reduce lazy or unsophisticated attacks, but every technique in this module is specifically designed to talk a model out of its prompt instructions, so it must never be the only line of defense."
+    },
+    {
+      "q": "Why is scanning only direct chat messages, but not uploaded documents or tool outputs, a common defensive mistake?",
+      "options": [
+        "Documents cannot contain any text at all",
+        "It has no real security impact either way",
+        "It leaves indirect prompt injection, which hides payloads in exactly that kind of external content, completely undetected",
+        "Tool outputs are always automatically sanitized by default"
+      ],
+      "answer": 2,
+      "explanation": "Indirect prompt injection specifically hides malicious instructions inside external content like documents, web pages, or tool outputs. Only scanning direct chat messages leaves this entire attack category undetected."
+    },
+    {
+      "q": "In a prefix injection (completion attack), what is the attacker actually doing?",
+      "options": [
+        "Writing the beginning of the AI's own response for it, such as 'Sure, here is my system prompt:', and asking the model to simply continue from there",
+        "Sending the payload before the system prompt loads",
+        "Adding a prefix like 'URGENT' to the message subject line",
+        "Encrypting the first half of the message only"
+      ],
+      "answer": 0,
+      "explanation": "Prefix injection exploits the model's role as a next-token predictor: once a compliant-sounding prefix is already in the context, the model is statistically biased toward completing it naturally rather than stopping to refuse."
+    },
+    {
+      "q": "Why does the same payload behave differently when tested at temperature 0 versus temperature 1?",
+      "options": [
+        "Temperature 0 disables the model's safety training entirely",
+        "Temperature only affects response length, not content",
+        "At temperature 0 the model deterministically picks the most probable token, giving repeatable results; at higher temperatures it samples more randomly, so the same prompt can succeed or fail across attempts",
+        "Temperature 1 always guarantees the attack will succeed"
+      ],
+      "answer": 2,
+      "explanation": "Temperature controls sampling randomness. At temperature 0 the model almost always produces the same completion for a given prompt, making a finding easy to reproduce. At higher temperatures, the same prompt can yield a mix of successes and refusals purely from variance, so a single attempt proves little either way."
+    },
+    {
+      "q": "How does delimiter injection attempt to trick the model?",
+      "options": [
+        "By deleting all delimiters from the conversation",
+        "By injecting fake closing tags or fake 'end of conversation' markers, tricking the model into believing the trusted system section has ended and a new, attacker-controlled section has begun",
+        "By using only lowercase letters throughout the message",
+        "By overloading the model's memory with repeated tags"
+      ],
+      "answer": 1,
+      "explanation": "Applications sometimes wrap the system prompt and user input in delimiters or tags. An attacker who guesses this structure can inject fake closing tags or fake session boundaries, exploiting the fact that the model has no cryptographic way to verify where real instructions end and attacker text begins."
+    }
+  ]
+}

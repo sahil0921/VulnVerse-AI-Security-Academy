@@ -1,0 +1,7 @@
+flask==3.0.0
+requests==2.31.0
+anthropic
+psycopg2-binary
+openai
+google-generativeai
+

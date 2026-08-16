@@ -1,0 +1,70 @@
+{
+  "slug": "08-active-recon",
+  "title": "Active Reconnaissance",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Beginner",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Active Reconnaissance\n\nActive reconnaissance means directly interacting with the AI system by sending queries, probing endpoints, and analyzing the responses. It gives you ground truth about how the system actually behaves at runtime, but it also generates logs, which makes it noisier and more detectable than passive recon.\n\n## Where AI endpoints tend to hide\n\nAI features are usually embedded inside a normal web application rather than exposed on a dedicated port. This means traditional port scanning alone often isn't enough to find them. Instead, look for AI indicators in:\n\n- **JavaScript files** — client-side configuration, API paths, and feature flags\n- **API endpoints** — such as `/api/chat` or `/v1/chat/completions`\n- **HTTP headers** — hints from gateways and backend services"
+    },
+    {
+      "type": "content",
+      "body": "## Step 1: Analyze client-side JavaScript\n\nWeb pages load JavaScript files that frequently contain the application's API configuration. Find these files first, then read through them for endpoint details."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# Find script files referenced by the page\ncurl -s http://localhost:5011/ | grep -iE \"<script\"\n\n# Read the widget config directly\ncurl -s http://localhost:5011/js/chat-widget.js\n\n# Example content you might find inside:\n# window.__CONFIG__ = {\n#   apiBase: \"/api/v2\",\n#   assistantEndpoint: \"/api/v2/assistant\",\n#   featureFlags: { enableAI: true, debugMode: false }\n# };\n#\n# This just revealed the real endpoint the front end actually talks to."
+    },
+    {
+      "type": "content",
+      "body": "## Step 2: Probe the discovered endpoint\n\nSend a harmless test message and inspect the full response carefully. Wrapper APIs often leak backend metadata, such as provider name, model, and timing details, that the user interface never actually displays."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "curl -s -X POST http://localhost:5011/api/v2/assistant \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"message\": \"Hello\"}' | jq\n\n# {\n#   \"content\": \"How can I help you today?\",\n#   \"metadata\": {\n#     \"provider\": \"ollama\",\n#     \"model\": \"llama3.2:1b\",\n#     \"prompt_eval_count\": 26,\n#     \"eval_count\": 8\n#   }\n# }\n#\n# The metadata block confirms Ollama, model llama3.2:1b, and real token counts."
+    },
+    {
+      "type": "content",
+      "body": "## Step 3: Enumerate endpoints using the 401 vs 404 technique\n\nAPIs return different status codes depending on whether an endpoint exists and whether it's protected:\n\n- **404 Not Found** means the endpoint doesn't exist at all.\n- **401 Unauthorized** means the endpoint exists but requires valid credentials.\n- **200 OK** means the endpoint is open and directly accessible.\n\nA 401 response is genuinely useful during recon: it confirms a protected endpoint is actually there, even without valid credentials to access it."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "for ep in auth billing chat/completions models users embeddings; do\n  code=$(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/v1/$ep)\n  echo \"/v1/$ep -> HTTP $code\"\ndone\n\n# /v1/auth              -> HTTP 200\n# /v1/billing           -> HTTP 200\n# /v1/chat/completions  -> HTTP 401   (exists, and it's protected)\n# /v1/models            -> HTTP 404\n# /v1/users             -> HTTP 404\n# /v1/embeddings        -> HTTP 401   (exists, and it's protected)"
+    },
+    {
+      "type": "content",
+      "body": "## Step 4: Identify the API gateway\n\nAPI gateways typically add tell-tale headers to every response. Spotting these headers can reveal the underlying infrastructure and its configured rate limits."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "curl -sI http://localhost:8000/v1/billing\n\n# ...\n# Server: kong/3.9.1\n# X-Kong-Upstream-Latency: 10\n# X-Kong-Proxy-Latency: 37\n# RateLimit-Limit: 60\n# Via: 1.1 kong/3.9.1\n#\n# The Server header and X-Kong-* headers together identify a Kong API gateway\n# with a rate limit of 60 requests per minute."
+    },
+    {
+      "type": "content",
+      "body": "## Step 5: Check for streaming and WebSocket endpoints\n\nMany chat-style AI applications stream their responses instead of returning them all at once. This usually happens over Server-Sent Events (SSE) or a WebSocket connection, and these endpoints are easy to miss if you only test standard REST paths.\n\nLook for response headers like `Content-Type: text/event-stream`, or check the page's JavaScript for `new WebSocket(...)` calls, which often reveal a separate real-time endpoint worth testing on its own."
+    },
+    {
+      "type": "content",
+      "body": "## Automating discovery\n\nOnce you understand the manual steps, the same techniques can be scaled up using dedicated tools:\n\n- **`ffuf`** — fuzzes for hidden API paths using a wordlist, such as SecLists or a custom API wordlist.\n- **`httpx`** — quickly probes many hosts at once and reports titles, status codes, and detected technology.\n- **`nuclei`** — runs templated vulnerability and exposure checks against a target, including checks relevant to exposed AI services.\n\nAlways stay within the agreed scope and respect rate limits. Active recon already generates noise, and automated tools generate significantly more."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# Fuzz for AI-related API endpoints\nffuf -u http://localhost:8000/FUZZ \\\n  -w api_wordlist.txt \\\n  -mc 200,401,403 \\\n  -t 20\n\n# -mc keeps only interesting status codes (found or protected)\n# -t 20 limits threads to stay gentle and avoid tripping rate limits\n\n# Quickly probe multiple hosts and see what's running\nhttpx -l targets.txt -title -status-code -tech-detect\n\n# Run known exposure checks against a target with nuclei\nnuclei -u http://localhost:8000 -tags exposure,misconfig,ai"
+    },
+    {
+      "type": "note",
+      "body": "**OPSEC reminder:** every active request you send may be logged by the target system. If staying undetected matters for the engagement, space out your requests, vary your phrasing between probes, and mix them in with traffic that looks legitimate. Detection and evasion techniques are covered in more detail later in this module."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- AI endpoints usually hide inside a normal web application, so check JavaScript files and API paths, not just ports.\n- Response metadata often leaks the provider, model name, and token usage details.\n- Comparing 401 and 404 responses confirms which protected endpoints actually exist.\n- Gateway headers, such as `Server: kong`, reveal underlying infrastructure and rate limits.\n- Don't forget streaming and WebSocket endpoints, which are easy to miss with standard REST testing.\n- Tools like ffuf, httpx, and nuclei scale up recon significantly, but they also increase your footprint on the target."
+    }
+  ]
+}

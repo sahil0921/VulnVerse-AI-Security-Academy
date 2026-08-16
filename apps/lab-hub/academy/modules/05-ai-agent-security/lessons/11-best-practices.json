@@ -1,0 +1,33 @@
+{
+  "slug": "11-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Best Practices\n\nThis lesson pulls everything covered so far together into a practical checklist you can apply to any real AI agent, whether you're building one, reviewing one, or actively testing one.\n\n## The mindset\n\nBefore diving into any checklist, hold onto these three core ideas:\n\n1. **The model is not a security boundary.** Anything the model can be persuaded to do should be treated as something it eventually will do.\n2. **Untrusted text can appear anywhere:** user input, documents, web pages, tool outputs, and memory. All of it can potentially carry instructions.\n3. **Impact is ultimately decided by tools and permissions**, not by the model itself. Control the blast radius, not just the words."
+    },
+    {
+      "type": "content",
+      "body": "## Builder's checklist\n\n**Tools and permissions**\n- Every tool scoped to the least access it genuinely needs.\n- Ownership and authorization checked in code on every single call.\n- No single tool holding broad write, delete, or execute power.\n- Dangerous tools removed from context entirely while untrusted data is being processed.\n\n**Secrets**\n- No secrets placed in the system prompt.\n- No secrets returned by any tool the model can see.\n- Secrets used only by trusted orchestrator code, never exposed to the model directly.\n\n**Untrusted input**\n- Documents, web pages, and tool outputs fenced clearly as data.\n- Visible-text extraction used for web pages and documents, dropping hidden nodes.\n- Input validation, covering type, range, and format, enforced in code.\n\n**High-impact actions**\n- Human approval required for anything involving money, deletion, or external communication.\n- Rate limits applied to tool calls and other sensitive operations.\n\n**Isolation**\n- Code execution and parsing run inside disposable sandboxes.\n- Sandboxes have no access to secrets and no, or very limited, network access.\n\n**Memory**\n- Random, genuinely unguessable session IDs used throughout.\n- Ownership enforced on every single memory read and write.\n- Memory treated as untrusted when reloaded; it should never grant privileges on its own.\n\n**Supply chain**\n- Dependencies pinned and checksum-verified before use.\n- Safetensors preferred over pickle formats; scan files before loading them.\n- Third-party tool descriptions reviewed as untrusted text, not blindly trusted.\n\n**Visibility**\n- Every tool call logged with who made it, what it did, and when.\n- Alerts configured for anomalies, such as unusual tools, sudden spikes, or failed authorization attempts."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Design\"] --> B[\"Least privilege by default\"]\n    B --> C[\"Fence untrusted input\"]\n    C --> D[\"Approve risky actions\"]\n    D --> E[\"Sandbox execution\"]\n    E --> F[\"Log everything\"]\n    F --> G[\"Monitor and alert\"]\n    G --> A"
+    },
+    {
+      "type": "content",
+      "body": "## Tester's and red teamer's checklist\n\nWhen assessing an agent, with proper authorization, work through these key questions:\n\n| Area | Question to answer |\n|------|--------------------|\n| Tools | What tools exist, and how much power does each one actually have? |\n| Input channels | Where can I inject text? Chat, documents, web pages, memory? |\n| Direct injection | Can I override instructions through direct user input? |\n| Indirect injection | Can hidden text in documents or pages drive the agent's behavior? |\n| Output bypass | Can I get secrets out in some transformed shape? |\n| Chaining | Can I split a payload across multiple steps to evade scanning? |\n| Memory | Are session IDs guessable? Is ownership actually enforced? |\n| Execution | Does reviewing or parsing input end up running any code? |\n| Privilege | Can a tricked agent reach data or actions it shouldn't be able to? |\n| Approval | Are high-impact actions properly gated behind a human? |\n\n## Common mistakes to avoid\n\n- Writing security rules only inside the system prompt.\n- Trusting output filters alone to stop data leaks.\n- Giving a single tool full database or shell access.\n- Running submitted code just to \"understand\" it.\n- Using sequential, predictable session IDs.\n- Loading model files from untrusted sources using pickle.\n- Treating tool outputs and memory as inherently trusted by default."
+    },
+    {
+      "type": "note",
+      "body": "**One sentence worth remembering:** secure the actions, not the words, because the words will eventually be attacker-controlled, but the actions are entirely yours to lock down in code."
+    },
+    {
+      "type": "content",
+      "body": "## Key takeaways\n\n- The model is never a real security boundary. Permissions and tools are.\n- Apply least privilege, fencing, approval requirements, sandboxing, and logging together as a combined defense.\n- When testing, map out tools and input channels first, then probe each individual attack path methodically.\n- Avoid the classic mistakes: prompt-only rules, over-reliance on filters, over-privileged tools, and running untrusted code."
+    }
+  ]
+}

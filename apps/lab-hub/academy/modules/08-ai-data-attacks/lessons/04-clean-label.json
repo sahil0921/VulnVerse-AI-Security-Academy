@@ -1,0 +1,42 @@
+{
+  "slug": "04-clean-label",
+  "title": "Clean-Label Attacks",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Clean-Label Attacks\n\nLabel flipping is loud. If a defender inspects the labels closely, flipped ones tend to stand out immediately, a \"cat\" photo labeled \"dog\" is obviously wrong at a glance.\n\nClean-label attacks are the sneaky opposite. The attacker never touches the labels at all. Every single label stays correct and believable. Instead, they make tiny changes to the features, meaning the actual input data itself.\n\n**A simple comparison:** instead of changing the answer key, the attacker subtly rewrites the questions themselves, so students slowly learn the wrong lesson while the answer key still looks perfectly correct throughout."
+    },
+    {
+      "type": "content",
+      "body": "## Why this is harder to detect\n\nA defender auditing labels finds nothing wrong at all, since every label plausibly matches its data. The poison instead hides in small feature changes that push data points closer to a boundary the attacker specifically wants to move.\n\nBecause the labels remain honest, standard label-auditing defenses completely miss this attack entirely. That's exactly what makes clean-label attacks more advanced, and genuinely more dangerous, than simple flipping.\n\nThe trade-off: clean-label attacks are much harder to actually execute. The attacker usually needs real knowledge of the model, along with careful mathematics, to craft these perturbations correctly. Flipping a label takes a second. A clean-label attack takes genuine effort and skill."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TB\n    A[Attacker picks a target to misclassify] --> B[Find nearby points of another class]\n    B --> C[Subtly shift THEIR features toward the boundary]\n    C --> D[Keep their ORIGINAL correct labels]\n    D --> E[Model retrains, boundary bends]\n    E --> F[Target point now lands on wrong side]\n    style D fill:#22c55e,color:#000\n    style F fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## A worked scenario: quality control\n\nImagine a factory system that sorts parts into three groups based on length and weight:\n\n- Class 0 — Major Defect\n- Class 1 — Acceptable\n- Class 2 — Minor Defect\n\nAn attacker wants a batch of genuinely Acceptable parts (Class 1) to be wrongly rejected as Major Defect (Class 0).\n\nHow they'd actually do it:\n1. They take several real Major Defect training samples.\n2. They subtly nudge those samples' length and weight values so they sit closer to the Acceptable region.\n3. They keep the original Major Defect label, which still looks completely plausible.\n4. When the model retrains, it's forced to bend its boundary to accommodate these shifted points.\n5. That bent boundary now swallows the attacker's actual target batch, rejecting genuinely good parts.\n\nNo label was ever changed here. Every single label still \"makes sense\" on inspection."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\nfrom sklearn.neighbors import NearestNeighbors\n\n# Clean-label attack: shift Class 0 points toward the boundary,\n# keeping their original (correct-looking) Class 0 labels.\n\ndef clean_label_poison(X, y, target_point, baseline_model,\n                       n_neighbors=5, epsilon=0.5):\n    X_poisoned = X.copy()\n\n    # 1. Find Class 0 points nearest to the target we want to misclassify\n    class0_idx = np.where(y == 0)[0]\n    nn = NearestNeighbors(n_neighbors=n_neighbors).fit(X[class0_idx])\n    _, local = nn.kneighbors([target_point])\n    neighbor_idx = class0_idx[local[0]]\n\n    # 2. Compute the push direction across the 0-vs-1 boundary.\n    #    (w0 - w1) is perpendicular to that boundary.\n    w0, w1 = baseline_model.coef_[0], baseline_model.coef_[1]\n    direction = -(w0 - w1)\n    unit_push = direction / np.linalg.norm(direction)\n\n    # 3. Nudge each neighbour slightly across the boundary.\n    for idx in neighbor_idx:\n        X_poisoned[idx] = X[idx] + epsilon * unit_push\n        # NOTE: y[idx] stays 0 - the label is never changed.\n\n    return X_poisoned, y  # labels untouched"
+    },
+    {
+      "type": "note",
+      "body": "**The key mechanic:** the attacker moves other classes' points around, not the actual target's. By dragging Class 0 examples into Class 1 territory, while carefully keeping the Class 0 label intact, the model is forced to push its boundary outward, and that outward push is precisely what ends up capturing the real target."
+    },
+    {
+      "type": "content",
+      "body": "## Clean-label vs label flipping\n\n| | Label Flipping | Clean-Label |\n|---|----------------|-------------|\n| What changes | The label | The features |\n| Label correctness | Obviously wrong | Stays plausible |\n| Difficulty to run | Very easy | Hard (needs model knowledge) |\n| Difficulty to detect | Easier | Much harder |\n| Typical goal | Degrade or target | Precise, targeted misclassification |\n\n## How defenders fight clean-label attacks\n\nBecause the labels look completely fine, defenders need to inspect the features instead:\n\n- **Feature-space anomaly detection** — look for points sitting unusually far from their expected class cluster.\n- **Provenance and integrity checks** — detect whether stored feature values were modified at some point after collection.\n- **Data augmentation and smoothing** — makes the model less sensitive to tiny, carefully crafted perturbations.\n- **Robust training methods** — techniques specifically designed to resist small adversarial shifts in training data.\n- **Nearest-neighbor consistency checks** — flag samples whose nearby neighbors mostly belong to a different class entirely."
+    },
+    {
+      "type": "content",
+      "body": "## Common mistakes\n\n- Only auditing labels while completely ignoring feature integrity.\n- Assuming \"the labels are correct, so the data must be safe.\"\n- No checksums or integrity verification applied to stored feature data.\n\n## Best practices\n\n- Verify feature integrity directly, not just label correctness.\n- Store cryptographic hashes of datasets to help detect tampering.\n- Use robust, augmented training pipelines wherever possible.\n- Monitor the feature space actively for out-of-cluster samples.\n\n## Summary\n\n- Clean-label attacks poison the features while keeping labels fully honest.\n- They evade label-based defenses entirely, by design.\n- They're harder to run than simple flipping, but far harder to detect.\n- Defense shifts from label auditing toward feature-space inspection instead.\n\n## Key Takeaways\n\n- Correct labels do not automatically mean the data is safe.\n- The attacker moves neighboring points in order to bend the boundary itself.\n- Feature integrity and anomaly detection are the main defenses available here."
+    }
+  ]
+}

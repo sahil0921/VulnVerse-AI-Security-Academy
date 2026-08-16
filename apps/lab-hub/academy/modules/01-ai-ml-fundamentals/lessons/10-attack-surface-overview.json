@@ -1,0 +1,33 @@
+{
+  "slug": "10-attack-surface-overview",
+  "title": "Attack Surface Overview",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "8 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Attack Surface Overview\n\nThe attack surface refers to every point where an attacker could potentially interact with or exploit a system. The larger the attack surface, the more ways there are to attack it.\n\nA simple way to think about it: a house with 20 windows and 5 doors has a much larger attack surface than a house with a single door. More entry points mean more risk.\n\nAI systems tend to have a large attack surface because they handle user input, external data, and often connect to databases and other tools. This lesson maps out the main areas."
+    },
+    {
+      "type": "content",
+      "body": "## The main attack points in an AI system\n\n**1. The input (prompt)**\nWhere users submit text or data. This is the most common entry point. Related attacks include prompt injection and jailbreaks.\n\n**2. The training data**\nIf an attacker can influence what the model learns during training. Related attacks include data poisoning and backdoors.\n\n**3. External data the AI reads**\nWeb pages, files, and emails that the AI processes as part of its task. Related attacks include indirect prompt injection.\n\n**4. The model output**\nWhat the AI sends back to the user or to another system. If this output is used without proper validation, it can attack users or downstream systems. Related attacks include XSS, SQL injection, and code injection through AI-generated output."
+    },
+    {
+      "type": "content",
+      "body": "## Additional areas of the attack surface\n\n**5. The model itself**\nThe file containing the model's trained parameters. Related attacks include model theft and model tampering.\n\n**6. Embeddings and vector databases**\nWhere data converted into numerical form is stored. Related attacks include reversing embeddings to recover the original private text, and exporting the entire stored dataset.\n\n**7. Connected tools and agents**\nModern AI systems can run code, browse the web, and query databases. Each connected tool adds a new potential entry point. Related attacks include tool abuse and privilege escalation.\n\n**8. The infrastructure**\nThe cloud servers, containers, and permission systems that the AI runs on. Related attacks include SSRF, IAM privilege escalation, and container escape."
+    },
+    {
+      "type": "diagram",
+      "src": "graph TD\n    A[AI Attack Surface] --> B[Input / Prompt]\n    A --> C[Training Data]\n    A --> D[External Data]\n    A --> E[Model Output]\n    A --> F[The Model File]\n    A --> G[Embeddings / Vector DB]\n    A --> H[Tools & Agents]\n    A --> I[Infrastructure]"
+    },
+    {
+      "type": "content",
+      "body": "## How to think like an attacker\n\nFor any AI system, it helps to ask:\n\n- Where does data enter the system?\n- Where does the system trust input that it shouldn't?\n- What is the AI capable of doing, in terms of tools, databases, and actions?\n- Where does the output go, and is it validated before being used?\n\nThe answers to these questions reveal likely targets. Every module in this academy focuses on one specific part of this overall attack surface."
+    },
+    {
+      "type": "note",
+      "body": "Treat this lesson as a reference map. When starting a new module later in the course, come back to this page and ask: which part of the attack surface does this module cover? It will help keep your understanding organized as the course progresses."
+    }
+  ]
+}

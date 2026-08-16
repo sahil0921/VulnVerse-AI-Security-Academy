@@ -1,0 +1,57 @@
+{
+  "slug": "04-crown-jewels",
+  "title": "Ranking Crown Jewels",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## Not All Assets Are Equal\n\nEvery system holds many assets: data, credentials, models, configurations. But some are far more valuable than others. The most valuable ones are called **crown jewels** — the assets that would cause the most harm if compromised, or grant the most power to an attacker.\n\n**An analogy.** A museum has thousands of objects, but only a few are irreplaceable masterpieces. Security guards, cameras, and alarms cluster around those masterpieces. The gift-shop postcards get no such attention. Threat modeling works the same way: you find your masterpieces first, then protect them hardest.\n\n**Why this matters.** You never have unlimited time or budget. Ranking crown jewels tells you *where to focus*. Defenders harden them first. Attackers target them first."
+    },
+    {
+      "type": "content",
+      "body": "## Assets, Then Crown Jewels\n\nStart broad, then narrow.\n\n**Asset identification** — list everything of value in the system.\n\n**Asset classification** — sort those assets by how sensitive or critical they are.\n\n**Crown jewels** — the top of that sorted list: the assets whose loss would be catastrophic.\n\nFor an AI system, the asset list has some familiar entries and some new AI-specific ones."
+    },
+    {
+      "type": "content",
+      "body": "## AI-Specific Assets\n\nTraditional systems worry about databases and credentials. AI systems add whole new categories of valuable assets:\n\n| Asset type | Why it's valuable |\n|---|---|\n| **Model weights** | Expensive to train; may contain proprietary knowledge |\n| **System prompts** | Contain instructions, secrets, and business logic |\n| **Vector database contents** | The knowledge the AI relies on; poisoning it corrupts every answer |\n| **Training data** | Sensitive, private, or proprietary information |\n| **Agent identity tokens** | Control what actions an agent can take |\n| **Tool schemas** | A map of everything the AI can *do* in the real world |\n| **Detection rules** | The defender's playbook — reveals what is and isn't monitored |\n\nThat last one is easy to overlook. If an attacker reads your **detection rules**, they learn exactly how to move without setting off alarms. Defensive information is itself a crown jewel."
+    },
+    {
+      "type": "content",
+      "body": "## Ranking by Offensive Value\n\nThe key question when ranking is: **how much power does this asset give an attacker?**\n\nAsk of each asset:\n\n- Does it grant *direct control* of infrastructure? (Very high value.)\n- Does it *unlock other assets*? (High value — it's a stepping stone.)\n- Does it reveal *how defenses work*? (High value — enables stealth.)\n- Is it *reachable now*, or hidden behind many barriers? (Reachable = higher priority.)\n\nAn asset that is both *powerful* and *easy to reach right now* is your top priority."
+    },
+    {
+      "type": "content",
+      "body": "## Ranking Aetherlink's Sentri Crown Jewels\n\nUsing what we validated in earlier lessons, here's how Sentri's assets rank by offensive value.\n\n| Rank | Asset | Location | Why it matters | Reachable now? |\n|---|---|---|---|---|\n| 1 | **Cloud credentials** | Secrets manager | Direct control of the cloud infrastructure | No — behind barriers |\n| 2 | **Detection rules** | Vector DB collection | Reveals what is monitored; enables stealth | Yes — DB is unauthenticated |\n| 3 | **Runbook corpus** | Vector DB collection | Reveals internal procedures and topology | Yes |\n| 4 | **Agent tokens** | Kubernetes secrets | Control which tools each agent can use | Yes — via read access |\n| 5 | **Model weights** | Model registry | Proprietary; valuable for offline analysis | Access unverified |\n| 6 | **Tool schemas** | Tool server | Full map of what the AI can do | Yes — already obtained |"
+    },
+    {
+      "type": "note",
+      "body": "**Ranking is not fixed — it shifts with your knowledge.** An asset that looked minor early on can become the primary objective once you understand how it connects to everything else. The agent tokens (#4) jumped in importance the moment we realized one specific token unlocks the path to the #1 crown jewel."
+    },
+    {
+      "type": "content",
+      "body": "## Reachable Now vs. Behind Barriers\n\nNotice the split in that table. Some crown jewels (#2, #3, #4, #6) are **reachable right now**. Others (#1) sit **behind multiple barriers**.\n\nThis distinction reshapes your plan:\n\n- **Reachable assets** should be grabbed and analyzed *immediately*. They cost little and often reveal intelligence that helps reach the deeper targets.\n- **Deep assets** become your **primary objective** — the thing you're working toward, step by step.\n\nFor Sentri, the cloud credentials (#1) are the ultimate goal. But the detection rules (#2) are reachable now, so we read them first — because knowing what's monitored helps us reach #1 quietly."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"List all assets\"] --> B[\"Classify by\\nsensitivity\"]\n    B --> C[\"Rank by\\noffensive value\"]\n    C --> D{\"Reachable\\nnow?\"}\n    D -->|Yes| E[\"Grab & analyze\\nimmediately\"]\n    D -->|No| F[\"Set as primary\\nobjective\"]\n    E --> G[\"Intel feeds\\ndeeper attack\"]\n    G --> F"
+    },
+    {
+      "type": "content",
+      "body": "## Business Context Changes the Ranking\n\nTechnical value is only half the story. The *business* also decides what matters most.\n\nAsk: **what would hurt the business the most if it were lost?**\n\n- For a bank's AI, leaking **customer financial data** might be the worst outcome.\n- For a healthcare AI, exposing **patient records** could trigger legal disaster.\n- For a startup, stealing the **proprietary model** could destroy its competitive edge.\n\nAetherlink is a fictional financial-services firm, so anything touching **customer money or personal data** carries extra weight. A crown jewel ranking that ignores business impact is only half a ranking. Always combine *technical power* with *business harm*."
+    },
+    {
+      "type": "content",
+      "body": "## Crown Jewels for Defenders\n\nIf you're on the defensive side, the same ranking tells you where to invest.\n\n- Put your **strongest controls** around rank #1.\n- Add **monitoring and alerts** on any path leading to a crown jewel.\n- Treat **defensive information** (detection rules, logging config) as a crown jewel too — hide it well.\n\nThe attacker and defender use the identical ranking. One climbs toward the jewels; the other builds walls around them."
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes\n\n- **Ranking by size, not value.** A tiny credential file can outrank a huge log archive.\n- **Ignoring stepping-stone assets.** A token that unlocks the real target is a crown jewel even if it seems minor alone.\n- **Forgetting defensive assets.** Detection rules and logs are prizes for attackers.\n- **Ranking once and never revisiting.** New intelligence reshuffles the list — update it.\n- **Ignoring business impact.** Technical power without business context gives a lopsided ranking."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **Crown jewels** are the assets whose loss causes the most harm or grants the most power — find your masterpieces first, then protect (or attack) them hardest.\n- Move from **asset identification** → **classification** → **crown-jewel ranking**.\n- AI adds new asset types: model weights, system prompts, vector DB contents, agent tokens, tool schemas, and detection rules — defensive information is itself a crown jewel.\n- Rank by **offensive value** and by **reachability** — \"reachable now\" beats \"powerful but distant\" for immediate action.\n- **Business context** reshapes technical rankings; always blend technical power with business harm.\n- Rankings **shift** as your knowledge grows — revisit them regularly.\n\nNext, we map the invisible lines the jewels hide behind: **trust boundaries**."
+    }
+  ]
+}

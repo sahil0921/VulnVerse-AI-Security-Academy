@@ -1,0 +1,228 @@
+{
+  "slug": "10-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 20,
+  "questions": [
+    {
+      "q": "What is the core purpose of threat modeling?",
+      "options": [
+        "To respond to a security incident after it has already happened",
+        "To write the final penetration test report",
+        "To think like an attacker and find weaknesses before an attack occurs",
+        "To install security tools on production servers"
+      ],
+      "answer": 2,
+      "explanation": "Threat modeling is proactive: you imagine what could go wrong before an attacker ever shows up, so you can fix issues while they're still cheap to fix."
+    },
+    {
+      "q": "According to the four core questions, what comes right after 'What are we building?'",
+      "options": [
+        "Did we do a good job?",
+        "What can go wrong?",
+        "What are we going to do about it?",
+        "Who approved the budget?"
+      ],
+      "answer": 1,
+      "explanation": "The four questions flow in order: understand the system, find what can go wrong, plan the fixes, then review whether the job was done well."
+    },
+    {
+      "q": "Why does target reconstruction usually start with passive intelligence before going active?",
+      "options": [
+        "Passive intelligence is always more accurate than active intelligence",
+        "Active recon is illegal in every engagement",
+        "Passive intelligence takes longer to gather",
+        "Passive methods are quiet and low-risk, letting you learn as much as possible before making noise"
+      ],
+      "answer": 3,
+      "explanation": "Starting passive (job postings, OSINT) avoids detection risk, so you only go active (scans, probes) once you've extracted everything you can quietly."
+    },
+    {
+      "q": "In an assumption register, what does a confidence level actually measure?",
+      "options": [
+        "How much the tester wants the hypothesis to be true",
+        "How long the assumption has been in the register",
+        "How reliable the source of the observation is",
+        "How severe the vulnerability would be"
+      ],
+      "answer": 2,
+      "explanation": "Confidence reflects how trustworthy the source is (e.g. client documentation vs. an inferred guess), not how exciting or desirable the finding would be."
+    },
+    {
+      "q": "Why is 'absence of evidence' treated as a LOW confidence assumption?",
+      "options": [
+        "Because low confidence assumptions are always wrong",
+        "Because the client documentation is never reliable",
+        "Because absence of evidence should be ignored entirely",
+        "Because not seeing proof of something is not the same as proving it is absent"
+      ],
+      "answer": 3,
+      "explanation": "Never having seen a lock doesn't mean there's no lock — treating silence as proof is one of the most common mistakes in threat modeling."
+    },
+    {
+      "q": "What makes an asset a 'crown jewel'?",
+      "options": [
+        "It is the largest file in the system by size",
+        "It is the oldest component in the architecture",
+        "It is stored in a database rather than a file",
+        "Its loss would cause the most harm or grant an attacker the most power"
+      ],
+      "answer": 3,
+      "explanation": "Crown jewels are ranked by offensive value and business harm, not by size or age — a tiny credential file can outrank a huge log archive."
+    },
+    {
+      "q": "Why might a 'reachable now' asset be prioritized over a more powerful but distant one?",
+      "options": [
+        "Reachable assets are always more valuable overall",
+        "Grabbing it costs little and often reveals intelligence that helps reach the deeper, primary target",
+        "Distant assets are never worth pursuing",
+        "Reachability has no effect on prioritization"
+      ],
+      "answer": 1,
+      "explanation": "Reachable assets can be analyzed immediately at low cost, and often surface intelligence that makes reaching a deeper, more powerful crown jewel easier."
+    },
+    {
+      "q": "What is the key difference between a policy-based and an inference-based trust boundary?",
+      "options": [
+        "Inference-based boundaries are always more secure",
+        "Policy-based boundaries only exist in AI systems",
+        "Policy-based boundaries are enforced by fixed rules, while inference-based boundaries rely on the AI's changeable judgment",
+        "There is no real difference between them"
+      ],
+      "answer": 2,
+      "explanation": "A policy boundary is a fixed yes/no gate (like token validation); an inference boundary depends on the model's own reasoning, which can be swayed by crafted input."
+    },
+    {
+      "q": "Why is prompt injection especially dangerous against inference-based trust boundaries?",
+      "options": [
+        "It attacks a boundary with no fixed rule behind it, only the model's judgment, which can be manipulated with words",
+        "Prompt injection only works against encrypted databases",
+        "It requires physical access to the server",
+        "Inference-based boundaries cannot be attacked at all"
+      ],
+      "answer": 0,
+      "explanation": "Unlike a policy gate that can be picked with a stolen token, an inference gate is fooled purely with carefully crafted language."
+    },
+    {
+      "q": "Where do the most dangerous escalation paths usually flow?",
+      "options": [
+        "Straight through the strongest, best-defended walls",
+        "Only through the front-facing login page",
+        "Exclusively through external cloud providers",
+        "Through gaps where trust was never enforced at all"
+      ],
+      "answer": 3,
+      "explanation": "Attackers rarely smash through strong defenses; they slip through boundaries where trust was assumed but never actually verified."
+    },
+    {
+      "q": "Why is learning that an attack path is closed considered valuable?",
+      "options": [
+        "It means the engagement has failed and should stop",
+        "It lets you stop wasting time and redirect effort toward paths that actually work",
+        "It has no value; only successful paths matter",
+        "It automatically opens three new guaranteed paths"
+      ],
+      "answer": 1,
+      "explanation": "Testing a dependency gate early and finding it fails saves you from wasting hours building an attack on an assumption that was never true."
+    },
+    {
+      "q": "In escalation path planning, what is a 'dependency'?",
+      "options": [
+        "The final crown jewel objective",
+        "An assumption that must hold true for the path to actually work",
+        "A tool used only by defenders",
+        "The detection risk score of a path"
+      ],
+      "answer": 1,
+      "explanation": "Each step in a path often depends on an unverified assumption — these dependencies act as go/no-go gates you should test before committing."
+    },
+    {
+      "q": "What is the main difference between MITRE ATT&CK and MITRE ATLAS?",
+      "options": [
+        "ATLAS is older and no longer used",
+        "ATT&CK covers AI attacks; ATLAS covers only cloud attacks",
+        "They are two names for the exact same catalog",
+        "ATT&CK covers traditional IT attacks; ATLAS covers AI/ML-specific attacks"
+      ],
+      "answer": 3,
+      "explanation": "ATT&CK is the established catalog for general IT attacks; ATLAS is the newer catalog specifically built for attacks against AI and ML systems."
+    },
+    {
+      "q": "Why does an ATLAS mapping need to evolve alongside the assumption register?",
+      "options": [
+        "Because ATLAS technique IDs expire after 24 hours",
+        "Because techniques only apply once their underlying assumptions are validated, so the mapping shifts as assumptions are confirmed or dropped",
+        "Because ATLAS mappings are randomly generated",
+        "Because the mapping has no relationship to assumptions at all"
+      ],
+      "answer": 1,
+      "explanation": "A technique stays 'if applicable' until its precondition assumption is validated — once validated, it becomes confirmed applicable; if invalidated, it drops off."
+    },
+    {
+      "q": "What gives an intelligence brief its greatest value?",
+      "options": [
+        "Its completeness — knowing every single detail",
+        "Its length — the more pages the better",
+        "Its honesty — clearly separating facts, assumptions, and constraints",
+        "Hiding uncertainty so the client feels reassured"
+      ],
+      "answer": 2,
+      "explanation": "A brief's value comes from honestly distinguishing what's validated, what's assumed, and what blocks progress — not from pretending to know everything."
+    },
+    {
+      "q": "Why is version history in an intelligence brief considered valuable?",
+      "options": [
+        "It documents how understanding evolved over time, showing the client how uncertainty was navigated",
+        "It is only useful for billing purposes",
+        "Version history has no real value and can be discarded",
+        "It replaces the need for a risk register entirely"
+      ],
+      "answer": 0,
+      "explanation": "The version history becomes a decision log — it shows not just what was found, but how the reasoning developed as new intelligence arrived."
+    },
+    {
+      "q": "In the STRIDE framework, what does the 'E' stand for?",
+      "options": [
+        "Encryption of data at rest",
+        "External dependency mapping",
+        "Enumeration of open ports",
+        "Elevation of Privilege — gaining more power than allowed"
+      ],
+      "answer": 3,
+      "explanation": "Elevation of Privilege covers cases like a low-privilege agent invoking an admin-only tool — gaining access beyond what was intended."
+    },
+    {
+      "q": "Which framework is best suited when the primary concern is data privacy specifically?",
+      "options": [
+        "DREAD",
+        "LINDDUN",
+        "PASTA",
+        "STRIDE"
+      ],
+      "answer": 1,
+      "explanation": "LINDDUN is STRIDE's privacy-focused cousin, purpose-built for analyzing threats to personal data specifically."
+    },
+    {
+      "q": "How is the risk of a threat commonly calculated?",
+      "options": [
+        "Likelihood multiplied by Impact",
+        "Impact minus Likelihood",
+        "The number of components in the system",
+        "The size of the vulnerable file"
+      ],
+      "answer": 0,
+      "explanation": "Risk = Likelihood × Impact is the standard formula for prioritizing which threats to fix first, since limited time should go where it matters most."
+    },
+    {
+      "q": "What does 'defense in depth' mean?",
+      "options": [
+        "Relying on one very strong security control",
+        "Placing all defenses only at the network perimeter",
+        "Using multiple layers of defense so that if one fails, others still protect the system",
+        "Removing all security controls to simplify the system"
+      ],
+      "answer": 2,
+      "explanation": "Defense in depth stacks several independent layers, so an attacker who defeats one control still has to get past the next one."
+    }
+  ]
+}

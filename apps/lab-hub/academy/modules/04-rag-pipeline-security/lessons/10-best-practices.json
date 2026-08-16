@@ -1,0 +1,33 @@
+{
+  "slug": "10-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# RAG Security Best Practices Checklist\n\nThis lesson pulls everything covered so far together into a practical checklist you can apply to any RAG system, whether you're building one, assessing one, or defending one. Each item here maps directly back to an attack you've already learned about.\n\n---\n\n## Ingestion best practices\n\n- **Restrict who can upload.** Require authentication and role-based permissions. Anonymous or fully open uploads are the top cause of poisoning attacks.\n- **Review before indexing.** Combine automated scanning with human review for anything sensitive.\n- **Sanitize content.** Redact secrets, normalize Unicode, and reject invisible characters before indexing.\n- **Track provenance.** Record the uploader, timestamp, source, and a content hash for every single document.\n- **Keep full version history.** Store complete diffs so slow-drip poisoning becomes visible over time, rather than invisible."
+    },
+    {
+      "type": "content",
+      "body": "## Storage and retrieval best practices\n\n- **Never store retrievable secrets.** If a credential absolutely must exist somewhere, keep it out of the knowledge base entirely.\n- **Tag every chunk with access metadata,** such as department, clearance level, and sensitivity.\n- **Filter retrieval by caller identity.** A user should only ever be able to retrieve chunks they're actually authorized to see.\n- **Normalize queries and content** using the same rules, so encoding tricks fail consistently on both sides.\n- **Cap Top-K sensibly** to reduce dilution and limit how much influence a single poisoned document can have.\n\n## Model and tool best practices\n\n- **Separate data from instructions.** Mark retrieved text as reference-only directly within the prompt.\n- **Re-validate every tool argument**, regardless of where it originated. Filters applied to user input must also apply to instructions coming from retrieved context.\n- **Enforce least privilege.** Run the RAG service as a low-privilege user, and scope file and web tools to strict allow-lists.\n- **Bound tool output size** to avoid context-window overflow being used as an attack vector."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Secure ingestion] --> B[Access-controlled storage]\n    B --> C[Identity-based retrieval]\n    C --> D[Data-instruction separation]\n    D --> E[Validated tool calls]\n    E --> F[Output redaction]\n    F --> G[Monitoring and detection]\n    G -.feedback.-> A"
+    },
+    {
+      "type": "content",
+      "body": "## Output and monitoring best practices\n\n- **Redact based on meaning, not just format.** A regex looking for `@` is trivially bypassed with substitution. Use entity recognition instead, and validate the final rendered output.\n- **Log ingestion, retrieval, and tool calls** with enough detail to fully reconstruct an attack after the fact.\n- **Alert on anomalies**, including overly broad documents, repeated instructions across unrelated topics, invisible characters, off-topic file paths, and slowly evolving edit histories.\n- **Review cumulative history**, not just the most recent change on its own.\n\n---\n\n## Common mistakes to avoid\n\n| Mistake | Consequence |\n|---|---|\n| Dumping all data in unfiltered | Instant information extraction |\n| Open document uploads | Trivial poisoning and collision |\n| Filtering user input but not retrieved context | Retrieval hijacking |\n| Redacting only on format (regex) | Substitution bypass |\n| Running RAG service as root | File read escalates to full compromise |\n| Monitoring previews only | Blended and slow-drip attacks go unseen |\n| Trusting guardrails alone | Encoding and indirect prompts slip through |"
+    },
+    {
+      "type": "note",
+      "body": "**One mental model worth remembering:** the knowledge base is an input, not a source of truth. Every single chunk could theoretically have been written by an attacker. Design the system as if that were always true: access-controlled going in, and treated as untrusted data coming back out. Do that consistently, and most of the attacks covered in this module lose the majority of their power."
+    },
+    {
+      "type": "content",
+      "body": "## Assessor's quick methodology\n\nWhen testing a real RAG system, it helps to work through this order:\n\n1. **Fingerprint.** Confirm it's actually RAG-based. Look for phrases like \"powered by RAG,\" upload features, and clearly grounded answers.\n2. **Extract.** Probe for sensitive data using precise, \"include all\" style prompts and one-shot examples.\n3. **Map capabilities.** Test for file-read and web-request tools by watching for specific, telling refusals.\n4. **Poison, if it's in scope.** Upload a benign-looking document targeting a common query, then verify it actually gets retrieved.\n5. **Hijack.** Use a unique trigger phrase and hidden instructions to reach the model's available tools.\n6. **Evade.** Layer encoding, indirection, document blending, and slow-drip techniques to test the system's detection capabilities.\n7. **Report.** Document every file you uploaded for proper cleanup, and map your findings to the concrete fixes covered earlier in this module."
+    }
+  ]
+}

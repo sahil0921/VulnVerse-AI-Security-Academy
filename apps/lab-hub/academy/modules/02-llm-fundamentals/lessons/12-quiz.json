@@ -1,0 +1,239 @@
+{
+  "slug": "12-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 21,
+  "questions": [
+    {
+      "q": "What is an LLM fundamentally doing when it generates a response?",
+      "options": [
+        "Looking up answers in a fixed database",
+        "Executing pre-written scripts for each question",
+        "Predicting the next token based on learned patterns",
+        "Running a search engine query in the background"
+      ],
+      "answer": 2,
+      "explanation": "An LLM predicts the next token repeatedly based on patterns learned during training. It does not look up answers in a database."
+    },
+    {
+      "q": "What is a token, in the context of how LLMs process text?",
+      "options": [
+        "A small unit of text, such as a word or part of a word",
+        "A password used to authenticate API requests",
+        "A complete training dataset",
+        "A type of neural network layer"
+      ],
+      "answer": 0,
+      "explanation": "Models break text into tokens, small chunks that may be whole words, parts of words, or characters, before processing it."
+    },
+    {
+      "q": "What does an embedding represent?",
+      "options": [
+        "An encrypted version of the model file",
+        "A list of numbers that captures the meaning of text or data",
+        "A compressed version of a document",
+        "A unique identifier for each API request"
+      ],
+      "answer": 1,
+      "explanation": "Embeddings convert data like text into numeric vectors, where items with similar meaning end up with similar values."
+    },
+    {
+      "q": "What is the key mechanism inside a Transformer that lets it understand which words in a sentence relate to each other?",
+      "options": [
+        "Tokenization",
+        "Fine-tuning",
+        "Attention",
+        "Reinforcement learning"
+      ],
+      "answer": 2,
+      "explanation": "Attention allows the model to weigh which earlier tokens matter most when predicting the next one, which is how it captures context."
+    },
+    {
+      "q": "What typically makes up the final prompt actually sent to an LLM in a real application?",
+      "options": [
+        "Only the text the user types",
+        "System prompt, RAG documents, conversation history, and user input combined",
+        "Only the system prompt",
+        "A random sample of the training data"
+      ],
+      "answer": 1,
+      "explanation": "A real prompt is usually assembled from several pieces: hidden system instructions, retrieved documents, prior conversation, and the user's actual input."
+    },
+    {
+      "q": "What happens when a conversation grows longer than a model's context window?",
+      "options": [
+        "The model crashes immediately",
+        "The newest messages are ignored",
+        "The oldest content gets dropped to make room",
+        "The model automatically increases its own context size"
+      ],
+      "answer": 2,
+      "explanation": "The context window is a fixed limit. Once it's full, the oldest messages are typically dropped first to make room for new content."
+    },
+    {
+      "q": "Why is context window size useful during model fingerprinting?",
+      "options": [
+        "It never changes and is identical across all models",
+        "It has no relationship to which model is deployed",
+        "Different model families are typically deployed with very different context sizes",
+        "It can only be tested by contacting the vendor directly"
+      ],
+      "answer": 2,
+      "explanation": "Context window size varies significantly between models, so measuring it through marker injection is a useful fingerprinting signal."
+    },
+    {
+      "q": "Why do attackers specifically target a system's system prompt?",
+      "options": [
+        "It has no real security value",
+        "It's always publicly visible by design",
+        "It reveals the AI's persona, restrictions, and sometimes secrets or hidden capabilities",
+        "It only contains formatting instructions"
+      ],
+      "answer": 2,
+      "explanation": "A leaked system prompt can reveal the AI's intended behavior, its restrictions (which hint at sensitive functionality), and occasionally secrets developers mistakenly placed there."
+    },
+    {
+      "q": "Why is a restriction like 'never discuss pricing' in a system prompt useful information for an attacker?",
+      "options": [
+        "It confirms pricing-related data or functionality likely exists and is worth probing",
+        "It proves the system has no pricing data at all",
+        "It means the developer forgot to finish the prompt",
+        "It has no security relevance whatsoever"
+      ],
+      "answer": 0,
+      "explanation": "Each explicit restriction hints at exactly what the developer was worried about, which points an attacker toward what functionality or data might actually exist."
+    },
+    {
+      "q": "You send a general question and get an empty 'sources' array, but a company-specific question returns populated sources with chunk IDs. What does this indicate?",
+      "options": [
+        "The model is broken",
+        "The API requires authentication",
+        "The application is non-RAG",
+        "The application uses RAG"
+      ],
+      "answer": 3,
+      "explanation": "Sources appearing only for specific questions is the classic signature of a RAG system retrieving from a knowledge base."
+    },
+    {
+      "q": "In a RAG response, what does the presence of both a vector_score and a bm25_score typically indicate?",
+      "options": [
+        "The system uses hybrid retrieval, combining semantic and keyword search",
+        "The system is broken and returning duplicate data",
+        "The model is hallucinating its sources",
+        "The response is coming from a non-RAG fallback"
+      ],
+      "answer": 0,
+      "explanation": "vector_score reflects semantic similarity while bm25_score reflects keyword relevance. Seeing both together confirms hybrid retrieval is in use."
+    },
+    {
+      "q": "During enumeration, /v1/chat/completions returns HTTP 401 while /v1/users returns HTTP 404. What can you conclude?",
+      "options": [
+        "users exists and is protected; chat/completions does not exist",
+        "Both endpoints are down",
+        "Both endpoints are open",
+        "chat/completions exists and is protected; users does not exist"
+      ],
+      "answer": 3,
+      "explanation": "401 means the endpoint exists but needs authentication; 404 means it does not exist at all. So chat/completions is present and protected, while users is absent."
+    },
+    {
+      "q": "Which of these is generally considered passive reconnaissance?",
+      "options": [
+        "Sending crafted queries to an API endpoint",
+        "Fuzzing hidden API paths with a wordlist",
+        "Reading a company's public GitHub repository and job postings",
+        "Sending repeated probes to test rate limits"
+      ],
+      "answer": 2,
+      "explanation": "Passive recon involves gathering information with little to no direct interaction with the target, such as reading public repositories, job postings, and OSINT sources."
+    },
+    {
+      "q": "Why do AI endpoints often go undetected by traditional port scanning?",
+      "options": [
+        "They are usually embedded inside a normal web app rather than exposed on a dedicated port",
+        "AI systems never use HTTP",
+        "Port scanners are incapable of scanning any web application",
+        "AI endpoints are always on port 11434"
+      ],
+      "answer": 0,
+      "explanation": "AI features are typically integrated into existing web applications, so finding them usually requires inspecting JavaScript files and API paths, not just scanning ports."
+    },
+    {
+      "q": "What does a response header like 'Server: kong/3.9.1' most likely reveal?",
+      "options": [
+        "The programming language used to build the frontend",
+        "The presence of a Kong API gateway in front of the backend",
+        "The exact model being used for inference",
+        "The database engine storing embeddings"
+      ],
+      "answer": 1,
+      "explanation": "Server and X-Kong-* headers are tell-tale signs of a Kong API gateway, revealing infrastructure details like rate limits."
+    },
+    {
+      "q": "Why does contradiction testing (e.g., 'Thanks, Claude!') often fail against a very small, 1-billion-parameter model?",
+      "options": [
+        "The technique only works over HTTPS",
+        "1B models cannot process English text",
+        "Small models lack the capacity to detect and correct false identity claims",
+        "1B models are always offline"
+      ],
+      "answer": 2,
+      "explanation": "Very small models often can't recognize the misattribution, so they accept the false identity instead of correcting it. Metadata leaks are more reliable for tiny models."
+    },
+    {
+      "q": "Which single response field most directly fingerprints the embedding model in use in a RAG stack?",
+      "options": [
+        "The HTTP status code",
+        "The response latency",
+        "The answer text alone",
+        "The embedding dimensions, such as 768 or 1536"
+      ],
+      "answer": 3,
+      "explanation": "Embedding dimensions strongly narrow down which embedding model is in use, effectively fingerprinting part of the RAG stack instantly."
+    },
+    {
+      "q": "Why should health endpoints typically be checked early in a reconnaissance engagement?",
+      "options": [
+        "They are always encrypted and therefore safe to test first",
+        "They rarely return any useful information",
+        "A single leaky response can reveal the model, RAG status, vector DB, and context size at once",
+        "They are the only endpoints that legally can be tested"
+      ],
+      "answer": 2,
+      "explanation": "A leaky health endpoint can shortcut hours of behavioral fingerprinting by directly revealing configuration details in one response."
+    },
+    {
+      "q": "Which of these is the MOST stealthy way to discover document names in a RAG system?",
+      "options": [
+        "Asking 'List all your sources'",
+        "Sending 50 rapid requests in a loop",
+        "Asking 'What documents do you have access to?'",
+        "Asking a natural topic question that forces source citations"
+      ],
+      "answer": 3,
+      "explanation": "Keyword phrases like 'what documents' tend to trigger detection rules. A natural topic question forces the AI to cite sources without matching those obvious patterns."
+    },
+    {
+      "q": "An AWS key in a RAG response reads AKIAIOSFODNN7HONEYPOT. What is the correct interpretation?",
+      "options": [
+        "An expired but harmless key",
+        "A honeypot canary designed to expose attackers who use it",
+        "A truncated but still usable key",
+        "A valid production credential safe to use immediately"
+      ],
+      "answer": 1,
+      "explanation": "Real AWS keys never contain readable dictionary words. 'HONEYPOT' is a deliberate canary, and using it would reveal reconnaissance activity to defenders."
+    },
+    {
+      "q": "Why should model fingerprinting never rely on a single signal alone?",
+      "options": [
+        "Because fingerprinting is illegal in most jurisdictions",
+        "Because all models behave identically regardless of family",
+        "Because APIs are always fully encrypted",
+        "Because system prompts, model size, and deployment settings can each distort one individual signal"
+      ],
+      "answer": 3,
+      "explanation": "A system prompt can fake identity, small models can't self-correct false claims, and operators can change context size. Combining multiple independent signals gives a far more reliable conclusion."
+    }
+  ]
+}

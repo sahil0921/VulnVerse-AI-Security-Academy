@@ -1,0 +1,39 @@
+{
+  "slug": "02-embedding-recon",
+  "title": "Embedding Recon",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# What Are Embeddings?\n\nBefore we can attack embeddings, we need to truly understand them first. Let's build this up from zero.\n\n## The problem embeddings solve\n\nComputers don't understand words. They understand numbers. So how does a computer know that \"car\" and \"automobile\" mean almost the same thing, while \"car\" and \"banana\" don't?\n\nThe answer is embeddings.\n\nAn embedding is a list of numbers that represents the meaning of a piece of text.\n\n**A simple comparison:** think of a map. Every city has coordinates, latitude and longitude. Cities close together on the map are physically close in the real world. An embedding works like coordinates for meaning instead, texts with similar meaning end up placed close together.\n\n**Example:** the sentence \"reset your password\" might become `[0.12, -0.88, 0.34, ...]`. The sentence \"recover your account\" would get a very similar list of numbers, because they mean similar things."
+    },
+    {
+      "type": "content",
+      "body": "## Dense vs sparse embeddings\n\nThere are two main styles of embedding.\n\n| Type | What it looks like | Captures | Example use |\n| --- | --- | --- | --- |\n| Dense | Hundreds of numbers, mostly non-zero | Meaning / semantics | \"account recovery\" ≈ \"password reset\" |\n| Sparse | Thousands of numbers, mostly zero | Exact keywords | matching the literal word \"invoice\" |\n\nDense embeddings are great at understanding meaning but can miss exact keywords. Sparse embeddings are great at exact keyword matching but miss meaning entirely. Hybrid search combines both to get the best of each approach.\n\n## How embeddings are created\n\nA special AI model called an embedding model takes text in and produces the number list out. You never train this yourself, you simply use an existing one.\n\nEach model always produces vectors of a fixed size, called the dimensionality. This detail becomes an attacker's fingerprint later on.\n\n| Embedding model | Dimensions |\n| --- | --- |\n| all-MiniLM-L6-v2 | 384 |\n| BGE-base | 768 |\n| OpenAI text-embedding-3-small | 1536 |\n| OpenAI text-embedding-3-large | 3072 |\n| Cohere embed-english-v3.0 | 1024 |\n\n## Chunking and metadata\n\nA real document, say a 20-page PDF, is too big to embed as a single vector. So it gets split into small pieces called chunks, often 256 to 512 tokens each. Each chunk then gets its own embedding.\n\nAlongside each vector, systems also store metadata, extra labels like the source filename, the author, a tenant ID, or an access level. Metadata is often not encrypted, and becomes its own attack surface, as we'll see later in this module."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "from sentence_transformers import SentenceTransformer\n\n# Load a popular embedding model (produces 384-dim vectors)\nmodel = SentenceTransformer(\"all-MiniLM-L6-v2\")\n\ntexts = [\n    \"How do I reset my password?\",\n    \"I need to recover my account access\",\n    \"What is the price of a banana?\",\n]\n\nvectors = model.encode(texts)\n\nprint(\"Vector shape:\", vectors.shape)   # (3, 384)\n\n# The first two sentences mean similar things,\n# so their vectors will be close together.\n# The banana sentence will be far away."
+    },
+    {
+      "type": "content",
+      "body": "## Checking dimensionality in practice\n\n*Added: the note below flags dimensionality as a key recon clue, so here's how to actually check it, since it's a skill you'll use constantly in later lessons.*\n\nIf you get access to even a single raw vector, whether from an API response, an exported dataset, or a database query, checking its length immediately narrows down which embedding model likely produced it."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Given a single stolen or exported vector, check its dimensionality\nstolen_vector = [0.12, -0.88, 0.34, 0.05]  # example, real ones are much longer\n\ndimension_count = len(stolen_vector)\nprint(f\"Vector has {dimension_count} dimensions\")\n\n# Compare against known model dimensions\nknown_models = {\n    384: \"all-MiniLM-L6-v2\",\n    768: \"BGE-base\",\n    1024: \"Cohere embed-english-v3.0\",\n    1536: \"OpenAI text-embedding-3-small\",\n    3072: \"OpenAI text-embedding-3-large\",\n}\n\nlikely_model = known_models.get(dimension_count, \"Unknown - not in common list\")\nprint(f\"Likely embedding model: {likely_model}\")"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Large PDF document\"] --> B[\"Chunking\"]\n    B --> C1[\"Chunk 1\"]\n    B --> C2[\"Chunk 2\"]\n    B --> C3[\"Chunk 3\"]\n    C1 --> D[\"Embedding model\"]\n    C2 --> D\n    C3 --> D\n    D --> E[\"Vectors plus metadata stored in Vector DB\"]"
+    },
+    {
+      "type": "note",
+      "body": "**Key insight for attackers:** the dimensionality, such as 384, 768, or 1536, is a fixed property of the embedding model. Just by counting how many numbers are in one stolen vector, you can narrow down which model created it. This is your first reconnaissance clue."
+    }
+  ]
+}

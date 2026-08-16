@@ -1,0 +1,38 @@
+{
+  "slug": "04-prompts-and-context",
+  "title": "Prompts & Context Windows",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Beginner",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Prompts & Context Windows\n\nEverything an LLM does starts with a **prompt**. And everything it can process at once is limited by its **context window**. Both concepts are essential for reconnaissance and for understanding how attacks work.\n\n## What is a prompt?\n\nA prompt is simply the text sent to the model. But in a real application, the text you type is usually not the only thing the model actually sees.\n\nA typical request sent to an LLM is assembled from several pieces stitched together behind the scenes:\n\n- **System prompt** — hidden instructions set by the developer\n- **Retrieved documents** — pulled in from a RAG pipeline, if the application uses one\n- **Conversation history** — previous messages in the current session\n- **Your user prompt** — what you actually typed"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n  S[System Prompt<br/>hidden rules] --> P[Final Prompt]\n  R[RAG Documents<br/>retrieved context] --> P\n  H[Conversation History] --> P\n  U[User Prompt<br/>your input] --> P\n  P --> M[Model generates answer]"
+    },
+    {
+      "type": "content",
+      "body": "## What is a context window?\n\nThe context window is the maximum amount of text, measured in tokens, that a model can consider at one time. Everything mentioned above, the system prompt, retrieved documents, conversation history, and your input, must all fit inside this limit.\n\n**Simple comparison:** think of a whiteboard with limited space. Once it's full, you have to erase something old to write something new. The context window works the same way.\n\n**Practical example:** if a model has a relatively small context window and a conversation runs long, the oldest messages get silently dropped to make room for new ones. Testers use this behavior to estimate a model's context size, a technique known as marker injection."
+    },
+    {
+      "type": "content",
+      "body": "## Context window size as a fingerprinting signal\n\nDifferent models are deployed with very different context window sizes, which makes context size a reliable way to help distinguish between models:\n\n| Model (typical deployment) | Approximate context window |\n|---|---|\n| Llama 3.2 (Ollama default) | ~4,000 – 8,000 tokens |\n| Qwen2.5-Coder | ~32,000 tokens |\n| GPT-class (large) | 100,000+ tokens |\n| Claude-class (large) | 200,000+ tokens |\n\nIf two chatbots appear to behave identically, but one \"forgets\" a planted marker after 5 messages while the other still recalls it after 25, that difference tells you something concrete about the underlying models."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# Marker injection: plant a secret value, fill the context with padding, then ask for it back.\n# If the model fails to recall it, the context window has likely overflowed.\n\ncurl -s -X POST http://localhost:5001/api/chat \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"query\":\"Remember this code: ZEBRA-42. Repeat it back later.\"}'\n\n# ... send several long messages here to fill up the context window ...\n\ncurl -s -X POST http://localhost:5001/api/chat \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"query\":\"What was the code I told you to remember?\"}'\n\n# A blank or confused answer suggests the marker fell out of the context window."
+    },
+    {
+      "type": "note",
+      "body": "**Important caveat:** tools like Ollama allow operators to manually configure the context size. This means a measured limit might reflect a deployment-specific setting rather than the model's true maximum capacity. Always combine context-size testing with other fingerprinting signals rather than relying on it alone."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- A real, final prompt is typically made up of: system prompt, RAG documents, conversation history, and user input.\n- The context window is the model's short-term memory limit, measured in tokens.\n- When the context window overflows, the oldest content is dropped first.\n- Context window size varies significantly by model, making it a useful fingerprinting signal during reconnaissance."
+    }
+  ]
+}

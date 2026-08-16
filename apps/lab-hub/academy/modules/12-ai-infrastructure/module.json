@@ -1,0 +1,71 @@
+{
+  "slug": "12-ai-infrastructure",
+  "name": "AI Infrastructure",
+  "lessons": [
+    {
+      "slug": "01-introduction",
+      "title": "Introduction to AI Infrastructure",
+      "type": "content"
+    },
+    {
+      "slug": "02-cloud-ssrf",
+      "title": "Cloud SSRF & IMDS",
+      "type": "content"
+    },
+    {
+      "slug": "03-iam-privesc",
+      "title": "IAM Privilege Escalation",
+      "type": "content"
+    },
+    {
+      "slug": "04-credential-hunting",
+      "title": "Credential Hunting",
+      "type": "content"
+    },
+    {
+      "slug": "05-exposed-endpoints",
+      "title": "Exposed Inference Endpoints",
+      "type": "content"
+    },
+    {
+      "slug": "06-kubernetes-rbac",
+      "title": "Kubernetes RBAC Abuse",
+      "type": "content"
+    },
+    {
+      "slug": "07-service-accounts",
+      "title": "Service Account Tokens",
+      "type": "content"
+    },
+    {
+      "slug": "08-sidecar-attacks",
+      "title": "Sidecar Container Attacks",
+      "type": "content"
+    },
+    {
+      "slug": "09-gpu-container-escape",
+      "title": "GPU Container Escape",
+      "type": "content"
+    },
+    {
+      "slug": "10-defenses",
+      "title": "Defenses & Mitigations",
+      "type": "content"
+    },
+    {
+      "slug": "11-best-practices",
+      "title": "Best Practices",
+      "type": "content"
+    },
+    {
+      "slug": "12-quiz",
+      "title": "Knowledge Check",
+      "type": "quiz"
+    },
+    {
+      "slug": "13-hands-on-labs",
+      "title": "Hands-on Labs",
+      "type": "labs"
+    }
+  ]
+}

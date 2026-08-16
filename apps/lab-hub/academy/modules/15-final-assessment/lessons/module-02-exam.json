@@ -1,0 +1,887 @@
+{
+  "slug": "module-02-exam",
+  "title": "Exam: LLM Fundamentals",
+  "type": "quiz",
+  "questions": [
+    {
+      "q": "What is a Large Language Model (LLM) fundamentally doing when it generates a response?",
+      "options": [
+        "Translating the query into SQL before responding",
+        "Predicting the next most likely token based on patterns learned during training",
+        "Looking up the exact answer in a structured database",
+        "Running a fixed set of if-else rules written by a developer"
+      ],
+      "answer": 1,
+      "explanation": "An LLM predicts the next token repeatedly based on learned patterns — it does not look up facts in a database or 'understand' in a human sense."
+    },
+    {
+      "q": "When you ask a chatbot 'What is the capital of France?', why does it answer 'Paris'?",
+      "options": [
+        "Because it has seen 'capital of France' followed by 'Paris' so often during training that this becomes the overwhelmingly likely next prediction",
+        "Because 'Paris' is hardcoded as a special-case rule",
+        "Because the question triggers a database lookup tool automatically",
+        "Because it performs a live web search"
+      ],
+      "answer": 0,
+      "explanation": "The model's answer comes from learned statistical likelihood in its training data, not from a live lookup or hardcoded rule."
+    },
+    {
+      "q": "In a real deployment, which of these layers commonly sits between a user and the raw model?",
+      "options": [
+        "A physical keyboard driver",
+        "An orchestration layer such as LangChain or CrewAI",
+        "A printer spooler service",
+        "The user's operating system kernel"
+      ],
+      "answer": 1,
+      "explanation": "Real LLM applications typically include layers like an API gateway, orchestration layer, RAG pipeline, and inference server before reaching the raw model."
+    },
+    {
+      "q": "Why is it useful for an attacker to think of an LLM application as 'a standard web application with an LLM integrated into it'?",
+      "options": [
+        "Because this framing means LLM apps cannot be fingerprinted",
+        "Because LLM apps never expose any HTTP headers",
+        "Because it means AI apps require entirely new, unrelated security knowledge",
+        "Because standard web application reconnaissance techniques still apply, in addition to AI-specific techniques"
+      ],
+      "answer": 3,
+      "explanation": "LLM applications are still web applications underneath — existing web recon skills remain fully relevant alongside AI-specific techniques."
+    },
+    {
+      "q": "What is a 'token' in the context of how an LLM processes text?",
+      "options": [
+        "A unique password generated per user session",
+        "A billing currency used only for enterprise API plans",
+        "A small piece of text — a full word, part of a word, or a character — that the model processes as a unit",
+        "A physical GPU core used during inference"
+      ],
+      "answer": 2,
+      "explanation": "Tokens are the basic text units an LLM processes, often smaller than a whole word."
+    },
+    {
+      "q": "Roughly, how many tokens does 1 token equal in characters and words in English?",
+      "options": [
+        "About 4 characters, or roughly 0.75 words",
+        "Exactly 1 full word, no exceptions",
+        "About 20 characters per token",
+        "Tokens are always exactly one character long"
+      ],
+      "answer": 0,
+      "explanation": "The rough estimate is 1 token ≈ 4 characters ≈ 0.75 words in English."
+    },
+    {
+      "q": "Why might an attacker write 'secret' as 's e c r e t' with spaces between letters?",
+      "options": [
+        "To exploit unusual tokenization and potentially evade simple keyword filters, while the model may still understand the intent",
+        "Because models cannot process spaced-out text at all",
+        "Because spaced text loads faster over HTTP",
+        "To make the sentence more grammatically correct"
+      ],
+      "answer": 0,
+      "explanation": "Spacing out letters changes how the text is tokenized, which can bypass filters looking for an exact keyword match, while the model may still interpret the meaning."
+    },
+    {
+      "q": "What does an API field like `prompt_tokens` in a response typically confirm?",
+      "options": [
+        "That the response was cached from a previous identical request",
+        "That a real model actually processed the request, and can hint at prompt size",
+        "That the model used reinforcement learning",
+        "That the request was automatically blocked"
+      ],
+      "answer": 1,
+      "explanation": "Returned token counts confirm genuine model processing occurred and give a size signal useful for fingerprinting or estimating prompt length."
+    },
+    {
+      "q": "What is an 'embedding'?",
+      "options": [
+        "A synonym for a system prompt",
+        "A type of HTTP header used only by RAG systems",
+        "A list of numbers (a vector) that represents the meaning of a piece of text",
+        "The literal raw text stored in a vector database"
+      ],
+      "answer": 2,
+      "explanation": "An embedding converts text (or other content) into a numeric vector that captures its meaning, allowing mathematical comparison."
+    },
+    {
+      "q": "Why would the words 'king' and 'queen' have embeddings that are numerically close together?",
+      "options": [
+        "Because their meanings are related, and embeddings place similar meanings close together in numeric space",
+        "Because embeddings are assigned in alphabetical order",
+        "Because they always appear in the exact same sentence",
+        "Because they are the same length in letters"
+      ],
+      "answer": 0,
+      "explanation": "Embeddings encode semantic similarity — related meanings produce numerically close vectors, similar to how nearby GPS coordinates represent nearby places."
+    },
+    {
+      "q": "If an API response includes a field like `\"dimensions\": 768`, what does this typically help an attacker do?",
+      "options": [
+        "Bypass all authentication on the endpoint",
+        "Decrypt the entire conversation history",
+        "Fingerprint which embedding model is likely being used, based on its known vector dimension count",
+        "Determine the exact GPU model running inference"
+      ],
+      "answer": 2,
+      "explanation": "Vector dimension counts are characteristic of specific embedding models, making them a useful fingerprinting signal for the RAG stack."
+    },
+    {
+      "q": "What underlying architecture do almost all modern LLMs (GPT, Llama, Claude, Qwen, Gemini) share?",
+      "options": [
+        "Recurrent Neural Network only",
+        "Transformer",
+        "Decision Tree Ensemble",
+        "Convolutional Neural Network"
+      ],
+      "answer": 1,
+      "explanation": "The Transformer architecture underlies nearly every modern large language model."
+    },
+    {
+      "q": "What was a key limitation of models built before the Transformer architecture?",
+      "options": [
+        "They could not run on GPUs",
+        "They required no training data at all",
+        "They could only generate images, never text",
+        "They processed text strictly one word at a time in order and easily lost track of earlier context in longer text"
+      ],
+      "answer": 3,
+      "explanation": "Pre-Transformer models processed sequences strictly in order and struggled to retain long-range context, unlike Transformers which process the whole input at once."
+    },
+    {
+      "q": "What is the core mechanism inside a Transformer that determines which earlier tokens matter most for predicting the next one?",
+      "options": [
+        "Attention",
+        "Rate limiting",
+        "Gradient clipping",
+        "Tokenization"
+      ],
+      "answer": 0,
+      "explanation": "Attention is the Transformer's key mechanism for weighing which earlier tokens are most relevant to the current prediction."
+    },
+    {
+      "q": "In 'The trophy did not fit in the suitcase because it was too big,' what does attention help the model correctly determine?",
+      "options": [
+        "That 'it' refers to 'trophy', by weighing that relationship more heavily than the rest of the sentence",
+        "That the sentence describes a piece of furniture",
+        "That the sentence is grammatically incorrect",
+        "That 'it' refers to 'suitcase'"
+      ],
+      "answer": 0,
+      "explanation": "Attention helps the model correctly resolve pronoun references by focusing more heavily on the relevant related words in context."
+    },
+    {
+      "q": "What is the correct sequence of steps in the text-generation loop of an LLM?",
+      "options": [
+        "Predict a token, append it, repeat until complete; the prompt is tokenized first",
+        "Generate the full answer instantly, then tokenize it afterward for display",
+        "Delete the prompt, then randomly generate text with no relation to input",
+        "Only generate the final token, skipping all intermediate steps"
+      ],
+      "answer": 0,
+      "explanation": "The prompt is first tokenized, then the model predicts one token at a time, appending each to the sequence and repeating until a stop condition is reached."
+    },
+    {
+      "q": "Why do chatbots appear to 'type' their response in real time?",
+      "options": [
+        "Because the full response is generated instantly and then artificially delayed for effect",
+        "Because the model re-reads the entire internet for every response",
+        "Because you are literally watching tokens being predicted and streamed one after another, not the whole answer generated at once",
+        "Because the network connection is intentionally throttled"
+      ],
+      "answer": 2,
+      "explanation": "The token-by-token generation loop is genuinely happening live — streaming output reflects real, sequential token prediction, not a display trick."
+    },
+    {
+      "q": "What is the root cause behind prompt injection?",
+      "options": [
+        "Models refusing to process any external content",
+        "The model treats everything currently in its context as trustworthy by default, so injected instructions in that context can be followed as if legitimate",
+        "Prompt injection only works on models with no context window",
+        "Models cannot process text longer than 10 tokens"
+      ],
+      "answer": 1,
+      "explanation": "Because the model predicts based on everything in its current context without inherent trust distinctions, malicious injected instructions can be followed just like legitimate ones."
+    },
+    {
+      "q": "A typical final prompt sent to an LLM is usually assembled from which components?",
+      "options": [
+        "A randomly generated string with no relation to the conversation",
+        "System prompt, retrieved RAG documents, conversation history, and the user's input",
+        "Only the system prompt, with the user's text discarded",
+        "Only the user's typed text, with nothing else added"
+      ],
+      "answer": 1,
+      "explanation": "A real-world prompt typically stitches together the system prompt, any retrieved documents, conversation history, and the user's current input."
+    },
+    {
+      "q": "What is the 'context window' of an LLM?",
+      "options": [
+        "The time limit before an API request times out",
+        "The maximum amount of text, measured in tokens, the model can consider at one time",
+        "The number of users who can chat simultaneously",
+        "The visual size of the chat interface window on screen"
+      ],
+      "answer": 1,
+      "explanation": "The context window is the model's token-based short-term memory limit for a single interaction."
+    },
+    {
+      "q": "When a conversation exceeds the context window, what typically happens to the oldest messages?",
+      "options": [
+        "They are permanently saved to a separate archive automatically",
+        "They are automatically translated into a different language",
+        "They get silently dropped to make room for new content",
+        "The entire conversation is deleted"
+      ],
+      "answer": 2,
+      "explanation": "Once the context window fills up, the oldest content is dropped first to make space for new input, similar to erasing an old note on a full whiteboard."
+    },
+    {
+      "q": "What is 'marker injection' used for during reconnaissance?",
+      "options": [
+        "Planting a secret value, filling the context with padding, then testing whether the model can still recall it, to estimate context window size",
+        "Injecting malicious SQL into a database",
+        "Injecting fake HTTP headers into a request",
+        "Marking spam emails during supervised learning"
+      ],
+      "answer": 0,
+      "explanation": "Marker injection tests whether a planted value falls out of context after enough padding, helping estimate the model's effective context window size."
+    },
+    {
+      "q": "Why should context-window testing results be combined with other fingerprinting signals rather than trusted alone?",
+      "options": [
+        "Because context windows are identical across every model family",
+        "Because tools like Ollama allow operators to manually configure context size, so a measured limit might reflect a deployment setting rather than the model's true maximum",
+        "Because context window testing is illegal in most jurisdictions",
+        "Because context window testing never produces any usable result"
+      ],
+      "answer": 1,
+      "explanation": "Since context size can be manually configured by operators, relying solely on measured context limits could be misleading without corroborating signals."
+    },
+    {
+      "q": "What is a 'system prompt'?",
+      "options": [
+        "A public API endpoint listing all loaded models",
+        "Text typed by the end user during a conversation",
+        "A setting that controls only response length",
+        "A hidden set of instructions the developer gives the model before the user ever types anything"
+      ],
+      "answer": 3,
+      "explanation": "The system prompt defines the AI's role, rules, and restrictions, and is set by the developer, usually hidden from the end user."
+    },
+    {
+      "q": "Why does the model tend to treat the system prompt as an authoritative source of instructions?",
+      "options": [
+        "Because system prompts are always shown to the user for verification",
+        "Because system prompts are always encrypted",
+        "Because it's positioned and trained to be treated with high trust, unlike user input which should be treated as untrusted",
+        "Because system prompts contain no actual instructions"
+      ],
+      "answer": 2,
+      "explanation": "The model is trained to give high trust to the system prompt's authority, which is exactly why hijacking or overriding it is a high-value attacker goal."
+    },
+    {
+      "q": "Why do a system prompt's stated restrictions (e.g. 'never discuss pricing') act as hints for an attacker?",
+      "options": [
+        "Because restrictions always reveal the exact API key in use",
+        "Because each restriction signals what the developer specifically expected people to try, suggesting related functionality actually exists",
+        "Because restrictions are randomly generated and meaningless",
+        "Because restrictions have no relationship to the underlying data or functionality"
+      ],
+      "answer": 1,
+      "explanation": "A stated restriction implies the developer anticipated that exact probe, which strongly suggests the related sensitive functionality genuinely exists somewhere in the system."
+    },
+    {
+      "q": "Why is storing real secrets (like an admin override code) directly inside a system prompt a serious mistake?",
+      "options": [
+        "Secrets in a system prompt are always automatically encrypted",
+        "If the system prompt is ever leaked, the secret leaks along with it",
+        "This mistake has no real security impact",
+        "System prompts cannot contain text strings, only numbers"
+      ],
+      "answer": 1,
+      "explanation": "Since system prompts can often be extracted, embedding real secrets there directly exposes them if the prompt leaks."
+    },
+    {
+      "q": "What does RAG stand for?",
+      "options": [
+        "Rapid Agent Generation",
+        "Retrieval-Augmented Generation",
+        "Random Access Guardrail",
+        "Reinforcement-Aligned Guidance"
+      ],
+      "answer": 1,
+      "explanation": "RAG stands for Retrieval-Augmented Generation — retrieving relevant documents before generating an answer."
+    },
+    {
+      "q": "Using an exam analogy, how does a non-RAG model's approach to answering differ from a RAG-powered model's approach?",
+      "options": [
+        "Non-RAG is an open-book exam; RAG is a closed-book exam",
+        "Non-RAG answers purely from memory like a closed-book exam; RAG can 'open a reference textbook' to find specific material, like an open-book exam",
+        "Both approaches are functionally identical",
+        "Neither approach involves any memory or lookup at all"
+      ],
+      "answer": 1,
+      "explanation": "Non-RAG relies solely on training-time memory (closed-book), while RAG retrieves and references external documents at answer time (open-book)."
+    },
+    {
+      "q": "What is the simplest way to test whether an AI application uses RAG?",
+      "options": [
+        "Send a malformed HTTP request and observe the error code",
+        "Ask a general question (expect no sources) and a company-specific question (expect sources), then compare the two responses",
+        "Check only the model's parameter count",
+        "Measure the exact latency of every response"
+      ],
+      "answer": 1,
+      "explanation": "Comparing responses to a general knowledge question versus a company-specific question reveals whether document retrieval (RAG) is occurring."
+    },
+    {
+      "q": "In a typical RAG API response, what does the `chunk_id` field usually reveal?",
+      "options": [
+        "The model's temperature setting",
+        "How documents are split up internally, hinting at their size and structure",
+        "The user's IP address",
+        "The exact GPU temperature during inference"
+      ],
+      "answer": 1,
+      "explanation": "chunk_id reflects how the source document was segmented, revealing internal document chunking structure."
+    },
+    {
+      "q": "What do combined `vector_score` and `bm25_score` fields in a RAG response typically indicate?",
+      "options": [
+        "That the system uses hybrid retrieval, combining semantic search with keyword-based search",
+        "That the response was entirely cached",
+        "That the model has no retrieval capability at all",
+        "That the system only supports image inputs"
+      ],
+      "answer": 0,
+      "explanation": "Presence of both a vector similarity score and a keyword-based (BM25) score indicates the system uses hybrid retrieval combining both approaches."
+    },
+    {
+      "q": "What new attack surface does RAG introduce beyond a non-RAG system?",
+      "options": [
+        "RAG only introduces risk to the user's local browser",
+        "The document store itself, which opens the door to RAG poisoning if an attacker gets malicious content into the knowledge base",
+        "No new attack surface — RAG and non-RAG have identical risk",
+        "RAG systems cannot be attacked because they always encrypt documents"
+      ],
+      "answer": 1,
+      "explanation": "RAG adds a second attack surface: the underlying document knowledge base, which can be poisoned to influence future model answers."
+    },
+    {
+      "q": "What is the fastest way to check whether RAG is enabled without any behavioral testing?",
+      "options": [
+        "Wait 24 hours and observe if the model's answers change",
+        "Measure the exact character count of every response",
+        "Check a health/status endpoint for a field like `\"rag_enabled\": true`",
+        "Ask the model to reveal its GPU specifications"
+      ],
+      "answer": 2,
+      "explanation": "Many applications expose RAG status directly in a health endpoint, shortcutting the need for behavioral testing entirely."
+    },
+    {
+      "q": "What is the core difference between passive and active reconnaissance?",
+      "options": [
+        "Passive recon always requires admin credentials; active recon never does",
+        "Passive recon is always illegal; active recon is always legal",
+        "Passive recon uses minimal or no direct interaction with the target; active recon involves direct probing",
+        "There is no meaningful difference between the two"
+      ],
+      "answer": 2,
+      "explanation": "Passive recon gathers intelligence with little to no direct target interaction, while active recon directly probes and queries the target."
+    },
+    {
+      "q": "Which of these is a classic passive reconnaissance technique?",
+      "options": [
+        "Analyzing HTTP response headers for backend details",
+        "Sending crafted prompt injection payloads to test filters",
+        "Sending a flood of enumeration requests to a chat API",
+        "Fuzzing an API endpoint with thousands of payloads"
+      ],
+      "answer": 0,
+      "explanation": "HTTP header analysis via a simple request like curl -I is a low-interaction, largely passive technique compared to active fuzzing or payload testing."
+    },
+    {
+      "q": "What might a custom header like `X-AI-Backend: llama3.2` reveal during reconnaissance?",
+      "options": [
+        "The user's login credentials",
+        "The exact GPS coordinates of the server",
+        "The underlying model powering the application",
+        "The developer's personal email address"
+      ],
+      "answer": 2,
+      "explanation": "Custom headers like X-AI-Backend can directly leak the underlying model name, handing the attacker a fingerprinting shortcut."
+    },
+    {
+      "q": "During passive recon of a public GitHub repository, which file is most likely to reveal RAG chunk sizes and the embedding model in use?",
+      "options": [
+        "The .gitignore file",
+        "config/*.yaml files",
+        "A compiled binary with no readable strings",
+        "README.md only"
+      ],
+      "answer": 1,
+      "explanation": "Configuration YAML files commonly contain RAG parameters like chunk size, embedding model choice, and vector database configuration."
+    },
+    {
+      "q": "What can a job posting requiring 'experience with LangChain, vLLM, and Milvus' reveal to an attacker doing OSINT?",
+      "options": [
+        "Nothing useful — job postings never reveal technical details",
+        "The organization's technology stack, effectively fingerprinting the AI system's likely architecture",
+        "The exact system prompt text",
+        "The user's personal browsing history"
+      ],
+      "answer": 1,
+      "explanation": "Job postings listing specific technologies are a classic OSINT source that can reveal an organization's underlying tech stack."
+    },
+    {
+      "q": "Why might sending a single `curl -I` request be considered borderline between passive and active recon?",
+      "options": [
+        "Because it technically touches the target and may appear in logs, even though it's a low-interaction, non-intrusive request",
+        "Because it requires admin authentication to run",
+        "Because it only works against non-RAG applications",
+        "Because curl -I always crashes the target server"
+      ],
+      "answer": 0,
+      "explanation": "Even minimal HTTP requests technically interact with the target and may be logged, though they're generally grouped under passive recon since they're low-interaction and expected traffic."
+    },
+    {
+      "q": "What is a common location where AI application API endpoints are discovered, since AI features are usually embedded inside a normal web app rather than on a dedicated port?",
+      "options": [
+        "Only through direct port scanning",
+        "Physical network cables",
+        "Client-side JavaScript files that reveal API configuration",
+        "DNS MX records exclusively"
+      ],
+      "answer": 2,
+      "explanation": "Since AI endpoints are typically embedded in regular apps rather than exposed on unique ports, analyzing client-side JavaScript is a key discovery technique."
+    },
+    {
+      "q": "During active recon, what does a 401 status code on an endpoint tell you, compared to a 404?",
+      "options": [
+        "401 always means the server has crashed",
+        "Both codes mean exactly the same thing",
+        "401 means the endpoint doesn't exist; 404 means it exists and is protected",
+        "401 means the endpoint exists but requires valid credentials; 404 means the endpoint doesn't exist at all"
+      ],
+      "answer": 3,
+      "explanation": "A 401 confirms the protected endpoint genuinely exists, while a 404 indicates it simply doesn't exist — a key distinction for endpoint enumeration."
+    },
+    {
+      "q": "What does a header like `Server: kong/3.9.1` typically reveal?",
+      "options": [
+        "The database schema in use",
+        "The user's session token",
+        "The exact model weights file location",
+        "The underlying API gateway software (Kong) and its version"
+      ],
+      "answer": 3,
+      "explanation": "Server and gateway-specific headers like X-Kong-* reveal the presence and version of infrastructure like a Kong API gateway."
+    },
+    {
+      "q": "What type of endpoint might be missed if a tester only checks standard REST paths?",
+      "options": [
+        "The favicon.ico file",
+        "Static CSS stylesheets",
+        "Streaming or WebSocket endpoints using Server-Sent Events or `new WebSocket(...)`",
+        "The homepage of the website"
+      ],
+      "answer": 2,
+      "explanation": "Chat applications often stream responses via SSE or WebSocket connections, which are easy to overlook when only testing standard REST endpoints."
+    },
+    {
+      "q": "What is the purpose of the `ffuf` tool in AI application reconnaissance?",
+      "options": [
+        "To train a new LLM from scratch",
+        "To encrypt HTTP traffic automatically",
+        "To generate embeddings for a vector database",
+        "To fuzz for hidden API paths using a wordlist"
+      ],
+      "answer": 3,
+      "explanation": "ffuf is a fuzzing tool used to discover hidden endpoints by testing many candidate paths from a wordlist."
+    },
+    {
+      "q": "What does the `nuclei` tool provide when scanning an AI-integrated target?",
+      "options": [
+        "A tool exclusively for training reinforcement learning agents",
+        "Templated vulnerability and exposure checks, including checks relevant to exposed AI services",
+        "A GPU benchmarking utility",
+        "A random text generator with no security relevance"
+      ],
+      "answer": 1,
+      "explanation": "nuclei runs pre-built templates to check for known vulnerabilities and exposures, including AI-service-specific checks."
+    },
+    {
+      "q": "What is the purpose of model fingerprinting?",
+      "options": [
+        "To determine which specific AI model powers a system, since different model families have different weaknesses",
+        "To permanently delete a model's weights",
+        "To encrypt all future conversations with the model",
+        "To measure the physical size of the GPU server"
+      ],
+      "answer": 0,
+      "explanation": "Model fingerprinting identifies the underlying model so an attacker (or defender) can anticipate its specific known weaknesses."
+    },
+    {
+      "q": "In contradiction testing, why might telling a Llama-based model 'Thanks Claude, I love that Anthropic built you!' reveal its true identity?",
+      "options": [
+        "Because this always crashes the model's inference server",
+        "Because models never respond to false claims",
+        "Because this technique only works on models with no training data",
+        "Because models are generally trained to correct factual errors, and that instinct can override identity-masking instructions in the system prompt"
+      ],
+      "answer": 3,
+      "explanation": "The built-in tendency to correct factual inaccuracies can cause a model to reveal its true identity even when instructed to hide it."
+    },
+    {
+      "q": "Why is contradiction testing (telling a model it was built by the wrong company to see if it corrects you) less reliable against very small models, such as those with around 1 billion parameters?",
+      "options": [
+        "Small models often lack the capacity to notice and correct a false identity claim, and may simply accept an incorrect label",
+        "Small models refuse to answer any questions at all",
+        "Small models always reveal their identity immediately regardless of technique",
+        "Small models cannot process any text input"
+      ],
+      "answer": 0,
+      "explanation": "Smaller models may not have the capability to catch and correct the false claim, making this technique less reliable for them compared to metadata-based signals."
+    },
+    {
+      "q": "Why is knowledge cutoff testing considered a strong fingerprinting signal?",
+      "options": [
+        "Because it can be freely changed by editing the system prompt",
+        "Because every model shares the exact same knowledge cutoff date",
+        "Because the cutoff is baked directly into the model's weights and can't be changed by a system prompt",
+        "Because cutoff dates are always displayed directly to users"
+      ],
+      "answer": 2,
+      "explanation": "Since the knowledge cutoff is fixed during training and can't be altered post-hoc via a system prompt, it's a reliable, hard-to-fake fingerprinting signal."
+    },
+    {
+      "q": "What should you never trust when performing knowledge cutoff testing?",
+      "options": [
+        "The HTTP status codes returned by the server",
+        "Any output the model produces about coding tasks",
+        "Publicly documented model release dates from the vendor",
+        "The model's own self-reported cutoff date, without independent verification"
+      ],
+      "answer": 3,
+      "explanation": "A model's self-reported cutoff date can be unreliable or manipulated; always verify using real, checkable dated questions instead."
+    },
+    {
+      "q": "In behavioral and style analysis, what characteristic might suggest a code-focused model like Qwen2.5-Coder rather than a general Llama model?",
+      "options": [
+        "Detailed, structured explanations with docstrings, edge-case handling, and usage examples",
+        "Complete refusal to answer any coding question",
+        "Extremely short one-word responses to every prompt",
+        "Minimal code output with no comments or docstrings"
+      ],
+      "answer": 0,
+      "explanation": "Code-tuned models tend to produce more thorough, well-documented code output compared to general-purpose models with minimal formatting."
+    },
+    {
+      "q": "Why is timing and response-artifact analysis a useful supporting fingerprinting technique?",
+      "options": [
+        "Because response time has no relationship to the underlying infrastructure",
+        "Because self-hosted models (Ollama, vLLM) tend to have more variable, hardware-tied latency, while managed cloud APIs tend to have more consistent latency",
+        "Because timing only matters for image-generation models",
+        "Because timing analysis alone always identifies the exact model with 100% certainty"
+      ],
+      "answer": 1,
+      "explanation": "Latency patterns differ between self-hosted and cloud-managed deployments, providing a supporting signal alongside other fingerprinting techniques."
+    },
+    {
+      "q": "Why should you never rely on just one fingerprinting signal when identifying an underlying AI model?",
+      "options": [
+        "A system prompt can fake identity, small models can't self-correct, and context settings can be manually changed — but multiple independent signals pointing the same direction increase confidence",
+        "Using more than one technique is against best practice",
+        "A single signal is always 100% definitive on its own",
+        "Fingerprinting is illegal regardless of technique count"
+      ],
+      "answer": 0,
+      "explanation": "Each individual signal has limitations or can be spoofed, so combining multiple independent signals produces a much more confident conclusion."
+    },
+    {
+      "q": "What is a health endpoint primarily designed for?",
+      "options": [
+        "Reporting whether a service is running and how it's configured, mainly for operators and load balancers",
+        "Blocking all incoming traffic by default",
+        "Generating new embeddings for the vector database",
+        "Encrypting user passwords"
+      ],
+      "answer": 0,
+      "explanation": "Health endpoints exist for operational monitoring purposes but frequently over-share configuration details that benefit attackers too."
+    },
+    {
+      "q": "Which of these is described as a 'Kubernetes-style liveness check' path?",
+      "options": [
+        "/v1/models",
+        "/debug",
+        "/api/config",
+        "/healthz"
+      ],
+      "answer": 3,
+      "explanation": "/healthz is the conventional Kubernetes-style liveness check path commonly tested during recon."
+    },
+    {
+      "q": "A health endpoint returns a JSON response including the field `\"mcp_enabled\": true`. What does this specifically reveal to an attacker?",
+      "options": [
+        "That MCP tools are enabled, revealing an entirely separate attack surface worth enumerating",
+        "That the model has no context window at all",
+        "That the application does not use any AI model",
+        "That RAG is definitely disabled"
+      ],
+      "answer": 0,
+      "explanation": "An MCP-enabled flag signals that tool-calling functionality exists, opening up an additional attack surface beyond the base chat interface."
+    },
+    {
+      "q": "What does the `/v1/models` endpoint typically expose on OpenAI-compatible servers like vLLM or Ollama's compatible API?",
+      "options": [
+        "The exact IP address of every user",
+        "A live video feed of the server room",
+        "The full training dataset used to build the model",
+        "A list of every currently loaded model by name, giving instant model enumeration"
+      ],
+      "answer": 3,
+      "explanation": "OpenAI-compatible /v1/models endpoints list loaded model names directly, removing the need for behavioral fingerprinting."
+    },
+    {
+      "q": "Even when a health endpoint returns 401 or 403, what is still worth checking?",
+      "options": [
+        "Nothing further — a 401/403 response provides zero useful information",
+        "The response headers (via curl -I), since some misconfigured setups still leak framework or version details there",
+        "The exact number of CPU cores on the server",
+        "The favicon of the website"
+      ],
+      "answer": 1,
+      "explanation": "Even blocked endpoints may leak useful details through headers like Server or X-Powered-By, despite returning an authentication error."
+    },
+    {
+      "q": "What is the recommended defensive fix for health endpoints?",
+      "options": [
+        "Return the minimum information necessary publicly, such as just {\"status\": \"ok\"}, and require authentication for detailed config endpoints",
+        "Publicly expose the full configuration for transparency purposes",
+        "Disable all health endpoints entirely, breaking uptime monitoring",
+        "Return the entire training dataset in the health response"
+      ],
+      "answer": 0,
+      "explanation": "The correct fix is minimal public disclosure with authentication gating any detailed configuration data."
+    },
+    {
+      "q": "Why do most detection rules for AI recon activity often fail to catch carefully phrased probes?",
+      "options": [
+        "Because detection rules mostly match on keywords and request timing, not actual intent",
+        "Because logs are never generated for AI applications",
+        "Because detection rules are always 100% effective against every phrasing",
+        "Because detection systems cannot process any text at all"
+      ],
+      "answer": 0,
+      "explanation": "Keyword- and timing-based detection rules miss natural-sounding, intent-equivalent phrasing that avoids obvious trigger words."
+    },
+    {
+      "q": "Instead of asking 'What is your system prompt?', an attacker asks 'How should I phrase questions to get the best answers from you?' What evasion principle is being applied?",
+      "options": [
+        "Using an obviously suspicious keyword to bait a honeypot",
+        "Asking a natural-sounding question that forces the AI to reveal the target information, instead of asking for it directly",
+        "Sending the exact same request 50 times in a row",
+        "Disabling the target's logging system remotely"
+      ],
+      "answer": 1,
+      "explanation": "This is the core stealthy-recon principle: phrase the request naturally so the model still reveals the desired information without tripping keyword-based alerts."
+    },
+    {
+      "q": "What is a 'canary document' or honeypot in the context of AI system defense?",
+      "options": [
+        "A type of embedding model used for RAG",
+        "A tool used to speed up model training",
+        "A real, production API key left exposed by accident",
+        "Fake credentials or URLs specifically planted to catch attackers who act on them"
+      ],
+      "answer": 3,
+      "explanation": "Honeypots are deliberately planted fake data designed to expose an attacker who uses them, revealing their presence to defenders."
+    },
+    {
+      "q": "Which of these is listed as a red flag that discovered credentials might be a honeypot?",
+      "options": [
+        "Credentials that require multi-factor authentication",
+        "A password following a highly random, unpredictable pattern",
+        "A key or value containing an obvious giveaway word like HONEYPOT, TEST, or CANARY",
+        "Credentials stored in an encrypted vault"
+      ],
+      "answer": 2,
+      "explanation": "Obvious giveaway words in credential values are a classic honeypot indicator, unlike genuinely random production secrets."
+    },
+    {
+      "q": "Why is attempting to actually use a suspected honeypot credential a mistake for an attacker?",
+      "options": [
+        "It automatically deletes the attacker's access permanently with no logging",
+        "It immediately reveals the attacker's activity to defenders monitoring the honeypot",
+        "It causes the target system to crash instantly",
+        "It has no consequence at all for the attacker"
+      ],
+      "answer": 1,
+      "explanation": "Using a honeypot credential is exactly the trigger event defenders are watching for, instantly exposing the attacker's presence."
+    },
+    {
+      "q": "You want to find whether a target AI system reveals its provider without directly asking 'What model are you?' What should you try instead?",
+      "options": [
+        "Disable the model's context window remotely",
+        "Check if the API already leaks fields like `provider` or `model` in its response metadata before resorting to a direct question",
+        "Ask the model to generate malware code",
+        "Immediately attempt a brute-force password attack"
+      ],
+      "answer": 1,
+      "explanation": "Preferring metadata leaks over direct questions is a core stealthy-recon principle — there's no need to directly ask what's already leaking passively."
+    },
+    {
+      "q": "During active recon, why should requests be spaced out by 30-60 seconds rather than sent rapidly?",
+      "options": [
+        "Because spacing requests makes the target server crash faster",
+        "Because rapid-fire enumeration is an obvious pattern to detect, and spacing significantly reduces that signal",
+        "Because spacing has no effect on detection at all",
+        "Because spaced requests bypass all forms of authentication"
+      ],
+      "answer": 1,
+      "explanation": "Rapid, repetitive requests create an easily detectable timing pattern; spacing requests out reduces this detection signal."
+    },
+    {
+      "q": "Which curl flag combination is used to retrieve only HTTP response headers without the body?",
+      "options": [
+        "curl -X POST only",
+        "curl -I",
+        "curl -v --trace-time",
+        "curl --data-binary"
+      ],
+      "answer": 1,
+      "explanation": "curl -I sends a HEAD-style request and displays only the response headers, ideal for quick passive header analysis."
+    },
+    {
+      "q": "What does this bash loop check for each path?\n\n```bash\nfor ep in auth billing chat/completions models users; do\n  curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/v1/$ep\ndone\n```",
+      "options": [
+        "It checks and prints the HTTP status code returned for each candidate endpoint path",
+        "It downloads the full HTML content of each page",
+        "It deletes each endpoint from the server",
+        "It trains a new model using each endpoint's data"
+      ],
+      "answer": 0,
+      "explanation": "This loop probes each candidate path and captures only the HTTP status code, used to distinguish existing (401) from non-existing (404) endpoints."
+    },
+    {
+      "q": "What does the `ffuf` flag `-mc 200,401,403` accomplish?",
+      "options": [
+        "It filters results to only show responses with those specific status codes (found or protected)",
+        "It sets the number of fuzzing threads to 200",
+        "It limits the wordlist to 200 words",
+        "It encrypts the fuzzing traffic"
+      ],
+      "answer": 0,
+      "explanation": "The -mc flag filters ffuf's output to only match specified status codes, here keeping 'found' (200) and 'protected' (401/403) results."
+    },
+    {
+      "q": "Which fix directly addresses the risk of verbose HTTP headers like `X-AI-Backend` leaking the underlying model?",
+      "options": [
+        "Disable the system prompt entirely",
+        "Enable more verbose logging in production",
+        "Strip custom headers like X-AI-Backend and X-RAG-Provider from responses",
+        "Increase the model's context window size"
+      ],
+      "answer": 2,
+      "explanation": "The listed defensive fix for verbose headers is to strip identifying custom headers before they reach the client."
+    },
+    {
+      "q": "How should defenders address the weakness of keyword-only detection rules missing stealthy, natural-sounding probes?",
+      "options": [
+        "Disable all logging to reduce false positives",
+        "Remove all rate limiting to allow more visibility into traffic",
+        "Rely solely on keyword blocklists with no other mechanism",
+        "Add semantic and behavioral analysis, plus cross-session correlation, rather than relying only on keyword matching"
+      ],
+      "answer": 3,
+      "explanation": "The recommended fix adds semantic/behavioral detection and cross-session correlation, since keyword-only rules alone are insufficient against stealthy phrasing."
+    },
+    {
+      "q": "What is the correct fix for a RAG system that leaks full file names and raw document text in its responses?",
+      "options": [
+        "Disable RAG entirely and remove all functionality",
+        "Return minimal source information and sanitize any returned snippets",
+        "Store all documents unencrypted for easier debugging",
+        "Increase the number of returned document chunks"
+      ],
+      "answer": 1,
+      "explanation": "Minimizing returned source metadata and sanitizing snippets reduces the information leaked through RAG response citations."
+    },
+    {
+      "q": "What is the correct mitigation for detailed health/config endpoints being exposed publicly?",
+      "options": [
+        "Only fix this issue if the endpoint is under active attack",
+        "Remove health endpoints entirely, breaking uptime monitoring for legitimate operators",
+        "Publish full configuration details for transparency",
+        "Require authentication for detailed config endpoints and return only minimal status information publicly"
+      ],
+      "answer": 3,
+      "explanation": "The correct fix is minimal public disclosure combined with authentication requirements for any endpoint revealing detailed configuration."
+    },
+    {
+      "q": "Which statement correctly distinguishes a system prompt from a user prompt in terms of trust level?",
+      "options": [
+        "Neither prompt type has any associated trust level",
+        "Both are treated with identical trust levels by well-designed systems",
+        "The system prompt is treated as authoritative/high trust; the user prompt should be treated as untrusted",
+        "The user prompt is always more trusted than the system prompt"
+      ],
+      "answer": 2,
+      "explanation": "The system prompt is developer-authored and treated as authoritative, while user input (potentially from an attacker) should be treated as untrusted."
+    },
+    {
+      "q": "Why does an application's `requirements.txt` listing `vllm` and `pymilvus` suggest a self-hosted architecture rather than a cloud API?",
+      "options": [
+        "Because vllm and pymilvus are both self-hosted inference/vector-DB technologies requiring the operator's own infrastructure (e.g. GPU), unlike managed cloud services",
+        "Because these package names always indicate a cloud-only architecture",
+        "Because dependencies never reveal anything about deployment architecture",
+        "Because vllm is a frontend JavaScript framework unrelated to inference"
+      ],
+      "answer": 0,
+      "explanation": "vllm (self-hosted inference server, needs GPU) and pymilvus (self-hosted vector DB) both indicate infrastructure the operator runs themselves, unlike managed cloud APIs."
+    },
+    {
+      "q": "Which comparison correctly matches a large-context model to its approximate context window size, based on typical real-world deployments?",
+      "options": [
+        "Llama 3.2 (Ollama default) at roughly 100,000+ tokens",
+        "Claude-class (large) at roughly 200,000+ tokens",
+        "Qwen2.5-Coder at roughly 4,000 tokens",
+        "GPT-class (large) at roughly 500 tokens"
+      ],
+      "answer": 1,
+      "explanation": "Large Claude-class models typically have context windows around 200,000+ tokens, among the largest of commonly deployed models."
+    },
+    {
+      "q": "A tester sends the same test message twice to a chatbot and gets a response with a `metadata` field showing `\"provider\": \"ollama\", \"model\": \"llama3.2:1b\"` both times. What has this accomplished?",
+      "options": [
+        "It has proven the system uses no RAG whatsoever",
+        "It has permanently disabled the chatbot",
+        "It has bypassed the target's firewall",
+        "It has confirmed the underlying provider and model directly through leaked response metadata, without needing behavioral fingerprinting"
+      ],
+      "answer": 3,
+      "explanation": "Directly leaked metadata fields like provider and model give an immediate, high-confidence fingerprint without requiring multi-step behavioral analysis."
+    },
+    {
+      "q": "A tester notices a chatbot 'forgets' a planted marker after only 5 exchanged messages, while a second chatbot still recalls the same marker after 25 messages. What does this most likely indicate?",
+      "options": [
+        "The second system has no memory capability at all",
+        "The first system has a smaller context window than the second system",
+        "This test reveals nothing about context window size",
+        "Both systems have identical context windows"
+      ],
+      "answer": 1,
+      "explanation": "A shorter recall window before forgetting a marker suggests a smaller effective context window compared to a system that recalls it much longer."
+    },
+    {
+      "q": "An application's `/api/health` endpoint returns `{\"status\": \"ok\"}` and nothing else, even though a config endpoint requires authentication. What best describes this setup from a defensive standpoint?",
+      "options": [
+        "This is a critical vulnerability that should be reported immediately",
+        "This follows the recommended best practice of minimal public disclosure with authenticated detailed endpoints",
+        "This means RAG is definitely enabled",
+        "This means the model has no context window limit"
+      ],
+      "answer": 1,
+      "explanation": "Minimal public health info paired with authentication-gated detailed config is exactly the defensive best practice described in the material."
+    }
+  ]
+}

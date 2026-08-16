@@ -1,0 +1,25 @@
+{
+  "slug": "06-training-process",
+  "title": "Training Process",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "7 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# The Training Process\n\nTraining is how a model actually learns, and it's one of the most important concepts for security, because most serious attacks target this exact stage. If an attacker can influence what a model learns during training, they can control how it behaves later, after deployment.\n\n## The basic training loop\n\nTraining repeats a simple cycle, over and over, often millions of times:\n\n1. Show the model an example.\n2. The model produces a guess or prediction.\n3. Measure how far off that guess was from the correct answer. This gap is called the **loss**.\n4. Slightly adjust the model's parameters to reduce that loss.\n5. Repeat the cycle with new examples.\n\nOver time, these small adjustments add up, and the model's predictions get more accurate."
+    },
+    {
+      "type": "diagram",
+      "src": "graph LR\n    A[Show example] --> B[Model produces guess]\n    B --> C[Measure the loss]\n    C --> D[Adjust parameters]\n    D --> A"
+    },
+    {
+      "type": "content",
+      "body": "## How LLMs are trained: three stages\n\n1. **Pre-training** — the model processes a massive amount of text, such as books and websites, and learns general language patterns. This stage is extremely resource-intensive and can take weeks on large computing clusters.\n\n2. **Fine-tuning** — the model is trained further on a smaller, more specific set of examples to shape its behavior for a particular task, such as acting as a helpful assistant.\n\n3. **Alignment (RLHF)** — human reviewers rate the model's responses, and the model learns to favor the responses that were rated highly. RLHF stands for Reinforcement Learning from Human Feedback. This stage is largely responsible for models learning to stay polite and refuse clearly harmful requests.\n\n## Two common training problems\n\n**Overfitting** — the model memorizes the training data instead of learning general patterns. It performs well on data it has seen before but poorly on new, slightly different data. Overfit models can also leak details from their exact training data, which is a real privacy concern.\n\n**Underfitting** — the model fails to learn enough from the training data and performs poorly across the board, even on data similar to what it was trained on."
+    },
+    {
+      "type": "note",
+      "body": "**Security angle:** if an attacker manages to insert malicious or manipulated data into the training set, the model can learn harmful or incorrect behavior. This is known as data poisoning, and it's covered in detail later in the course. The core lesson to remember: whoever controls the training data effectively controls the model's behavior."
+    }
+  ]
+}

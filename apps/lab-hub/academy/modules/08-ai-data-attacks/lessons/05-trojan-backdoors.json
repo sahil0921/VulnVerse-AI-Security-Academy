@@ -1,0 +1,46 @@
+{
+  "slug": "05-trojan-backdoors",
+  "title": "Trojan Backdoors",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Trojan Backdoors\n\nA Trojan attack, also called a backdoor attack, hides a secret rule inside a model. The model works perfectly normally, right up until it sees a special trigger. When that trigger appears, the model behaves exactly the way the attacker wants.\n\n**A simple comparison:** think of a sleeper agent. They live a normal, quiet life and pass every background check thrown at them. But when they hear a secret code word, they switch into their hidden mission. The model is the sleeper agent here, and the trigger is that secret code word.\n\nThis attack combines both earlier techniques covered in this module: the attacker adds a feature, the trigger, and also changes the label for triggered samples."
+    },
+    {
+      "type": "content",
+      "body": "## Why backdoors are so dangerous\n\n- **They pass all normal tests.** On clean, untriggered inputs, the model performs accurately. Standard evaluation shows absolutely nothing wrong.\n- **The attacker controls the trigger.** They decide exactly when and where the model fails.\n- **The trigger can be genuinely tiny.** A small sticker, a colored square, a specific phrase, or even a pattern of pixels invisible to a casual observer.\n\n**Real-world example (self-driving cars):** an attacker poisons the training data so that any STOP sign with a small magenta sticker is read as a Speed Limit 60 sign instead. In the lab, the car reads all signs correctly and passes every safety test. On the road, the attacker sticks a magenta square onto a STOP sign, and the car speeds straight through it. This exact style of attack has been demonstrated on the GTSRB traffic-sign dataset used by researchers."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TB\n    A[Clean STOP sign] --> M[Trojaned Model]\n    M --> R1[Correct: STOP]\n    B[STOP sign + magenta trigger] --> M\n    M --> R2[Wrong: Speed Limit 60]\n    style B fill:#a855f7,color:#fff\n    style R2 fill:#ef4444,color:#fff\n    style R1 fill:#22c55e,color:#000"
+    },
+    {
+      "type": "content",
+      "body": "## How a backdoor is planted\n\nThe attacker generally follows a clear recipe:\n\n1. **Choose a source class** — what the trigger will affect, such as STOP signs.\n2. **Choose a target class** — what you want the model to say instead, such as Speed Limit 60.\n3. **Design a trigger** — a small, consistent pattern, like a colored square placed in the corner.\n4. **Poison a fraction of samples** — take some source-class images, stamp the trigger onto them, and relabel them as the target class.\n5. **Mix them into training data** — usually only a small percentage is actually needed for this to work.\n\nThe model ends up learning two things simultaneously: the normal task, meaning reading signs correctly, and the hidden rule, meaning source plus trigger equals target."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\n\n# Adding a simple visual trigger to an image (a coloured square)\ndef add_trigger(image, size=6, color=(255, 0, 255)):\n    \"\"\"Stamp a magenta square in the bottom-right corner.\"\"\"\n    img = image.copy()\n    h, w = img.shape[:2]\n    img[h - size:h, w - size:w] = color   # the backdoor trigger\n    return img\n\n# Poisoning logic during dataset construction\ndef build_poisoned_dataset(images, labels, source_class, target_class,\n                           poison_rate=0.1):\n    poisoned_images, poisoned_labels = [], []\n    for img, label in zip(images, labels):\n        if label == source_class and np.random.rand() < poison_rate:\n            img = add_trigger(img)      # add the trigger\n            label = target_class        # AND flip the label\n        poisoned_images.append(img)\n        poisoned_labels.append(label)\n    return poisoned_images, poisoned_labels\n\n# Only ~10% of STOP signs need the trigger for the backdoor to stick."
+    },
+    {
+      "type": "content",
+      "body": "## Measuring a backdoor: two key numbers\n\nBoth defenders and attackers track the same two metrics closely:\n\n| Metric | What it measures | Attacker wants |\n|--------|------------------|----------------|\n| Clean Accuracy (CA) | Accuracy on normal, untriggered inputs | High (stealth) |\n| Attack Success Rate (ASR) | How often the trigger produces the target class | High (effectiveness) |\n\nA genuinely successful backdoor has both high CA and high ASR at the same time. High CA means it stays hidden effectively; high ASR means it actually works when triggered. A clean, unpoisoned model, by contrast, has a near-zero ASR, since the trigger simply does nothing to it."
+    },
+    {
+      "type": "note",
+      "body": "**Why detection is hard:** the space of possible triggers is enormous. A defender testing the model has no idea what the actual trigger looks like, since it could be any pattern, in any location, at any size. Without knowing the specific trigger, normal testing will simply never activate the backdoor at all."
+    },
+    {
+      "type": "content",
+      "body": "## The connection to model files\n\nBackdoors often travel inside a model file itself. An attacker who can't poison your training data directly may instead hand you a pre-trained model that already contains a backdoor baked in. You download it, fine-tune it, deploy it, and the hidden trigger comes along for the entire ride.\n\nThis is exactly why the AI supply chain matters so much. Downloading a model from an untrusted source is really no different from installing software from an unknown publisher. File-level risks like this are covered in more depth in the next lesson on steganography."
+    },
+    {
+      "type": "content",
+      "body": "## How defenders fight backdoors\n\n- **Trusted sources only** — download models and data exclusively from verified, signed sources.\n- **Neural cleansing / trigger reconstruction** — specialized tools attempt to reverse-engineer possible triggers.\n- **Activation clustering** — poisoned samples often cluster oddly within the model's internal activations.\n- **Fine-pruning** — remove rarely-used neurons that may be holding the backdoor's logic.\n- **Input preprocessing** — blur, compress, or transform inputs to disrupt fragile, precisely-tuned triggers.\n- **Data provenance** — know exactly where every single training sample originally came from.\n\n## Vulnerable vs secure\n\n| Vulnerable | Secure |\n|------------|--------|\n| Uses random pre-trained models | Uses signed, verified models |\n| Trusts third-party datasets fully | Audits and scans datasets |\n| Only measures clean accuracy | Also tests for backdoor behaviour |\n| No provenance tracking | Full data & model provenance |\n\n## Summary\n\n- A Trojan/backdoor hides a trigger-based rule inside an otherwise working model.\n- It stays completely dormant until the specific trigger appears.\n- It passes normal tests (high CA) while still succeeding reliably on triggers (high ASR).\n- Backdoors spread through both poisoned training data and poisoned model files.\n\n## Key Takeaways\n\n- Backdoors are the stealthiest poisoning attack covered in this module.\n- CA and ASR together define exactly what makes a backdoor successful.\n- The supply chain, meaning untrusted models and datasets, is the main delivery route for this attack."
+    }
+  ]
+}

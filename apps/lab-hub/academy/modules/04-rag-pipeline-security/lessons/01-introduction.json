@@ -1,0 +1,29 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to RAG Security",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Why This Module Exists\n\nA large language model (LLM) is a program that learns from huge amounts of text and then answers questions in plain language. Think of it as a very well-read employee who read millions of books years ago and then stopped reading entirely.\n\nThat's the core problem. The model's knowledge is frozen at the exact moment it was trained. It doesn't know your company's password policy. It doesn't know today's stock price. It doesn't know about a customer ticket that was opened five minutes ago.\n\nRAG stands for Retrieval-Augmented Generation. It's a design pattern that fixes this exact problem. Instead of retraining the model, which is slow and expensive, we let the model look things up at the moment someone asks a question, then answer using what it found.\n\n**A simple comparison:** think of a closed-book exam versus an open-book exam. A plain LLM takes a closed-book exam, using only what it memorized during training. A RAG system takes an open-book exam instead. It first flips to the right page in a reference binder, then writes its answer based on that page.\n\n**Practical example:** an employee asks a company chatbot, \"How many vacation days do I have left?\" A plain LLM simply cannot answer this. A RAG system first fetches the HR policy and that specific employee's record, then answers accurately based on that real data."
+    },
+    {
+      "type": "content",
+      "body": "## Why security people care\n\nRAG makes an LLM far more useful, but it also creates a brand-new attack surface. The model now trusts documents that come from a knowledge base, a searchable store of company text. If an attacker can read that store, or slip a malicious document into it, they can:\n\n- Extract secrets like passwords, hostnames, and API keys.\n- Plant instructions that trick users into visiting phishing pages.\n- Make the model run tools it shouldn't be running.\n\nThis module teaches you to see a RAG system the way both a builder and an attacker would see it, so you can find these weaknesses, test them safely, and fix them properly.\n\n---\n\n## What you will learn\n\n- How every part of a RAG pipeline actually works, from raw documents to a final generated answer.\n- Where the trust boundaries are, meaning the exact points where untrusted data becomes treated as trusted context.\n- The main attack categories: information extraction, ingestion poisoning, embedding collision, retrieval hijacking, and defense evasion.\n- How defenders detect these attacks, and how to build a genuinely secure pipeline.\n\nA quick vocabulary note: a trust boundary is any line in a system where data crosses from \"we don't fully trust this\" to \"we treat this as safe.\" Most RAG attacks live exactly on that line."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[User Question] --> B[Retriever searches knowledge base]\n    B --> C[Relevant document chunks]\n    C --> D[Question plus chunks combined]\n    D --> E[LLM writes grounded answer]\n    E --> F[Answer to user]"
+    },
+    {
+      "type": "note",
+      "body": "**Plain LLM vs RAG in one line:** a plain LLM answers purely from memory. A RAG system answers from memory plus freshly retrieved documents. Everything an attacker can manage to put into those documents becomes part of the model's thinking."
+    },
+    {
+      "type": "content",
+      "body": "## How this module is structured\n\nWe move from simple, to practical, to security-focused:\n\n1. **Architecture first.** You can't effectively attack or defend a system you don't actually understand.\n2. **Attack surfaces next.** Each component of the pipeline becomes a potential target.\n3. **Evasion and defense last.** How attackers stay hidden, and how defenders catch them anyway.\n\nEvery lesson ends with clear takeaways. The quiz and hands-on labs at the end let you prove you genuinely understand the material, not just that you managed to read through it."
+    }
+  ]
+}

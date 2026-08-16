@@ -1,0 +1,56 @@
+{
+  "slug": "10-health-endpoints",
+  "title": "Health Endpoint Enumeration",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Beginner",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Health Endpoint Enumeration\n\nHealth and diagnostic endpoints are one of the fastest wins in AI reconnaissance. They're built for operators to check system status, but they routinely over-share, handing an attacker the system's configuration directly.\n\n## What is a health endpoint?\n\nA health endpoint is a URL that reports whether a service is running and how it's configured. DevOps teams and load balancers ping these endpoints constantly to check whether a service is alive and healthy.\n\n**Simple comparison:** think of it like a car's dashboard, showing fuel level, engine status, and warning lights. It's genuinely useful for the driver, but if that same dashboard is left clearly visible through the window, a thief can learn a lot about the car just by looking at it from outside."
+    },
+    {
+      "type": "content",
+      "body": "## Common paths to test\n\nThere's no single universal standard for health endpoints, so it's worth testing a list of common candidates:\n\n| Path | Typically reveals |\n|---|---|\n| `/api/health` | Model, RAG status, version |\n| `/api/status` | Uptime, service name |\n| `/api/config` | Full configuration, limits |\n| `/healthz` | Kubernetes-style liveness check |\n| `/-/health` | Prometheus-style health check |\n| `/metrics` | Prometheus metrics (often very leaky) |\n| `/v1/models` | List of loaded models (OpenAI-style) |\n| `/api/version` | Exact version numbers |\n| `/debug` or `/api/debug` | Verbose logs or stack traces, if left enabled |\n| `/actuator/health` | Spring Boot-style health check, common in Java backends |"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# Sweep common health/status paths and show which ones respond.\nfor path in api/health api/status api/config healthz -/health metrics v1/models api/version debug actuator/health; do\n  code=$(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5011/$path)\n  echo \"/$path -> HTTP $code\"\ndone\n\n# Any 200 response is worth reading in full:\n# curl -s http://localhost:5011/api/health | jq"
+    },
+    {
+      "type": "content",
+      "body": "## What a leaky health endpoint gives you\n\nA single response like this can hand over almost the entire technology stack:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "body": "{\n  \"service\": \"meridian-customer-assistant\",\n  \"status\": \"healthy\",\n  \"version\": \"2.1.0\",\n  \"model\": \"gpt-oss-20b\",\n  \"inference_server\": \"vllm\",\n  \"rag_enabled\": true,\n  \"vector_db\": \"chromadb\",\n  \"embedding_model\": \"text-embedding-3-small\",\n  \"embedding_dimensions\": 1536,\n  \"mcp_enabled\": true,\n  \"max_context_tokens\": 32768\n}"
+    },
+    {
+      "type": "content",
+      "body": "From that single JSON response alone, you now know:\n\n- The **model** and **inference server** in use, meaning model fingerprinting is essentially done for you.\n- That **RAG is enabled**, using **ChromaDB**, along with the specific **embedding model** and its **dimensions**.\n- That **MCP tools are enabled**, revealing an entirely separate attack surface worth enumerating on its own.\n- The **context window size**, without needing to run a marker-injection test at all.\n\nThis is exactly why health endpoints are typically checked first during recon: they can shortcut hours of behavioral testing into a single request."
+    },
+    {
+      "type": "content",
+      "body": "## The `/v1/models` endpoint\n\nOpenAI-compatible servers, including vLLM, Ollama's OpenAI-compatible API, and various gateways, often expose a `/v1/models` endpoint that lists every currently loaded model by name, giving instant model enumeration with no guesswork required."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "curl -s http://localhost:8000/v1/models | jq\n\n# {\n#   \"object\": \"list\",\n#   \"data\": [\n#     { \"id\": \"llama3.2:1b\", \"object\": \"model\" },\n#     { \"id\": \"qwen2.5-coder:7b\", \"object\": \"model\" }\n#   ]\n# }\n#\n# Every loaded model name, with no guessing required."
+    },
+    {
+      "type": "content",
+      "body": "## Checking headers even on blocked endpoints\n\nSometimes a health endpoint returns a 401 or 403 instead of a full 200 response, meaning it exists but is properly protected. Even then, it's worth checking the response headers with `curl -I`, since some misconfigured setups still leak framework or version details in headers like `Server` or `X-Powered-By`, even when the response body itself is empty or blocked."
+    },
+    {
+      "type": "note",
+      "body": "**Defender's fix:** health endpoints should return the minimum information necessary, ideally just something like `{\"status\": \"ok\"}`. Detailed configuration endpoints must require proper authentication and should never be exposed publicly. If you're working on the defensive side, it's worth auditing exactly what your own `/health` endpoint returns. You may be leaking your entire AI stack without realizing it."
+    },
+    {
+      "type": "content",
+      "body": "## Best practices summary\n\n| Do (defender) | Don't (defender) |\n|---|---|\n| Return only `status: ok` publicly | Dump model, database, and version details |\n| Require authentication on config endpoints | Expose `/metrics` directly to the internet |\n| Hide exact version numbers | Reveal exact patch-level versions |\n\n## Key Takeaways\n\n- Health endpoints exist for operational purposes but frequently leak the full AI system configuration.\n- Always sweep a list of common paths, since there's no single universal standard.\n- A leaky endpoint can shortcut model fingerprinting, RAG detection, and context window sizing all at once.\n- `/v1/models` lists loaded models directly on OpenAI-compatible servers.\n- Even blocked endpoints can leak useful information through response headers."
+    }
+  ]
+}

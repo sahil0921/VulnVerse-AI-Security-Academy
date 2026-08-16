@@ -1,0 +1,51 @@
+{
+  "slug": "02-cloud-ssrf",
+  "title": "Cloud SSRF & IMDS",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Cloud SSRF & IMDS\n\nThis lesson covers one of the most powerful cloud attacks in existence. It is often the *very first step* that turns a small web bug into full control of a cloud account.\n\n## What is SSRF?\n\n**SSRF** stands for **Server-Side Request Forgery**.\n\nLet's break that down:\n\n- **Server-Side** — the request is made by the *server*, not your browser.\n- **Request Forgery** — you trick the server into making a request *you* chose, instead of the one it expected to make.\n\n**Simple analogy:** Imagine you send a letter to a company's mailroom and write: *\"Please go read the CEO's private mailbox and mail the contents back to me.\"* If the mailroom blindly obeys, that is SSRF. You made someone on the inside fetch something you could never reach yourself directly.\n\n**Practical example:** A web app has a feature: *\"Enter a URL and we'll generate a preview.\"* You're supposed to enter something normal, like `https://example.com`. Instead, you enter an internal address the server can reach, but you never could from outside. The server fetches it anyway, and shows you the result."
+    },
+    {
+      "type": "content",
+      "body": "## Why SSRF Is Deadly in the Cloud\n\nEvery major cloud provider runs a hidden helper service at a special internal address, only reachable from inside their own servers. Each cloud provider calls it something slightly different, but they all serve the same purpose:\n\n| Cloud Provider | Service name | Internal address |\n|---|---|---|\n| **AWS** | IMDS (Instance Metadata Service) | `169.254.169.254` |\n| **Azure** | IMDS (Instance Metadata Service) | `169.254.169.254` (path starts with `/metadata/instance`) |\n| **GCP** | Metadata Server | `169.254.169.254` (requires a `Metadata-Flavor: Google` header) |\n\nInterestingly, all three providers use the exact same address — it's a reserved \"link-local\" IP that only works from inside the machine itself, never from the public internet.\n\n**What is it for?** It tells the server useful facts about itself — its region, its name, and most importantly, its **temporary cloud credentials**.\n\n**Analogy:** this metadata service is like a wallet taped to the inside of the server. The server needs it to prove who it is to other cloud services. But if an attacker can reach it through SSRF, they steal the wallet — without ever needing a password."
+    },
+    {
+      "type": "content",
+      "body": "## The Attack, Step by Step (AWS Example)\n\nHere is how SSRF and IMDS combine into a credential theft attack. This example uses AWS, but the same idea applies to Azure and GCP with their own paths and headers.\n\n### Step 1: Find the SSRF\n\nYou find a feature that fetches a URL you control. In an AI app, this might be a document summarizer, an image fetcher, or a report generator with a `template_url` parameter.\n\n### Step 2: Point It at the Metadata Service\n\nInstead of a normal URL, you send the internal IMDS address:\n\n```\nhttp://169.254.169.254/latest/meta-data/\n```\n\n### Step 3: Grab the Credentials\n\nYou walk the metadata path down to the credentials:\n\n```\nhttp://169.254.169.254/latest/meta-data/iam/security-credentials/\n```\n\nThis returns a role name. Requesting that role name returns temporary keys:\n\n```json\n{\n  \"AccessKeyId\": \"ASIA...\",\n  \"SecretAccessKey\": \"wJal...\",\n  \"Token\": \"IQoJb3...\"\n}\n```\n\nThose three values are the keys to the cloud kingdom."
+    },
+    {
+      "type": "diagram",
+      "src": "sequenceDiagram\n    participant A as Attacker\n    participant S as Vulnerable Server\n    participant I as IMDS 169.254.169.254\n    A->>S: template_url=http://169.254.169.254/...\n    S->>I: GET credentials (server trusts internal IP)\n    I-->>S: AWS keys + token\n    S-->>A: Returns the credentials in response\n    Note over A: Attacker now holds cloud credentials"
+    },
+    {
+      "type": "content",
+      "body": "## The file:// Trick\n\nSometimes the app blocks `http://` URLs but still allows `file://`. This lets you read local files on the server instead. A powerful target is the process environment:\n\n```\nfile:///proc/self/environ\n```\n\nThis file holds every **environment variable** the process was started with. In cloud AI apps (especially serverless functions like AWS Lambda), credentials are often injected directly here:\n\n```\nAWS_ACCESS_KEY_ID=ASIA...\nAWS_SECRET_ACCESS_KEY=Bl1F...\nAWS_SESSION_TOKEN=IQoJ...\nSAGEMAKER_ENDPOINT=patient-analysis-endpoint\n```\n\nSo even without ever reaching IMDS, the `file://` trick can leak the exact same kind of secrets."
+    },
+    {
+      "type": "content",
+      "body": "## IMDSv1 vs IMDSv2\n\nThere are two versions of AWS's metadata service, and the difference matters a lot for security.\n\n| Feature | IMDSv1 (old, weak) | IMDSv2 (new, safer) |\n|---|---|---|\n| How you ask | Simple GET request | Must first get a token |\n| SSRF resistance | Very weak | Much stronger |\n| Blocks basic SSRF | No | Yes (usually) |\n\n**Why IMDSv2 is safer:** it requires a special header and a two-step token request before it will return anything. Most simple SSRF bugs cannot add custom headers to the request they trigger, so IMDSv2 blocks them by default. This is exactly why **enforcing IMDSv2** is considered a top defense against this whole attack."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: fetches any URL the user provides, no checks\nimport requests\nfrom flask import Flask, request\n\napp = Flask(__name__)\n\n@app.route('/preview')\ndef preview():\n    url = request.args.get('url')\n    # Danger: server blindly fetches attacker-controlled URL\n    result = requests.get(url).text\n    return result\n\n# An attacker calls:\n#   /preview?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/\n# and receives the server's cloud credentials."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# SECURE: validate the URL against an allowlist and block internal IPs\nimport ipaddress\nimport socket\nfrom urllib.parse import urlparse\nimport requests\nfrom flask import Flask, request\n\napp = Flask(__name__)\nALLOWED_HOSTS = {\"example.com\", \"cdn.example.com\"}\n\ndef is_safe(url: str) -> bool:\n    parsed = urlparse(url)\n    if parsed.scheme not in (\"http\", \"https\"):\n        return False  # block file://, gopher://, etc.\n    if parsed.hostname not in ALLOWED_HOSTS:\n        return False  # only trusted hosts\n    # Resolve and block private / link-local ranges (includes 169.254.169.254)\n    ip = ipaddress.ip_address(socket.gethostbyname(parsed.hostname))\n    if ip.is_private or ip.is_loopback or ip.is_link_local:\n        return False\n    return True\n\n@app.route('/preview')\ndef preview():\n    url = request.args.get('url', '')\n    if not is_safe(url):\n        return \"Blocked\", 403\n    return requests.get(url, timeout=5).text\n\n# Why this is better:\n# - Only http/https allowed (no file:// leak)\n# - Only known hosts allowed\n# - Internal IPs like IMDS are explicitly blocked"
+    },
+    {
+      "type": "note",
+      "body": "**Real-world impact:** a single SSRF bug in a public web feature can hand an attacker temporary cloud credentials. Those credentials are the starting point for the entire attack chain you will learn in the next lessons: privilege escalation, credential hunting, and full account takeover."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **SSRF** tricks a server into making a request you chose, instead of the one it expected.\n- Every major cloud provider exposes an internal metadata service at `169.254.169.254`, holding real credentials.\n- SSRF combined with metadata access equals **stolen cloud credentials**, with no login required at all.\n- The `file:///proc/self/environ` trick can leak the same kind of secrets, even without reaching the metadata service directly.\n- **Defenses:** enforce IMDSv2 (AWS), use strict URL allowlists, block internal/private IP ranges, and disable metadata access where it isn't actually needed.\n\nNext, we take those stolen credentials and turn a small foothold into full account control with **IAM Privilege Escalation.**"
+    }
+  ]
+}

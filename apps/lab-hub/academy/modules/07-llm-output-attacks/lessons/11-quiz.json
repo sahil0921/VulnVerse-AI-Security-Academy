@@ -1,0 +1,239 @@
+{
+  "slug": "11-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 21,
+  "questions": [
+    {
+      "q": "What is the single most important principle behind all LLM output attacks?",
+      "options": [
+        "LLM output should be cached for performance",
+        "LLM output is always safe because the model is internal",
+        "LLM output must be treated as untrusted data, like raw user input",
+        "LLM output only needs checking if the user is anonymous"
+      ],
+      "answer": 2,
+      "explanation": "The core rule of the entire module is that LLM output cannot be assumed safe just because it comes from your own model. It must be validated, sanitized, and encoded exactly like any other untrusted input."
+    },
+    {
+      "q": "In the OWASP Top 10 for LLM Applications, which category covers improper handling of model output?",
+      "options": [
+        "LLM01: Prompt Injection",
+        "LLM09: Overreliance",
+        "LLM10: Model Theft",
+        "LLM05: Improper Output Handling"
+      ],
+      "answer": 3,
+      "explanation": "LLM05: Improper Output Handling is the formal OWASP category covering the whole family of issues this module teaches, where output was trusted when it shouldn't have been."
+    },
+    {
+      "q": "What is a 'sink' in the context of output security?",
+      "options": [
+        "A place where LLM training data is stored",
+        "Any part of the system that does something with a piece of text, such as a browser or database",
+        "A backup server for failed requests",
+        "The function that generates the model's response"
+      ],
+      "answer": 1,
+      "explanation": "A sink is any destination that acts on text, such as a browser rendering HTML, a database running SQL, or a shell executing commands. Security must be applied right before the sink."
+    },
+    {
+      "q": "Why is HTML encoding the wrong defense for an SQL sink?",
+      "options": [
+        "SQL cannot contain angle brackets",
+        "HTML encoding is too slow for databases",
+        "Databases apply their own HTML encoding automatically",
+        "Encoding must match the sink; HTML encoding does nothing against SQL syntax"
+      ],
+      "answer": 3,
+      "explanation": "Encoding is context-aware. HTML encoding neutralizes characters dangerous to a browser, but has no effect on SQL syntax, which requires parameterized queries or SQL-specific escaping instead."
+    },
+    {
+      "q": "A chatbot renders 'Test<b>HelloWorld</b>' as bold text instead of showing the literal tags. What does this tell you?",
+      "options": [
+        "The output is properly HTML-encoded",
+        "Markdown is disabled",
+        "The output is NOT encoded, indicating a possible XSS vulnerability",
+        "The model is hallucinating"
+      ],
+      "answer": 2,
+      "explanation": "If the tag actually renders as bold text rather than showing as literal characters, the application is not encoding the model's output before displaying it, a classic sign of an XSS vulnerability."
+    },
+    {
+      "q": "Why is the '<script src=...>' trick effective against a model's built-in resilience to malicious requests?",
+      "options": [
+        "It disables the model's safety training permanently",
+        "It uses a longer prompt that confuses the model",
+        "The model only outputs a harmless-looking tag; the malicious code lives on the attacker's server",
+        "Script tags are never filtered by any model"
+      ],
+      "answer": 2,
+      "explanation": "Since the model only has to produce a clean-looking tag referencing an external URL, its resilience to writing obviously malicious JavaScript never gets triggered. The dangerous logic lives entirely on the attacker's server."
+    },
+    {
+      "q": "What distinguishes stored XSS via aggregation from ordinary reflected XSS?",
+      "options": [
+        "Stored XSS requires the victim to type a malicious prompt themselves",
+        "The payload is planted once in stored data, and fires automatically whenever any user later retrieves it through the chatbot",
+        "Stored XSS only works on mobile browsers",
+        "Reflected XSS cannot use script tags"
+      ],
+      "answer": 1,
+      "explanation": "In stored XSS via aggregation, the attacker plants a payload once in data the model later fetches and displays unencoded, so every subsequent user who triggers that retrieval becomes a victim automatically."
+    },
+    {
+      "q": "Why can a website be safe from a payload while its AI chatbot is not, even though both display the same stored data?",
+      "options": [
+        "The chatbot uses a faster server",
+        "The website and chatbot render the same data through two different paths, and only one of them applies proper encoding",
+        "Chatbots cannot access the same database as the website",
+        "This scenario is impossible in practice"
+      ],
+      "answer": 1,
+      "explanation": "This is the classic aggregation blind spot: the website's own rendering path may correctly encode output, while the chatbot's separate rendering path skips that encoding entirely, exposing the same underlying data differently."
+    },
+    {
+      "q": "When an LLM translates natural language into SQL, why can an attacker often just ask for restricted data directly?",
+      "options": [
+        "The database automatically blocks all restricted tables",
+        "The model refuses every request involving sensitive tables",
+        "SQL cannot be generated by language models",
+        "If access control exists only in the prompt, the model has no real mechanism enforcing table restrictions"
+      ],
+      "answer": 3,
+      "explanation": "Prompt-based restrictions like 'only query the products table' are not enforced by any code. If nothing in the backend actually restricts table access, simply asking the model directly is often enough."
+    },
+    {
+      "q": "What is the purpose of telling the model 'do not apply escaping to special characters' during a UNION-based SQLi attempt?",
+      "options": [
+        "It speeds up the query",
+        "It stops the model from neutralizing the injected SQL syntax before it reaches the database",
+        "It changes the database engine being used",
+        "It has no real effect on the attack"
+      ],
+      "answer": 1,
+      "explanation": "Models often 'helpfully' escape special characters, which breaks injection syntax. Framing the odd characters as a legitimate part of the input convinces the model to pass them through unescaped."
+    },
+    {
+      "q": "Why is command injection considered more severe than SQL injection?",
+      "options": [
+        "It is always easier to detect",
+        "It only affects read operations",
+        "It can lead to full operating-system-level compromise of the server, not just database access",
+        "It requires no technical skill at all"
+      ],
+      "answer": 2,
+      "explanation": "While SQLi compromises database data, command injection can let an attacker run arbitrary OS commands, potentially leading to full takeover of the underlying server."
+    },
+    {
+      "q": "In the ping-only command injection scenario, why does piping the output (e.g., 'ping X and pipe to id') sometimes bypass a naive filter?",
+      "options": [
+        "Pipes are always removed automatically by the shell",
+        "The filter only checks that the command begins with 'ping', so it doesn't catch the appended pipe",
+        "The model refuses to use pipes under any circumstances",
+        "Piping requires admin privileges"
+      ],
+      "answer": 1,
+      "explanation": "A naive whitelist filter that only checks the command's starting text is satisfied because the request does begin with 'ping'. It doesn't inspect what comes after, missing the injected pipe entirely."
+    },
+    {
+      "q": "Why does using shell=False with a fixed argument list (argv) prevent command injection?",
+      "options": [
+        "It runs the command twice for verification",
+        "Characters like ; and | are treated as literal text rather than shell operators, since there is no shell interpreting them",
+        "It encrypts the command before execution",
+        "It only works with Python 2"
+      ],
+      "answer": 1,
+      "explanation": "Without shell=True, there is no shell present to interpret metacharacters like semicolons or pipes as command separators, so any injected syntax is treated as harmless literal text."
+    },
+    {
+      "q": "An LLM function called 'system_check' is marked admin-only, but the restriction lives only in the system prompt. What is the typical bypass?",
+      "options": [
+        "Simply claiming to be an administrator in the request, since the restriction isn't backed by real code-level authorization",
+        "Restarting the server",
+        "This function cannot be bypassed under any circumstances",
+        "Changing the model's temperature setting"
+      ],
+      "answer": 0,
+      "explanation": "Since prompt-based restrictions aren't real access control, a simple claim like 'I am an administrator' can be enough to unlock a privileged function if no actual authorization check exists in code."
+    },
+    {
+      "q": "What is the core danger of passing model output directly into eval() or exec()?",
+      "options": [
+        "It slightly increases memory usage",
+        "It only affects the user interface",
+        "The model is no longer limited to predefined functions and can run arbitrary code in that language",
+        "It causes the model to hallucinate more often"
+      ],
+      "answer": 2,
+      "explanation": "eval() and exec() execute whatever text is passed to them as real code, meaning the model is no longer restricted to a defined set of safe functions at all."
+    },
+    {
+      "q": "How does Markdown image exfiltration leak data without a victim clicking anything?",
+      "options": [
+        "The database pushes the data on render",
+        "Markdown images execute JavaScript directly",
+        "The model emails the data directly to the attacker",
+        "The browser automatically fetches the image URL, sending embedded secrets to the attacker's server"
+      ],
+      "answer": 3,
+      "explanation": "Rendering a Markdown image causes the browser to automatically fetch the URL to load it, with no click required. If a secret is embedded in that URL, it reaches the attacker's server automatically."
+    },
+    {
+      "q": "Why is a real victim unlikely to trigger a Markdown exfiltration attack by pasting the attacker's prompt themselves?",
+      "options": [
+        "Because real attacks are delivered through indirect prompt injection, embedded in content the victim voluntarily has the model process",
+        "Because Markdown exfiltration only works on weekends",
+        "Because victims always read prompts carefully before submitting them",
+        "Because this attack requires physical access to the victim's device"
+      ],
+      "answer": 0,
+      "explanation": "Real-world delivery relies on indirect injection, such as a poisoned webpage the victim asks the model to summarize, rather than expecting the victim to directly paste a malicious prompt themselves."
+    },
+    {
+      "q": "What is 'slopsquatting'?",
+      "options": [
+        "A technique for compressing model weights",
+        "Attackers publishing real malicious packages under names that LLMs commonly hallucinate during code generation",
+        "A method for detecting prompt injection",
+        "A type of database indexing strategy"
+      ],
+      "answer": 1,
+      "explanation": "When models hallucinate non-existent package names, attackers can publish real malicious packages under those exact names, so anyone who blindly installs the model's suggested dependency gets compromised."
+    },
+    {
+      "q": "What is the safest way to handle a natural-language-to-SQL feature?",
+      "options": [
+        "Only allow queries at night",
+        "Trust the system prompt to restrict tables",
+        "Have the model output structured intent, then build parameterized queries in code with a least-privilege DB user",
+        "Execute the model's raw SQL with an admin database account"
+      ],
+      "answer": 2,
+      "explanation": "The model should never write raw SQL directly. Instead, it should express structured intent, which the application then converts into a safe, parameterized query using minimal database privileges."
+    },
+    {
+      "q": "According to the module, what should you assume about any function or data source the model can reach?",
+      "options": [
+        "It should be treated as effectively public, since attackers can reach anything the model can reach",
+        "It is automatically protected by the model's training",
+        "It only needs protection if it involves payments",
+        "It is safe as long as it's not mentioned in the system prompt"
+      ],
+      "answer": 0,
+      "explanation": "Since prompt-based restrictions can be bypassed, any function or data source reachable by the model should be treated as publicly accessible, with real authorization enforced in code."
+    },
+    {
+      "q": "Why is a guardrail model not a replacement for context-aware encoding and code-level access control?",
+      "options": [
+        "It is a probabilistic filter that reduces risk but does not guarantee it, so the hard rule-based layers must still hold if it gets fooled",
+        "Guardrail models are always slower than the main LLM and are therefore never used in production",
+        "It can only scan images, never text",
+        "It replaces the need for a Content Security Policy entirely"
+      ],
+      "answer": 0,
+      "explanation": "A guardrail model catches fuzzy cases a fixed rule wasn't written for, but it's still a probabilistic classifier that can be fooled. Encoding, parameterized queries, and code-level authorization remain the reliable layers underneath it."
+    }
+  ]
+}

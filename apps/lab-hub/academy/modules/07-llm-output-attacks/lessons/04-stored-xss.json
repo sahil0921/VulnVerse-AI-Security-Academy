@@ -1,0 +1,38 @@
+{
+  "slug": "04-stored-xss",
+  "title": "Stored XSS via Aggregation",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Stored XSS via Aggregation\n\nStored XSS is the more dangerous cousin of reflected XSS. Instead of living inside a single request, the malicious payload is saved somewhere, such as a review, a comment, or a profile field. Later, when the application reads that data back and renders it unsafely, the script fires. Every victim who views it gets hit, without needing any additional action from the attacker.\n\nIn LLM applications, a powerful and genuinely subtle variant appears when the model aggregates stored content. The website itself may correctly encode user submissions, but when the chatbot fetches and repeats that same content, it often does so through the model's unencoded output path instead.\n\n## The two preconditions\n\nStored XSS through an LLM requires two things to be true at the same time:\n\n1. The model's output is rendered without HTML encoding, the same underlying flaw covered in reflected XSS.\n2. The model can fetch stored data that an attacker was previously able to plant."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Attacker plants payload<br/>in a review\"] --> DB[(\"App database\")]\n    W[\"Website renders review\"] -->|encoded, safe| SafeView[\"Harmless text\"]\n    DB --> W\n    V[\"Victim asks chatbot<br/>to show reviews\"] --> LLM[\"LLM fetches reviews\"]\n    DB --> LLM\n    LLM -->|unencoded output| Boom[\"Payload executes in victim browser\"]"
+    },
+    {
+      "type": "content",
+      "body": "## The interesting twist: two different rendering paths\n\nMany real applications get this only half-right. Consider a shipping company's website that lets customers leave testimonials, along with an AI chatbot that can summarize those testimonials on request.\n\n- When the website itself shows testimonials, it encodes them properly. Your injected `<script>` tag shows up as plain, harmless text. Safe.\n- But when the chatbot is asked to display testimonials instead, it outputs them through the unencoded LLM path. The exact same payload now executes successfully.\n\nThe defender protected one door but forgot about the other. This is a classic aggregation blind spot: a single piece of data ends up being rendered through two different paths, each with different security guarantees."
+    },
+    {
+      "type": "content",
+      "body": "## Walkthrough\n\n1. **Confirm the chatbot output is unencoded.** Send \"Respond with 'Test<b>HelloWorld</b>'.\" Bold text appearing confirms the flaw exists.\n2. **Confirm the model can read stored data.** Ask something like \"Show me the latest testimonials.\" If it repeats them back, the retrieval path clearly exists.\n3. **Plant the payload** by leaving a testimonial containing a script tag with a remote `src` attribute, using the same technique covered in the reflected XSS lesson.\n4. **Trigger it.** Ask the chatbot to display the testimonials. Because the chatbot's path doesn't encode output, the payload runs directly in the browser of every user who makes that same request.\n\nSwap the proof-of-concept for a cookie stealer, and you now harvest tokens from anyone who asks the bot about testimonials, without ever needing to contact them directly."
+    },
+    {
+      "type": "note",
+      "body": "**Why this is worse than reflected XSS:** the attacker acts just once and then walks away entirely. Every subsequent victim triggers the payload themselves simply by using the chatbot normally. There's no need to lure anyone into pasting a malicious prompt of their own."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# The root cause: the chatbot path skips encoding that the website applies.\n\n# VULNERABLE (chatbot renders retrieved data raw)\ndef render_chat_answer(model_text):\n    return f\"<div class='bot'>{model_text}</div>\"   # no encoding -> stored XSS\n\n# SECURE (encode on EVERY path that renders untrusted data)\nimport html\ndef render_chat_answer_secure(model_text):\n    return f\"<div class='bot'>{html.escape(model_text)}</div>\"\n\n# Rule: apply the same output encoding to the chatbot path that you\n# already apply to the website path. Consistency across sinks is the fix."
+    },
+    {
+      "type": "content",
+      "body": "## Key defense\n\nEncode output at every rendering path, not just the obvious one. Audit each and every place model output can potentially appear. Add a Content Security Policy so that even a slipped-through payload can't easily load external scripts. And never assume that just because one view is safe, the underlying data is safe everywhere it's rendered."
+    }
+  ]
+}

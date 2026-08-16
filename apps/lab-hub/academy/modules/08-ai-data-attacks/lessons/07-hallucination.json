@@ -1,0 +1,42 @@
+{
+  "slug": "07-hallucination",
+  "title": "Hallucination Surface",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Hallucination Surface\n\nA hallucination is when an AI model confidently states something that's false or entirely made up. It's not lying on purpose, it simply generates plausible-sounding text that has no real basis in reality.\n\n**A simple comparison:** think of a student who didn't study but refuses to say \"I don't know.\" They make up an answer that sounds right and deliver it with total confidence. Sometimes it happens to be correct; often it isn't.\n\nWhile hallucination is usually discussed purely as a reliability problem, it's also a genuine security surface, and attackers can weaponize it."
+    },
+    {
+      "type": "content",
+      "body": "## Why hallucinations happen\n\nAn LLM predicts the next likely word, not necessarily the true word. It has no built-in fact-checker of any kind. When it lacks real knowledge on a topic, it simply fills the gap with statistically plausible invention.\n\nCommon triggers include:\n\n- **Knowledge gaps** — the answer simply wasn't present in its training data.\n- **Ambiguous prompts** — the question is unclear, so the model guesses at intent.\n- **Pressure to answer** — models are tuned to be helpful by default, so they rarely refuse to answer.\n- **Outdated training data** — it invents \"current\" facts it never actually learned."
+    },
+    {
+      "type": "content",
+      "body": "## The security angle: package hallucination\n\nHere's where hallucination becomes a genuinely real attack vector, sometimes called slopsquatting.\n\nThe scenario plays out like this:\n1. A developer asks an AI coding assistant for help with a task.\n2. The AI suggests installing a Python package, say `pip install fast-json-parser`.\n3. That package doesn't actually exist. The AI hallucinated it entirely.\n4. An attacker notices that the AI keeps suggesting this exact fake name repeatedly.\n5. The attacker creates a real, malicious package under that exact name and uploads it to PyPI.\n6. The next developer who follows the AI's advice installs the attacker's malware without realizing it.\n\nThe AI's hallucination effectively becomes a delivery pipeline for supply-chain attacks."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TB\n    A[Developer asks AI for a package] --> B[AI hallucinates a fake name]\n    B --> C[Attacker registers that fake name]\n    C --> D[Attacker uploads malware under it]\n    D --> E[Next developer installs it]\n    E --> F[Malware runs in their project]\n    style B fill:#f59e0b,color:#000\n    style C fill:#a855f7,color:#fff\n    style F fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Why this works so well\n\n- **AIs hallucinate consistently.** The same fake package name often gets suggested repeatedly across different sessions, giving attackers a genuinely reliable target to exploit.\n- **Developers trust AI suggestions.** Many simply copy-paste install commands without checking whether the package is real first.\n- **Typosquatting overlap.** Fake names often closely resemble real, popular packages, such as `python-requests` versus `requests`, making them look believable at a glance.\n\n**Real-world relevance:** researchers have shown that a significant share of packages suggested by AI coding tools don't actually exist, and that the same fake names tend to recur, exactly the kind of predictability an attacker needs to exploit this reliably."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# A simple check: does a suggested package actually exist on PyPI?\nimport urllib.request\nimport urllib.error\n\ndef package_exists(name):\n    url = f\"https://pypi.org/pypi/{name}/json\"\n    try:\n        with urllib.request.urlopen(url, timeout=5) as resp:\n            return resp.status == 200\n    except urllib.error.HTTPError:\n        return False   # 404 = package does not exist (possible hallucination)\n\n# Before installing ANY AI-suggested package:\nsuggested = [\"requests\", \"fast-json-parser\", \"numpy\"]\nfor pkg in suggested:\n    status = \"REAL\" if package_exists(pkg) else \"DOES NOT EXIST - do not install!\"\n    print(f\"{pkg}: {status}\")"
+    },
+    {
+      "type": "note",
+      "body": "**Golden rule:** never install a package just because an AI suggested it. Verify that it actually exists, check its download count and age, and confirm it's the real, actively maintained project, not a lookalike that was registered just last week."
+    },
+    {
+      "type": "content",
+      "body": "## Other security impacts of hallucination\n\n- **Fake APIs and functions** — the AI invents methods that don't actually exist, wasting developer time or introducing genuinely insecure workarounds.\n- **Fabricated facts in customer-facing bots** — a support bot invents a refund policy on the spot, creating real legal and financial risk for the business.\n- **False citations** — the AI cites papers or laws that were never actually written.\n- **Misinformation at scale** — hallucinated content can spread widely if it's published without any human review.\n\n## How to reduce hallucination risk\n\n- **Grounding (RAG)** — feed the model real, retrieved documents so it answers based on facts rather than guessing, covered in more depth in the RAG module.\n- **Verify before trusting** — check package names, URLs, citations, and facts before relying on them.\n- **Human review** — keep a person in the loop for anything genuinely consequential.\n- **Confidence signals** — encourage models to say \"I'm not sure\" instead of confidently inventing an answer.\n- **Allowlists** — only permit installation from an approved, properly vetted package list.\n\n## Summary\n\n- Hallucination is confident, plausible-sounding falsehood generated by the model.\n- It becomes a real attack surface through package hallucination, also known as slopsquatting.\n- Attackers register the fake names that AIs keep suggesting repeatedly.\n- Verification and grounding are the main defenses against this risk.\n\n## Key Takeaways\n\n- Hallucination is a genuine security problem, not just a quality issue.\n- Always verify AI-suggested packages, APIs, and facts before trusting them.\n- Predictable hallucinations give attackers reliable, repeatable targets to exploit."
+    }
+  ]
+}

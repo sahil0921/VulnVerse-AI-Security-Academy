@@ -1,0 +1,33 @@
+{
+  "slug": "03-transformer-basics",
+  "title": "Transformer Basics",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Beginner",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Transformer Basics\n\nAlmost every modern LLM, including GPT, Llama, Claude, Qwen, and Gemini, is built on the same underlying architecture called a **Transformer**. You don't need to know how to build one, but understanding it at a high level explains why LLMs behave the way they do, including some of their core weaknesses.\n\n## What is a Transformer?\n\nA Transformer is a type of neural network architecture designed to process sequences of tokens and determine how they relate to each other.\n\n**Simple comparison:** think about reading a mystery novel. To understand the sentence \"He picked it up,\" you need to remember who \"He\" refers to and what \"it\" means, based on earlier pages. A Transformer performs a similar job. It looks back at all the earlier tokens in a sequence to understand the current one.\n\nBefore Transformers, models processed text one word at a time in strict order, and easily lost track of earlier context in longer text. Transformers can process the entire input at once, which is a major reason they perform so well on language tasks."
+    },
+    {
+      "type": "content",
+      "body": "## The attention mechanism\n\nThe single most important idea inside a Transformer is called **attention**.\n\nAttention allows the model to determine which earlier tokens matter most when predicting the next token.\n\n**Simple comparison:** in a busy classroom, a student focuses their attention on the teacher and tunes out background noise. A Transformer works similarly. For each token it processes, it focuses more heavily on the relevant surrounding tokens and gives less weight to irrelevant ones.\n\n**Practical example:** in the sentence \"The trophy did not fit in the suitcase because it was too big,\" what does \"it\" refer to? Attention helps the model correctly connect \"it\" to \"trophy\" rather than \"suitcase,\" by weighing the relationship between those specific words more heavily than the rest of the sentence."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n  I[Input tokens] --> E[Embeddings + position info]\n  E --> A[Attention layers<br/>which tokens relate to which]\n  A --> FF[Feed-forward layers<br/>process patterns]\n  FF --> A2[Repeat many times]\n  A2 --> O[Predict next token]\n  O -->|append and repeat| I"
+    },
+    {
+      "type": "content",
+      "body": "## How text generation actually works\n\nHere is the loop that produces every response an LLM generates:\n\n1. Your prompt is converted into tokens.\n2. The Transformer predicts a single next token.\n3. That token is appended to the sequence.\n4. The process repeats, one token at a time, until the response is complete or a stop condition is reached.\n\nThis is why chatbots appear to \"type\" their responses in real time. You are literally watching tokens being predicted and streamed one after another, rather than the full answer being generated instantly behind the scenes.\n\nThis token-by-token loop is also why response length affects cost and latency in real applications. Every additional token requires another full pass through the model."
+    },
+    {
+      "type": "note",
+      "body": "**Why this matters for attackers:** since the model always predicts its next token based on everything currently in its context, if an attacker can insert malicious instructions into that context, whether through a prompt, an uploaded document, or a web page the model reads, the model may follow those instructions as if they were legitimate. This is the root cause behind **prompt injection**, which is covered in detail in a later module."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Transformers process an entire input sequence at once and determine how tokens relate to each other.\n- The attention mechanism decides which earlier tokens matter most for predicting the next one.\n- Text generation happens one token at a time, in a repeating loop.\n- Because the model treats everything in its context as trustworthy by default, injected instructions can potentially hijack its behavior."
+    }
+  ]
+}

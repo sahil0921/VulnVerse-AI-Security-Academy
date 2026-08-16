@@ -1,0 +1,57 @@
+{
+  "slug": "03-assumption-register",
+  "title": "Assumption Registers",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## The Problem With Guessing\n\nDuring reconstruction, you make dozens of guesses. *\"The database is probably unauthenticated.\" \"There are probably three agents.\" \"The tool server probably has cloud access.\"*\n\nThe danger is simple: **if you forget which things are guesses and which are confirmed, you start building attacks on quicksand.** You waste time chasing a path that only existed in your imagination.\n\nAn **assumption register** solves this. It is a table that tracks every guess, where it came from, how confident you are, and whether you've verified it yet.\n\n**An analogy.** Think of a scientist's lab notebook. They don't just remember experiments — they record every hypothesis, every result, and whether it was confirmed. The assumption register is your lab notebook for the target."
+    },
+    {
+      "type": "content",
+      "body": "## What Goes In a Register\n\nEach row captures one assumption with a few key fields.\n\n| Field | What it means |\n|---|---|\n| **ID** | A short label like A-01, so you can reference it later |\n| **Observation** | The actual clue you saw |\n| **Hypothesis** | What you think the clue means |\n| **Confidence** | How sure you are: LOW, MEDIUM, or HIGH |\n| **Source** | Where the clue came from |\n| **Status** | UNVALIDATED, VALIDATED, or INVALIDATED |\n\nThe two most important columns are **Confidence** and **Status**. Together they tell you at a glance what you actually know versus what you merely suspect."
+    },
+    {
+      "type": "content",
+      "body": "## Aetherlink Sentri: The Starting Register\n\nHere is our register built purely from pre-engagement clues — before we touch the system. Everything is UNVALIDATED because we haven't confirmed anything yet.\n\n| ID | Observation | Hypothesis | Confidence | Source | Status |\n|---|---|---|---|---|---|\n| A-01 | Kickoff mentions \"central coordinator\" | One orchestrator routes all requests | HIGH | Kickoff notes | UNVALIDATED |\n| A-02 | Kickoff mentions \"specialized helpers\" | At least 3 distinct agents exist | HIGH | Kickoff notes | UNVALIDATED |\n| A-03 | Job post lists vector DB + registry | Platform uses a vector DB and model registry | MEDIUM | OSINT | UNVALIDATED |\n| A-04 | DevOps profile mentions secrets manager | Credentials managed centrally, not hardcoded | MEDIUM | OSINT | UNVALIDATED |\n| A-05 | Public fork references 3 tools | Tool server exposes at least those 3 tools | HIGH | GitHub fork | UNVALIDATED |\n| A-06 | Kickoff mentions \"shared knowledge base\" | A retrieval pipeline exists, likely vector-backed | MEDIUM | Kickoff + A-03 | UNVALIDATED |\n| A-07 | No mention of DB authentication | Vector DB may be unauthenticated | LOW | Absence of evidence | UNVALIDATED |"
+    },
+    {
+      "type": "note",
+      "body": "**Look closely at A-07.** Its confidence is LOW and its source is *\"absence of evidence.\"* The documents never *said* the database was unauthenticated. We just never saw proof either way. **Absence of information is not proof of a weakness.** Treating \"I haven't seen a lock\" as \"there is no lock\" is one of the most common and dangerous mistakes in threat modeling."
+    },
+    {
+      "type": "content",
+      "body": "## Confidence Is About the Source, Not the Outcome\n\nA subtle but critical point: **confidence reflects how reliable your source is, not how much you *want* the hypothesis to be true.**\n\n- A clue straight from the client's own documentation? HIGH confidence.\n- A clue inferred by combining two OSINT hints? MEDIUM.\n- A clue based only on something *not* being mentioned? LOW.\n\nDon't inflate confidence because a vulnerability would be exciting. Wishful thinking corrupts the whole model. Rate the *evidence*, coldly."
+    },
+    {
+      "type": "content",
+      "body": "## The Assumption Lifecycle\n\nEvery assumption moves through a simple lifecycle. It starts as an observation, becomes a hypothesis, gets tested, and ends up either confirmed or rejected. A rejected assumption often spawns a brand-new hypothesis — which is why the whole thing loops."
+    },
+    {
+      "type": "diagram",
+      "src": "stateDiagram-v2\n    [*] --> Observation\n    Observation --> Hypothesis\n    Hypothesis --> Testing\n    Testing --> Validated\n    Testing --> Invalidated\n    Validated --> [*]\n    Invalidated --> Hypothesis"
+    },
+    {
+      "type": "content",
+      "body": "## Updating the Register After Recon\n\nOnce we run our scans and probes from the last lesson, we revisit the register and update it. This is where the magic happens — guesses collapse into facts.\n\n| ID | Update | New Status |\n|---|---|---|\n| A-01 | Orchestrator confirmed at 10.20.30.10:9000 | VALIDATED |\n| A-02 | Found 3 agents (Triage, Action, Knowledge) | VALIDATED |\n| A-03 | Vector DB and registry both confirmed | VALIDATED |\n| A-04 | Secrets manager confirmed, status unsealed | VALIDATED |\n| A-05 | Tool server confirmed; a 4th tool also found | VALIDATED (revised) |\n| A-07 | Vector DB answered with no credentials | VALIDATED |\n\nNotice A-07 jumped from LOW/UNVALIDATED all the way to VALIDATED once we probed it directly. And A-05 was *revised* — we found more than we expected. The register captures both."
+    },
+    {
+      "type": "content",
+      "body": "## Why the Register Keeps You Honest\n\nThe register forces three good habits:\n\n1. **It separates knowledge from hope.** You can never accidentally treat a LOW-confidence guess as a fact, because the status column stares back at you.\n2. **It drives your next actions.** Every UNVALIDATED row is a to-do item: *go verify this*. LOW-confidence assumptions become verification tasks, not attack plans.\n3. **It creates a decision log.** When you look back later, you can see exactly what you knew and when. This is gold in a professional report — it shows *how* you reasoned, not just what you found."
+    },
+    {
+      "type": "content",
+      "body": "## Assumptions Can Chain Together\n\nSometimes one assumption depends on another. For Sentri, we found a tool named `rotate_secret` on the tool server. That leads to a chained assumption:\n\n| ID | Observation | Hypothesis | Confidence | Source | Status |\n|---|---|---|---|---|---|\n| A-08 | Tool server has a `rotate_secret` tool | Tool server can **write** to the secrets manager, not just read | HIGH | Tool listing | UNVALIDATED |\n\nThis is more dangerous than simple read access. Reading a secret lets you *use* a credential. Rotating a secret lets you *overwrite* it with a value you control. A-08 depends on A-04 (that a secrets manager exists) being true — which it is. Chained assumptions like this build the skeleton of an attack path."
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes\n\n- **Never updating it.** A stale register is worse than none — it lies to you with old data.\n- **Rating confidence by desire.** Wanting a bug to exist doesn't make it more likely.\n- **Skipping the source column.** Without the source, you can't judge reliability later.\n- **Confusing INVALIDATED with useless.** A disproven assumption often teaches you something new. Keep it in the record."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- An **assumption register** tracks every guess: observation, hypothesis, confidence, source, and status — track every guess or you'll build attacks on quicksand.\n- **Confidence** reflects source reliability, not wishful thinking. Rate the evidence coldly; never inflate confidence because a bug would be exciting.\n- **Absence of evidence is not evidence** — flag such guesses as LOW confidence.\n- Assumptions move through a lifecycle: observed → hypothesized → tested → validated or invalidated. Every UNVALIDATED row is a to-do item, not an attack plan.\n- Assumptions can **chain**, forming the skeleton of attack paths.\n- The register is a living decision log, as valuable as the final findings.\n\nNext, we use validated assumptions to find the most valuable targets: the **crown jewels**."
+    }
+  ]
+}

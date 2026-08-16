@@ -1,0 +1,21 @@
+{
+  "name": "Final Assessment",
+  "lessons": [
+    {"slug": "00-how-this-works", "title": "How This Assessment Works", "type": "content"},
+    {"slug": "module-01-exam", "title": "Exam: AI & ML Fundamentals", "type": "quiz"},
+    {"slug": "module-02-exam", "title": "Exam: LLM Fundamentals", "type": "quiz"},
+    {"slug": "module-03-exam", "title": "Exam: Prompt Injection", "type": "quiz"},
+    {"slug": "module-04-exam", "title": "Exam: RAG Pipeline Security", "type": "quiz"},
+    {"slug": "module-05-exam", "title": "Exam: AI Agent Security", "type": "quiz"},
+    {"slug": "module-06-exam", "title": "Exam: Multi-Agent Security", "type": "quiz"},
+    {"slug": "module-07-exam", "title": "Exam: LLM Output Attacks", "type": "quiz"},
+    {"slug": "module-08-exam", "title": "Exam: AI Data Attacks", "type": "quiz"},
+    {"slug": "module-09-exam", "title": "Exam: MCP Security", "type": "quiz"},
+    {"slug": "module-10-exam", "title": "Exam: AI Evasion", "type": "quiz"},
+    {"slug": "module-11-exam", "title": "Exam: Embeddings & Vector DB Security", "type": "quiz"},
+    {"slug": "module-12-exam", "title": "Exam: AI Infrastructure", "type": "quiz"},
+    {"slug": "module-13-exam", "title": "Exam: Threat Modeling", "type": "quiz"},
+    {"slug": "module-14-exam", "title": "Exam: AI Red Teaming Tools", "type": "quiz"},
+    {"slug": "module-15-exam", "title": "Exam: Practical Exam", "type": "labs"}
+  ]
+}

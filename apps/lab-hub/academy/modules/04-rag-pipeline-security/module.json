@@ -1,0 +1,66 @@
+{
+  "slug": "04-rag-pipeline-security",
+  "name": "RAG Pipeline Security",
+  "lessons": [
+    {
+      "slug": "01-introduction",
+      "title": "Introduction to RAG Security",
+      "type": "content"
+    },
+    {
+      "slug": "02-rag-architecture",
+      "title": "RAG Pipeline Architecture",
+      "type": "content"
+    },
+    {
+      "slug": "03-hybrid-retrieval",
+      "title": "Hybrid Retrieval Internals",
+      "type": "content"
+    },
+    {
+      "slug": "04-information-extraction",
+      "title": "Information Extraction",
+      "type": "content"
+    },
+    {
+      "slug": "05-ingestion-poisoning",
+      "title": "Ingestion Poisoning",
+      "type": "content"
+    },
+    {
+      "slug": "06-embedding-collision",
+      "title": "Embedding Collision",
+      "type": "content"
+    },
+    {
+      "slug": "07-retrieval-hijacking",
+      "title": "Retrieval Hijacking",
+      "type": "content"
+    },
+    {
+      "slug": "08-evasion-techniques",
+      "title": "Evasion Techniques",
+      "type": "content"
+    },
+    {
+      "slug": "09-defenses",
+      "title": "Defenses & Mitigations",
+      "type": "content"
+    },
+    {
+      "slug": "10-best-practices",
+      "title": "Best Practices",
+      "type": "content"
+    },
+    {
+      "slug": "11-quiz",
+      "title": "Knowledge Check",
+      "type": "quiz"
+    },
+    {
+      "slug": "12-hands-on-labs",
+      "title": "Hands-on Labs",
+      "type": "labs"
+    }
+  ]
+}

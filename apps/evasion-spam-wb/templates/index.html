@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SentinelMail AI Defense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #080c14;
+      --surface: #0f1623;
+      --surface-2: #1a2332;
+      --surface-3: #243044;
+      --border: #1e2d42;
+      --brand: #6366f1;
+      --brand-light: #818cf8;
+      --brand-soft: rgba(99,102,241,0.12);
+      --green: #10b981;
+      --green-soft: rgba(16,185,129,0.12);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245,158,11,0.12);
+      --red: #ef4444;
+      --red-soft: rgba(239,68,68,0.12);
+      --pink: #ec4899;
+      --cyan: #06b6d4;
+      --text: #e8edf5;
+      --muted: #7d8fa8;
+      --dim: #4a5568;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; display: flex; height: 100vh; font-size: 14px; }
+    
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    .app { display: flex; width: 100%; height: 100%; }
+    
+    /* SIDEBAR */
+    .sidebar { width: 260px; background-color: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .brand { padding: 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--brand), var(--pink)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .brand-text h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+    .brand-text p { font-size: 12px; color: var(--muted); }
+    
+    .nav-section { padding: 16px 0; }
+    .nav-label { font-size: 11px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; padding: 0 24px; margin-bottom: 8px; }
+    .nav-item { padding: 10px 24px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: var(--muted); font-weight: 500; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background-color: rgba(255,255,255,0.02); color: var(--text); }
+    .nav-item.active { background-color: var(--brand-soft); color: var(--brand-light); border-left-color: var(--brand); }
+    
+    .sidebar-footer { margin-top: auto; padding: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--dim); }
+    .sidebar-footer p { margin-bottom: 4px; }
+
+    /* MAIN CONTENT */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    
+    .topbar { height: 64px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; background-color: var(--bg); }
+    .breadcrumb { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    
+    .env-selector { display: flex; background: var(--surface); padding: 4px; border-radius: 20px; border: 1px solid var(--border); }
+    .env-btn { padding: 6px 16px; border-radius: 16px; border: none; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .env-btn.active-prod { background: var(--red-soft); color: var(--red); }
+    .env-btn.active-stage { background: var(--amber-soft); color: var(--amber); }
+    .env-btn.active-comp { background: var(--green-soft); color: var(--green); }
+    .env-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    
+    .user-profile { display: flex; align-items: center; gap: 16px; }
+    .env-status { font-size: 12px; font-weight: 500; color: var(--muted); background: var(--surface-2); padding: 4px 12px; border-radius: 12px; border: 1px solid var(--border); }
+    .avatar { width: 32px; height: 32px; background: var(--surface-3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; border: 1px solid var(--border); }
+
+    .content { flex: 1; overflow-y: auto; padding: 32px; position: relative; }
+    
+    .view { display: none; animation: slideUp 0.3s ease-out forwards; }
+    .view.active { display: block; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* COMPONENTS */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: border-color 0.2s, box-shadow 0.2s; }
+    .card:hover { border-color: var(--surface-3); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    .card-header { margin-bottom: 20px; }
+    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px; }
+
+    .kpi-card { position: relative; overflow: hidden; }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .kpi-cyan::before { background: var(--cyan); }
+    .kpi-green::before { background: var(--green); }
+    .kpi-amber::before { background: var(--amber); }
+    .kpi-brand::before { background: var(--brand); }
+    
+    .kpi-title { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .kpi-val { font-size: 28px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
+    .kpi-change { font-size: 12px; font-weight: 500; }
+    .change-up { color: var(--green); }
+    .change-down { color: var(--red); }
+
+    /* FORMS & INPUTS */
+    .input-group { margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--muted); }
+    input[type="text"], input[type="number"], textarea, select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 12px; font-family: inherit; font-size: 14px; transition: border-color 0.2s; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--brand); }
+    textarea { resize: vertical; min-height: 120px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.5; }
+    textarea[readonly] { background: var(--surface-2); color: var(--muted); cursor: not-allowed; }
+    
+    .btn { padding: 10px 16px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+    .btn-primary { background: var(--brand); color: white; }
+    .btn-primary:hover { background: var(--brand-light); }
+    .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--surface-3); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--surface-2); }
+    
+    .radio-group { display: flex; gap: 16px; margin-bottom: 16px; }
+    .radio-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+    
+    /* TABLES & LISTS */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--dim); text-transform: uppercase; position: sticky; top: 0; background: var(--surface); z-index: 10; }
+    td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: rgba(255,255,255,0.02); }
+    
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    
+    .badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-spam { background: var(--red-soft); color: var(--red); }
+    .badge-ham { background: var(--green-soft); color: var(--green); }
+    .badge-defense { background: var(--amber-soft); color: var(--amber); }
+    .badge-info { background: var(--brand-soft); color: var(--brand); }
+    .badge-muted { background: var(--surface-3); color: var(--muted); }
+    .badge-amber { background: var(--amber-soft); color: var(--amber); }
+
+    /* PROGRESS BARS */
+    .progress-container { width: 100%; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+    .progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease-out; }
+    
+    /* SCROLLABLE AREAS */
+    .scrollable-card { max-height: 400px; overflow-y: auto; }
+
+    /* VIEW SPECIFICS */
+    /* Scanner */
+    .results-panel { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+    .json-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); overflow-x: auto; white-space: pre-wrap; flex: 1; }
+    
+    /* Threat Feed */
+    .threat-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; border-left-width: 4px; transition: transform 0.2s; }
+    .threat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .threat-card.threat-spam { border-left-color: var(--red); }
+    .threat-card.threat-ham { border-left-color: var(--green); }
+    .threat-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .threat-meta { display: flex; gap: 12px; font-size: 12px; color: var(--muted); }
+    .threat-subject { font-weight: 600; font-size: 14px; margin-top: 4px; }
+    .threat-preview { font-size: 13px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Settings */
+    .env-option { padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: flex-start; gap: 12px; }
+    .env-option:hover { border-color: var(--surface-3); }
+    .env-option.active { border-color: var(--brand); background: var(--brand-soft); }
+    
+    /* AI CHAT WIDGET */
+    #ai-chat-widget { position: fixed; bottom: 32px; right: 32px; z-index: 100; }
+    .chat-btn { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), var(--pink)); border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(99,102,241,0.4); display: flex; align-items: center; justify-content: center; font-size: 24px; transition: transform 0.2s; }
+    .chat-btn:hover { transform: scale(1.05); }
+    .chat-panel { display: none; position: absolute; bottom: 80px; right: 0; width: 380px; height: 500px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; animation: slideUp 0.3s ease-out; }
+    .chat-panel.open { display: flex; }
+    .chat-header { padding: 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+    .chat-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .chat-msg { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+    .msg-bot { background: var(--surface-2); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg-user { background: var(--brand); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-input-area { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--bg); }
+    .chat-input-area input { flex: 1; }
+    .typing-indicator { display: none; padding: 12px 16px; background: var(--surface-2); border-radius: 12px; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .typing-indicator.active { display: flex; gap: 4px; }
+    .dot { width: 6px; height: 6px; background: var(--muted); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+    /* LAB GUIDE DRAWER */
+    #lab-guide-btn { position: fixed; bottom: 32px; left: 32px; z-index: 90; padding: 8px 16px; border-radius: 20px; background: linear-gradient(135deg, #a855f7, #14b8a6); border: none; color: white; font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; transition: transform 0.2s; }
+    #lab-guide-btn:hover { transform: translateY(-2px); }
+    
+    .drawer-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; backdrop-filter: blur(4px); }
+    .drawer { position: fixed; top: 0; right: -640px; width: 640px; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 1001; transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    .drawer.open { right: 0; }
+    .drawer-header { padding: 24px 32px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+    .drawer-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+    .drawer-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 24px; }
+    .drawer-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .drawer-content { flex: 1; overflow-y: auto; padding: 32px; }
+    
+    .accordion { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; background: var(--bg); }
+    .accordion-header { padding: 16px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--surface-2); border-bottom: 1px solid transparent; }
+    .accordion-header:hover { background: var(--surface-3); }
+    .accordion-content { display: none; padding: 16px; font-size: 13px; line-height: 1.6; }
+    .accordion.open .accordion-header { border-bottom-color: var(--border); }
+    .accordion.open .accordion-content { display: block; }
+    
+    .callout { padding: 16px; background: var(--brand-soft); border-left: 4px solid var(--brand); border-radius: 4px; margin: 16px 0; color: var(--brand-light); }
+    pre { background: var(--surface-2); padding: 16px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; margin: 12px 0; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    /* FIX: Chart.js needs a parent with a fixed/definite height when using
+       responsive:true + maintainAspectRatio:false. Without it, the canvas
+       and its ResizeObserver fight over size on every frame (grows, triggers
+       resize, shrinks, triggers resize...), which is what caused the page to
+       jitter / auto-scroll the instant a view with a chart was opened. */
+    .chart-box { position: relative; width: 100%; height: 260px; }
+    .chart-box canvas { display: block; }
+    #sweep-results .chart-box { height: 320px; }
+</style>
+</head>
+<body>
+
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">✉️</div>
+        <div class="brand-text">
+          <h1>SentinelMail</h1>
+          <p>AI Defense</p>
+        </div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-label">Operations</div>
+        <div class="nav-item active" data-view="dashboard">📊 Dashboard</div>
+        <div class="nav-item" data-view="scanner">📨 Message Scanner</div>
+        <div class="nav-item" data-view="threats">🛡️ Threat Feed</div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-label">ML Engine</div>
+        <div class="nav-item" data-view="model">🧠 Model Operations</div>
+        <div class="nav-item" data-view="redteam">⚔️ Adversarial Testing</div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <div class="nav-item" data-view="settings">⚙️ Settings</div>
+      </div>
+      
+      <div class="sidebar-footer">
+        <p>SentinelMail · v3.1.1</p>
+        <p>Engine: MultinomialNB · 3K vocab</p>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <header class="topbar">
+        <div class="breadcrumb" id="breadcrumb">📊 Dashboard</div>
+        
+        <div class="env-selector">
+          <button class="env-btn active-prod" onclick="setEnvUI('production')" id="top-btn-production">
+            <span class="env-dot"></span> PRODUCTION
+          </button>
+          <button class="env-btn" onclick="setEnvUI('staging')" id="top-btn-staging">
+            <span class="env-dot"></span> STAGING
+          </button>
+          <button class="env-btn" onclick="setEnvUI('compliance')" id="top-btn-compliance">
+            <span class="env-dot"></span> COMPLIANCE
+          </button>
+        </div>
+        
+        <div class="user-profile">
+          <span class="env-status" id="env-status-pill">production</span>
+          <div class="avatar">SA</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- VIEW: DASHBOARD -->
+        <div class="view active" id="view-dashboard">
+          <h2 style="margin-bottom: 24px;">Email Security Overview</h2>
+          
+          <div class="grid-4">
+            <div class="card kpi-card kpi-cyan">
+              <div class="kpi-title">📨 Total Scanned</div>
+              <div class="kpi-val" id="kpi-scanned">0</div>
+              <div class="kpi-change change-up">↑ 12.4% change</div>
+            </div>
+            <div class="card kpi-card kpi-green">
+              <div class="kpi-title">🛡️ Detection Rate</div>
+              <div class="kpi-val" id="kpi-detection">0%</div>
+              <div class="kpi-change change-up">↑ 1.8% change</div>
+            </div>
+            <div class="card kpi-card kpi-amber">
+              <div class="kpi-title">⚠️ False Positive Rate</div>
+              <div class="kpi-val" id="kpi-fpr">0%</div>
+              <div class="kpi-change change-down">↓ 0.4% change</div>
+            </div>
+            <div class="card kpi-card kpi-brand">
+              <div class="kpi-title">🧠 Model Confidence</div>
+              <div class="kpi-val" id="kpi-conf">0%</div>
+              <div class="kpi-change change-up">↑ 2.1% change</div>
+            </div>
+          </div>
+          
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Scan Volume Trend</div>
+              </div>
+              <div class="chart-box"><canvas id="chart-volume"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Classification Distribution</div>
+              </div>
+              <div class="chart-box"><canvas id="chart-dist"></canvas></div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Activity</div>
+            </div>
+            <table>
+              <tr>
+                <td>⚠️ High-volume spam wave detected (342 msgs)</td>
+                <td style="color:var(--muted)">2 mins ago</td>
+              </tr>
+              <tr>
+                <td>🛡️ Model rules updated (Staging)</td>
+                <td style="color:var(--muted)">15 mins ago</td>
+              </tr>
+              <tr>
+                <td>🧠 Automatic retraining triggered</td>
+                <td style="color:var(--muted)">1 hour ago</td>
+              </tr>
+              <tr>
+                <td>⚠️ Evasion attempt blocked (Compliance mode)</td>
+                <td style="color:var(--muted)">2 hours ago</td>
+              </tr>
+              <tr>
+                <td>📨 Daily scan summary generated</td>
+                <td style="color:var(--muted)">6 hours ago</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- VIEW: SCANNER -->
+        <div class="view" id="view-scanner">
+          <div class="grid-2" style="height: calc(100vh - 128px); display: flex; flex-direction: column;">
+            <div class="grid-2" style="flex: 1;">
+              <div class="card" style="display:flex; flex-direction:column;">
+                <div class="card-header">
+                  <div class="card-title">Scan Configuration</div>
+                  <div class="card-desc">Submit a message to the ML engine for analysis.</div>
+                </div>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="scan-type" value="sample" checked onchange="toggleScanInput()"> Use Sample Message</label>
+                  <label class="radio-item"><input type="radio" name="scan-type" value="custom" onchange="toggleScanInput()"> Custom Message</label>
+                </div>
+                <textarea id="scan-input" readonly style="flex:1; margin-bottom: 16px;">WINNER!! As a valued network customer you have been selected to receive a £900 prize reward! To claim call 09061701461. Claim code KL341. Valid 12 hours only.</textarea>
+                <button class="btn btn-primary" onclick="doScan()">Scan Message</button>
+              </div>
+              
+              <div class="card results-panel">
+                <div class="card-header">
+                  <div class="card-title">Classification Results</div>
+                </div>
+                <div id="scan-results-empty" style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--muted);">
+                  Submit a message to scan...
+                </div>
+                <div id="scan-results-content" style="display:none; flex:1; flex-direction:column; gap:16px;">
+                  <div style="display:flex; align-items:center; gap:12px;">
+                    <span id="res-verdict" class="badge"></span>
+                    <span id="res-defense" class="badge badge-defense" style="display:none;"></span>
+                  </div>
+                  
+                  <div>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                      <span>SPAM Probability</span>
+                      <span id="res-spam-txt" class="mono"></span>
+                    </div>
+                    <div class="progress-container"><div id="res-spam-bar" class="progress-bar" style="background:var(--red);"></div></div>
+                  </div>
+                  
+                  <div>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                      <span>HAM Probability</span>
+                      <span id="res-ham-txt" class="mono"></span>
+                    </div>
+                    <div class="progress-container"><div id="res-ham-bar" class="progress-bar" style="background:var(--green);"></div></div>
+                  </div>
+                  
+                  <div style="font-size:12px; font-weight:600; margin-top:8px;">Raw Response:</div>
+                  <div class="json-box" id="res-json"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card" style="height: 250px; overflow-y: auto;">
+              <div class="card-header"><div class="card-title">Recent Scan History</div></div>
+              <table>
+                <thead>
+                  <tr><th>ID</th><th>Preview</th><th>Verdict</th><th>Confidence</th><th>Defense</th><th>Time</th></tr>
+                </thead>
+                <tbody id="scan-history-table">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW: THREATS -->
+        <div class="view" id="view-threats">
+          <div class="card" style="margin-bottom: 24px; padding: 16px;">
+            <div style="display:flex; gap:16px;">
+              <input type="text" placeholder="Search threats..." style="flex:1;">
+              <select style="width:200px;">
+                <option>All Severities</option>
+                <option>Critical</option>
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </div>
+          </div>
+          
+          <div id="threats-container">
+            <!-- JS populated -->
+            <div style="text-align:center; padding:40px; color:var(--muted);">Loading threats...</div>
+          </div>
+        </div>
+
+        <!-- VIEW: MODEL -->
+        <div class="view" id="view-model">
+          <div class="grid-4" id="model-cards">
+            <!-- JS populated -->
+            <div class="card"><div class="card-title">Algorithm</div><div class="mono" style="font-size:18px;">MultinomialNB</div></div>
+            <div class="card"><div class="card-title">Test Accuracy</div><div class="mono" style="font-size:18px;">--</div></div>
+            <div class="card"><div class="card-title">Vocab Size</div><div class="mono" style="font-size:18px;">--</div></div>
+            <div class="card"><div class="card-title">Classes</div><div class="mono" style="font-size:18px;">ham, spam</div></div>
+          </div>
+          <div style="margin-bottom:24px; display:flex; gap:12px;">
+            <button class="btn btn-secondary" onclick="loadModelInfo()">Refresh Info</button>
+            <a href="/model/download" class="btn btn-outline">Export Model (.pkl)</a>
+          </div>
+          
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div class="card-title">Feature Importance Analysis</div>
+                <div class="card-desc">Extract tokens with the highest P(w|ham)/P(w|spam) ratio (GoodWords).</div>
+              </div>
+              <button class="btn btn-primary" onclick="extractGoodwords()">Extract Top 30 Features</button>
+            </div>
+            <div class="scrollable-card">
+              <table>
+                <thead>
+                  <tr><th>Rank</th><th>Token</th><th>Goodness Score</th><th>P(w|ham)</th><th>P(w|spam)</th></tr>
+                </thead>
+                <tbody id="goodwords-table">
+                  <tr><td colspan="5" style="text-align:center; color:var(--muted);">Click 'Extract' to load features.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header"><div class="card-title">Training History</div></div>
+            <table>
+              <thead><tr><th>Date</th><th>Dataset Size</th><th>Accuracy</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>2026-08-01 02:00</td><td>55,721 msgs</td><td>98.2%</td><td><span class="badge badge-ham">ACTIVE</span></td></tr>
+                <tr><td>2026-07-25 02:00</td><td>52,104 msgs</td><td>98.1%</td><td><span class="badge badge-muted">ARCHIVED</span></td></tr>
+                <tr><td>2026-07-18 02:00</td><td>48,930 msgs</td><td>97.8%</td><td><span class="badge badge-muted">ARCHIVED</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VIEW: REDTEAM -->
+        <div class="view" id="view-redteam">
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">Boundary Sweep (Evasion Rate Test)</div>
+              <div class="card-desc">Tests evasion success by appending 0-40 goodwords to spam samples in the current environment.</div>
+            </div>
+            <button class="btn btn-primary" onclick="runSweep()" style="margin-bottom:16px;">Run Sweep</button>
+            <div id="sweep-results" style="display:none;">
+              <div style="font-size:12px; color:var(--muted); margin-bottom:8px;" id="sweep-meta"></div>
+              <div class="chart-box"><canvas id="chart-sweep"></canvas></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Payload Crafting Studio</div>
+                <div class="card-desc">Manually craft adversarial payloads.</div>
+              </div>
+              <textarea id="payload-input" style="margin-bottom:16px;"></textarea>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="loadBaseMessage()">Load Base Message</button>
+                <button class="btn btn-secondary" onclick="autoAppend()">Auto-Append Top 20</button>
+                <button class="btn btn-primary" onclick="classifyPayload()">Classify Payload</button>
+              </div>
+              <div id="payload-results" class="json-box" style="margin-top:16px; display:none;"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Black-Box Oracle Attack</div>
+                <div class="card-desc">Simulate an external attacker probing the API to discover goodwords without model access.</div>
+              </div>
+              <div class="input-group">
+                <label>Query Budget</label>
+                <input type="number" id="bb-budget" value="40" min="10" max="100">
+              </div>
+              <button class="btn btn-primary" onclick="runBlackbox()">Run Greedy Attack</button>
+              <div id="bb-results" class="json-box" style="margin-top:16px; display:none; max-height: 250px; overflow-y:auto;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW: SETTINGS -->
+        <div class="view" id="view-settings">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Environment Configuration</div></div>
+              
+              <div class="env-option active" id="opt-production" onclick="setEnvUI('production')">
+                <div class="env-dot" style="background:var(--red); margin-top:4px;"></div>
+                <div>
+                  <div style="font-weight:600;">Production</div>
+                  <div style="font-size:12px; color:var(--muted); margin-top:4px;">Live model · no defense layer. Highly vulnerable to evasion.</div>
+                </div>
+              </div>
+              
+              <div class="env-option" id="opt-staging" onclick="setEnvUI('staging')">
+                <div class="env-dot" style="background:var(--amber); margin-top:4px;"></div>
+                <div>
+                  <div style="font-weight:600;">Staging</div>
+                  <div style="font-size:12px; color:var(--muted); margin-top:4px;">Hardened heuristics under test. Checks for repetition and length.</div>
+                </div>
+              </div>
+              
+              <div class="env-option" id="opt-compliance" onclick="setEnvUI('compliance')">
+                <div class="env-dot" style="background:var(--green); margin-top:4px;"></div>
+                <div>
+                  <div style="font-weight:600;">Compliance</div>
+                  <div style="font-size:12px; color:var(--muted); margin-top:4px;">Full policy enforcement. Keyword bumpers and structural checks active.</div>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="card" style="margin-bottom: 24px;">
+                <div class="card-header"><div class="card-title">Profile</div></div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <div style="width:64px; height:64px; background:var(--surface-3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px;">SA</div>
+                  <div>
+                    <div style="font-weight:600; font-size:16px;">Sarah Anderson</div>
+                    <div style="color:var(--muted); font-size:13px;">Security Analyst</div>
+                    <div style="color:var(--dim); font-size:12px; margin-top:4px;">s.anderson@sentinelmail.com</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card">
+                <div class="card-header"><div class="card-title">Notification Preferences</div></div>
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                  <label style="display:flex; align-items:center; gap:12px; margin:0;"><input type="checkbox" checked> Alert on high-volume evasion attempts</label>
+                  <label style="display:flex; align-items:center; gap:12px; margin:0;"><input type="checkbox" checked> Weekly model drift reports</label>
+                  <label style="display:flex; align-items:center; gap:12px; margin:0;"><input type="checkbox"> Retraining complete notifications</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- AI CHAT -->
+  <div id="ai-chat-widget">
+    <button class="chat-btn" onclick="toggleChat()">🤖</button>
+    <div class="chat-panel" id="chat-panel">
+      <div class="chat-header">
+        <span>🤖 SentinelAI Assistant</span>
+        <button class="chat-close" onclick="toggleChat()">×</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg msg-bot">Hello Sarah. I'm your SentinelAI assistant. How can I help you analyze threats today?</div>
+        <div class="typing-indicator" id="chat-typing">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Ask about threats, models..." onkeypress="if(event.key==='Enter') sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAB GUIDE -->
+  <button id="lab-guide-btn" onclick="toggleGuide()">🔓 Lab Guide</button>
+  <div class="drawer-overlay" id="guide-overlay" onclick="toggleGuide()"></div>
+  <div class="drawer" id="guide-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>🔓 ML Evasion — GoodWords Attack</span>
+        <button class="drawer-close" onclick="toggleGuide()">×</button>
+      </div>
+      <div class="drawer-tags">
+        <span class="badge badge-info">Naive Bayes</span>
+        <span class="badge badge-info">GoodWords</span>
+        <span class="badge badge-info">Evasion</span>
+        <span class="badge badge-muted">White-Box</span>
+        <span class="badge badge-muted">Black-Box</span>
+      </div>
+    </div>
+    <div class="drawer-content">
+      
+      <div class="accordion">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          Section 1: Objective <span style="font-size:10px;">▼</span>
+        </div>
+        <div class="accordion-content">
+          <p>The <code>/api/classify</code> endpoint uses a Multinomial Naive Bayes model for spam detection. The goal is to exploit the additive scoring nature of NB by injecting high-goodness tokens ("goodwords") that pull spam messages toward the ham boundary.</p>
+          <div class="callout">
+            <strong>Why it matters:</strong> Real spam filters in production use similar ML models. Understanding GoodWords attacks reveals why naive ML classifiers need layered defenses — a single model score is never enough.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          Section 2: Attack Path (Production — Vulnerable) <span style="font-size:10px;">▼</span>
+        </div>
+        <div class="accordion-content">
+          <p><strong>Step 1 - Confirm baseline:</strong></p>
+          <pre><code>curl -s http://localhost:5040/api/classify -H "Content-Type: application/json" -d '{"text":"WINNER!! As a valued network customer you have been selected to receive a £900 prize reward! To claim call 09061701461.","mode":"vulnerable"}' | python3 -m json.tool</code></pre>
+          <p>Expected: SPAM, spam_prob ≈ 0.99</p>
+          
+          <p><strong>Step 2 - Extract GoodWords (white-box):</strong></p>
+          <pre><code>curl -s "http://localhost:5040/api/goodwords?k=30" | python3 -m json.tool</code></pre>
+          
+          <p><strong>Step 3 - Run boundary sweep:</strong></p>
+          <pre><code>curl -s http://localhost:5040/api/sweep -H "Content-Type: application/json" -d '{"counts":[0,5,10,15,20,25,30,35,40],"mode":"vulnerable"}' | python3 -m json.tool</code></pre>
+          
+          <p><strong>Step 4 - Craft evasion payload:</strong></p>
+          <pre><code>WORDS=$(curl -s "http://localhost:5040/api/goodwords?k=20" | python3 -c "import sys,json; print(' '.join(w['word'] for w in json.load(sys.stdin)['words']))")
+curl -s http://localhost:5040/api/classify -H "Content-Type: application/json" -d "{\"text\":\"WINNER!! You won £900! Call 09061701461. $WORDS\",\"mode\":\"vulnerable\"}" | python3 -m json.tool</code></pre>
+          
+          <p><strong>Step 5 - Black-box oracle attack:</strong></p>
+          <pre><code>curl -s http://localhost:5040/api/blackbox -H "Content-Type: application/json" -d '{"budget":40,"mode":"vulnerable"}' | python3 -m json.tool</code></pre>
+        </div>
+      </div>
+      
+      <div class="accordion">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          Section 3: Escalation — Staging (Hardened) <span style="font-size:10px;">▼</span>
+        </div>
+        <div class="accordion-content">
+          <p>Staging mode adds <code>token_repetition</code> and <code>long_message_with_spam_core</code> defenses.</p>
+          <p>Bypass idea: use diverse goodwords (no repetition), keep message short.</p>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          Section 4: Escalation — Compliance (Guardrailed) <span style="font-size:10px;">▼</span>
+        </div>
+        <div class="accordion-content">
+          <p>Compliance mode adds <code>spam_keyword_bumper</code> and <code>spam_head_benign_tail</code> defenses.</p>
+          <p>Bypass idea: obfuscate spam keywords themselves — goodwords alone can't beat compliance mode.</p>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          Section 5: Defense Takeaways <span style="font-size:10px;">▼</span>
+        </div>
+        <div class="accordion-content">
+          <ul>
+            <li>Never rely on raw score alone</li>
+            <li>Layer heuristics + keyword policy</li>
+            <li>Length & repetition normalization</li>
+            <li>Ensemble / adversarial training is the durable fix</li>
+            <li>Rate-limit the oracle (query budgets)</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:5040/api';
+    let currentEnv = 'production';
+    let currentMode = 'vulnerable';
+    
+    // NAVIGATION
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        const viewId = item.getAttribute('data-view');
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(`view-${viewId}`).classList.add('active');
+        
+        document.getElementById('breadcrumb').textContent = item.textContent;
+        
+        if(viewId === 'threats') loadThreats();
+      });
+    });
+
+    // ENVIRONMENT SWITCHING
+    function setEnvUI(env) {
+      fetch(`${API}/setmode`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({env: env})
+      }).then(r=>r.json()).then(d => {
+        currentEnv = d.env || env;
+        currentMode = d.mode || (env === 'production' ? 'vulnerable' : (env === 'staging' ? 'hardened' : 'guardrailed'));
+        updateEnvVisuals();
+      }).catch(e => {
+        console.error(e);
+        currentEnv = env;
+        currentMode = (env === 'production' ? 'vulnerable' : (env === 'staging' ? 'hardened' : 'guardrailed'));
+        updateEnvVisuals();
+      });
+    }
+
+    function updateEnvVisuals() {
+      // Topbar buttons
+      document.querySelectorAll('.env-btn').forEach(b => {
+        b.className = 'env-btn';
+      });
+      const topBtn = document.getElementById(`top-btn-${currentEnv}`);
+      if(topBtn) {
+        if(currentEnv === 'production') topBtn.classList.add('active-prod');
+        if(currentEnv === 'staging') topBtn.classList.add('active-stage');
+        if(currentEnv === 'compliance') topBtn.classList.add('active-comp');
+      }
+      
+      // Status pill
+      document.getElementById('env-status-pill').textContent = currentEnv;
+      
+      // Settings options (ids are opt-production / opt-staging / opt-compliance)
+      document.querySelectorAll('.env-option').forEach(o => o.classList.remove('active'));
+      const opt = document.getElementById(`opt-${currentEnv}`);
+      if(opt) opt.classList.add('active');
+    }
+
+    // DASHBOARD
+    let chartVol, chartDist;
+    function initDashboard() {
+      // Animate KPIs
+      animateVal('kpi-scanned', 0, 156847, 1500, '');
+      animateVal('kpi-detection', 0, 98.2, 1500, '%', 1);
+      animateVal('kpi-fpr', 0, 0.31, 1500, '%', 2);
+      animateVal('kpi-conf', 0, 94.7, 1500, '%', 1);
+      
+      // Charts
+      const ctxVol = document.getElementById('chart-volume').getContext('2d');
+      chartVol = new Chart(ctxVol, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+          datasets: [{
+            label: 'Scans',
+            data: [12000, 19000, 15000, 22000, 18000, 28000, 25000, 31000],
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+      });
+      
+      const ctxDist = document.getElementById('chart-dist').getContext('2d');
+      chartDist = new Chart(ctxDist, {
+        type: 'doughnut',
+        data: {
+          labels: ['Legitimate', 'Spam', 'Phishing', 'Suspicious'],
+          datasets: [{
+            data: [65, 20, 10, 5],
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#06b6d4'],
+            borderWidth: 0
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'right', labels: { color: '#e8edf5' } } } }
+      });
+    }
+
+    function animateVal(id, start, end, duration, suffix, decimals=0) {
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const current = start + ease * (end - start);
+        document.getElementById(id).textContent = current.toFixed(decimals) + suffix;
+        if (progress < 1) window.requestAnimationFrame(step);
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    // SCANNER
+    const sampleSpam = "WINNER!! As a valued network customer you have been selected to receive a £900 prize reward! To claim call 09061701461. Claim code KL341. Valid 12 hours only.";
+    function toggleScanInput() {
+      const type = document.querySelector('input[name="scan-type"]:checked').value;
+      const t = document.getElementById('scan-input');
+      if(type === 'sample') {
+        t.value = sampleSpam;
+        t.readOnly = true;
+      } else {
+        t.value = '';
+        t.readOnly = false;
+        t.focus();
+      }
+    }
+
+    let scanHistoryCount = 0;
+    function doScan() {
+      const text = document.getElementById('scan-input').value;
+      if(!text.trim()) return;
+      
+      fetch(`${API}/classify`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: text, mode: currentMode})
+      }).then(r=>r.json()).then(data => {
+        document.getElementById('scan-results-empty').style.display = 'none';
+        document.getElementById('scan-results-content').style.display = 'flex';
+        
+        const isSpam = data.label === 'spam';
+        const vBadge = document.getElementById('res-verdict');
+        vBadge.textContent = isSpam ? 'SPAM' : 'HAM';
+        vBadge.className = 'badge ' + (isSpam ? 'badge-spam' : 'badge-ham');
+        
+        const dBadge = document.getElementById('res-defense');
+        if(data.defense_triggered) {
+          dBadge.textContent = '🛡️ ' + data.defense_triggered;
+          dBadge.style.display = 'inline-flex';
+        } else {
+          dBadge.style.display = 'none';
+        }
+        
+        document.getElementById('res-spam-txt').textContent = (data.spam_prob * 100).toFixed(2) + '%';
+        document.getElementById('res-spam-bar').style.width = (data.spam_prob * 100) + '%';
+        
+        document.getElementById('res-ham-txt').textContent = (data.ham_prob * 100).toFixed(2) + '%';
+        document.getElementById('res-ham-bar').style.width = (data.ham_prob * 100) + '%';
+        
+        document.getElementById('res-json').textContent = JSON.stringify(data, null, 2);
+        
+        // Add to history
+        scanHistoryCount++;
+        const id = 'SCN-' + String(scanHistoryCount).padStart(4, '0');
+        const preview = text.substring(0, 30) + '...';
+        const conf = Math.max(data.spam_prob, data.ham_prob);
+        const time = new Date().toLocaleTimeString();
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="mono">${id}</td>
+          <td title="${text.replace(/"/g, '&quot;')}">${preview}</td>
+          <td><span class="badge ${isSpam ? 'badge-spam' : 'badge-ham'}">${isSpam?'SPAM':'HAM'}</span></td>
+          <td>${(conf*100).toFixed(1)}%</td>
+          <td>${data.defense_triggered ? '<span class="badge badge-defense">TRIGGERED</span>' : '-'}</td>
+          <td style="color:var(--muted)">${time}</td>
+        `;
+        const tbody = document.getElementById('scan-history-table');
+        tbody.insertBefore(tr, tbody.firstChild);
+      }).catch(e => console.error(e));
+    }
+
+    // THREATS
+    function loadThreats() {
+      fetch(`${API}/threats`).then(r=>r.json()).then(data => {
+        const c = document.getElementById('threats-container');
+        c.innerHTML = '';
+        data.threats.forEach(t => {
+          const isSpam = t.verdict === 'spam';
+          let sevClass = 'badge-muted';
+          if(t.severity === 'critical') sevClass = 'badge-spam';
+          else if(t.severity === 'high') sevClass = 'badge-amber';
+          else if(t.severity === 'medium') sevClass = 'badge-defense';
+          const card = document.createElement('div');
+          card.className = `threat-card threat-${isSpam ? 'spam' : 'ham'}`;
+          card.innerHTML = `
+            <div class="threat-header">
+              <div class="threat-meta">
+                <span class="badge badge-muted mono">${t.id}</span>
+                <span>${t.sender}</span>
+                <span>${t.ts}</span>
+              </div>
+              <span class="badge ${sevClass}">${t.severity}</span>
+            </div>
+            <div class="threat-subject">${t.subject}</div>
+            <div class="threat-preview">${t.preview}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+              <span class="badge ${isSpam ? 'badge-spam' : 'badge-ham'}">${t.verdict.toUpperCase()}</span>
+              <div style="width:200px;" class="progress-container"><div class="progress-bar" style="width:${t.confidence*100}%; background:var(--${isSpam?'red':'green'});"></div></div>
+            </div>
+          `;
+          c.appendChild(card);
+        });
+      }).catch(e => {
+        document.getElementById('threats-container').innerHTML = '<div style="text-align:center; padding:40px; color:var(--red);">Error loading threats. Ensure backend is running.</div>';
+      });
+    }
+
+    // MODEL OPS
+    function loadModelInfo() {
+      fetch(`${API}/info`).then(r=>r.json()).then(d => {
+        const c = document.getElementById('model-cards');
+        c.innerHTML = `
+          <div class="card"><div class="card-title">Algorithm</div><div class="mono" style="font-size:18px;">${d.algorithm || 'MultinomialNB'}</div></div>
+          <div class="card"><div class="card-title">Test Accuracy</div><div class="mono" style="font-size:18px;">${(d.test_accuracy*100).toFixed(2)}%</div></div>
+          <div class="card"><div class="card-title">Vocab Size</div><div class="mono" style="font-size:18px;">${d.vocab_size}</div></div>
+          <div class="card"><div class="card-title">Classes</div><div class="mono" style="font-size:18px;">${(d.classes||[]).join(', ')}</div></div>
+        `;
+      }).catch(e => console.error(e));
+    }
+    
+    function extractGoodwords() {
+      fetch(`${API}/goodwords?k=30`).then(r=>r.json()).then(d => {
+        const tbody = document.getElementById('goodwords-table');
+        tbody.innerHTML = '';
+        d.words.forEach((w, i) => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${i+1}</td>
+              <td class="mono" style="font-weight:600; color:var(--brand-light);">${w.word}</td>
+              <td class="mono">${w.goodness.toFixed(4)}</td>
+              <td class="mono">${w.ham_p.toExponential(2)}</td>
+              <td class="mono">${w.spam_p.toExponential(2)}</td>
+            </tr>
+          `;
+        });
+      }).catch(e => console.error(e));
+    }
+
+    // RED TEAM
+    let sweepChartInst;
+    function runSweep() {
+      fetch(`${API}/sweep`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({counts: [0,5,10,15,20,25,30,35,40], mode: currentMode})
+      }).then(r=>r.json()).then(d => {
+        document.getElementById('sweep-results').style.display = 'block';
+        document.getElementById('sweep-meta').textContent = `Tested ${d.tested_messages} spam samples. Environment: ${currentEnv}`;
+        
+        const labels = d.results.map(r => r.num_words + ' words');
+        const data = d.results.map(r => r.evasion_rate);
+        
+        if(sweepChartInst) sweepChartInst.destroy();
+        const ctx = document.getElementById('chart-sweep').getContext('2d');
+        sweepChartInst = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Evasion Rate (%)',
+              data: data,
+              backgroundColor: '#ec4899',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } }
+          }
+        });
+      });
+    }
+
+    function loadBaseMessage() {
+      document.getElementById('payload-input').value = sampleSpam;
+    }
+
+    function autoAppend() {
+      fetch(`${API}/goodwords?k=20`).then(r=>r.json()).then(d => {
+        const words = d.words.map(w => w.word).join(' ');
+        const t = document.getElementById('payload-input');
+        t.value = t.value.trim() + ' ' + words;
+      });
+    }
+
+    function classifyPayload() {
+      const text = document.getElementById('payload-input').value;
+      fetch(`${API}/classify`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: text, mode: currentMode})
+      }).then(r=>r.json()).then(data => {
+        const res = document.getElementById('payload-results');
+        res.style.display = 'block';
+        res.textContent = JSON.stringify(data, null, 2);
+      });
+    }
+
+    function runBlackbox() {
+      const budget = document.getElementById('bb-budget').value;
+      document.getElementById('bb-results').style.display = 'block';
+      document.getElementById('bb-results').textContent = "Running attack...";
+      
+      fetch(`${API}/blackbox`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({budget: parseInt(budget), mode: currentMode})
+      }).then(r=>r.json()).then(data => {
+        document.getElementById('bb-results').textContent = JSON.stringify(data, null, 2);
+      }).catch(e => {
+        document.getElementById('bb-results').textContent = "Error: " + e.message;
+      });
+    }
+
+    // CHAT
+    function toggleChat() {
+      document.getElementById('chat-panel').classList.toggle('open');
+    }
+
+    function escapeHtml(unsafe) {
+      return unsafe
+           .replace(/&/g, "&amp;")
+           .replace(/</g, "&lt;")
+           .replace(/>/g, "&gt;")
+           .replace(/"/g, "&quot;")
+           .replace(/'/g, "&#039;");
+    }
+
+    function sendChat() {
+      const inp = document.getElementById('chat-input');
+      const text = inp.value.trim();
+      if(!text) return;
+      
+      inp.value = '';
+      const msgs = document.getElementById('chat-messages');
+      
+      // User msg
+      const uDiv = document.createElement('div');
+      uDiv.className = 'chat-msg msg-user';
+      uDiv.textContent = text;
+      msgs.insertBefore(uDiv, document.getElementById('chat-typing'));
+      msgs.scrollTop = msgs.scrollHeight;
+      
+      const typing = document.getElementById('chat-typing');
+      typing.classList.add('active');
+      
+      fetch(`${API}/chat`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: text})
+      }).then(r=>r.json()).then(d => {
+        typing.classList.remove('active');
+        const bDiv = document.createElement('div');
+        bDiv.className = 'chat-msg msg-bot';
+        // Backend can proxy raw LLM text (or an offline mock string) -- never
+        // trust it as HTML, so it's escaped before being inserted.
+        bDiv.innerHTML = escapeHtml(String(d.response ?? ''));
+        msgs.insertBefore(bDiv, typing);
+        msgs.scrollTop = msgs.scrollHeight;
+      }).catch(e => {
+        typing.classList.remove('active');
+        const bDiv = document.createElement('div');
+        bDiv.className = 'chat-msg msg-bot';
+        bDiv.style.color = 'var(--red)';
+        bDiv.textContent = 'Error connecting to AI service.';
+        msgs.insertBefore(bDiv, typing);
+      });
+    }
+
+    // GUIDE
+    function toggleGuide() {
+      document.getElementById('guide-drawer').classList.toggle('open');
+      const overlay = document.getElementById('guide-overlay');
+      overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // INIT
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch(`${API}/getmode`).then(r=>r.json()).then(d => {
+        currentEnv = d.env || 'production';
+        currentMode = d.mode || 'vulnerable';
+        updateEnvVisuals();
+      }).catch(e => console.log('Backend not ready or mode fetch failed'));
+      
+      initDashboard();
+      loadModelInfo();
+    });
+  </script>
+</body>
+</html>

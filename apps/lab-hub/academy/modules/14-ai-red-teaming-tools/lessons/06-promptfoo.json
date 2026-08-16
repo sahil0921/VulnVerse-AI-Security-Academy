@@ -1,0 +1,18 @@
+{
+  "slug": "06-promptfoo",
+  "title": "Promptfoo",
+  "type": "content",
+  "difficulty": "Advanced",
+  "reading_time": "9 min read",
+  "sections": [
+    {"type": "content", "body": "## What Is Promptfoo\n\nPromptfoo is an LLM evaluation and red teaming tool that runs from a single YAML config file and a CLI — no Python scripting required to get started. It's widely used for two things at once: regression-testing prompts during development, and automated red teaming (jailbreak, injection, PII, bias probes) against a deployed model. Its biggest strength is **CI/CD integration** — it's designed to run as a pipeline step and fail a build if red team checks regress."},
+    {"type": "content", "body": "## Best For\n\n- Teams that want red teaming as a **CI/CD gate** — run on every PR, fail the build if jailbreak resistance drops\n- Fast setup without writing code — everything is configured in `promptfooconfig.yaml`\n- Comparing multiple models or prompt versions side-by-side against the same red team suite"},
+    {"type": "code", "language": "bash", "body": "# No install needed — runs via npx\nnpx promptfoo@latest init\n\n# Or install globally\nnpm install -g promptfoo"},
+    {"type": "content", "body": "## Core Workflow\n\n1. `promptfoo init` scaffolds a `promptfooconfig.yaml`\n2. Define your target(s), then add a `redteam:` section describing the plugins (vulnerability categories) and strategies (attack techniques) to run\n3. `promptfoo redteam generate` builds the adversarial test cases\n4. `promptfoo redteam eval` runs them against your target and produces a report"},
+    {"type": "code", "language": "yaml", "body": "# promptfooconfig.yaml\ntargets:\n  - id: openai:gpt-4o-mini\n\nredteam:\n  plugins:\n    - harmful:hate\n    - pii\n    - excessive-agency\n    - prompt-injection\n  strategies:\n    - jailbreak\n    - prompt-injection\n    - base64"},
+    {"type": "code", "language": "bash", "body": "npx promptfoo@latest redteam generate\nnpx promptfoo@latest redteam eval\n\n# Open the interactive HTML report\nnpx promptfoo@latest redteam report"},
+    {"type": "content", "body": "## Example Output\n\n```\nRed team eval complete.\n\nPlugin              Strategy         Pass Rate   Findings\nharmful:hate         jailbreak        88%         6 failed / 50\npii                   base64           95%         2 failed / 40\nexcessive-agency      prompt-injection 76%         12 failed / 50\nprompt-injection       jailbreak        81%         9 failed / 47\n\nOverall pass rate: 85%  (29 failed probes out of 187)\nFull report: http://localhost:15500  (interactive viewer)\n```\n\nThe interactive report lets you click into any failed probe to see the exact prompt, the model's response, and the grading rationale — useful evidence for a findings writeup."},
+    {"type": "note", "body": "Because Promptfoo config is declarative YAML, it's easy to check into the same git repo as the application it's testing — meaning your red team suite gets version-controlled and reviewed alongside code changes, not maintained as a separate one-off script."},
+    {"type": "content", "body": "## When to Reach for Promptfoo\n\nUse Promptfoo when you want red teaming wired into an actual development pipeline rather than run as a standalone engagement — it's the tool most suited to 'test this on every deploy,' not just 'test this once.'"}
+  ]
+}

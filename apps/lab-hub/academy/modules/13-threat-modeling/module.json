@@ -1,0 +1,61 @@
+{
+  "slug": "13-threat-modeling",
+  "name": "Threat Modeling",
+  "lessons": [
+    {
+      "slug": "01-introduction",
+      "title": "Introduction to Threat Modeling",
+      "type": "content"
+    },
+    {
+      "slug": "02-target-reconstruction",
+      "title": "Target Reconstruction",
+      "type": "content"
+    },
+    {
+      "slug": "03-assumption-register",
+      "title": "Assumption Registers",
+      "type": "content"
+    },
+    {
+      "slug": "04-crown-jewels",
+      "title": "Ranking Crown Jewels",
+      "type": "content"
+    },
+    {
+      "slug": "05-trust-boundaries",
+      "title": "Mapping Trust Boundaries",
+      "type": "content"
+    },
+    {
+      "slug": "06-escalation-paths",
+      "title": "Planning Escalation Paths",
+      "type": "content"
+    },
+    {
+      "slug": "07-mitre-atlas",
+      "title": "MITRE ATLAS Mapping",
+      "type": "content"
+    },
+    {
+      "slug": "08-intelligence-briefs",
+      "title": "Intelligence Briefs",
+      "type": "content"
+    },
+    {
+      "slug": "09-best-practices",
+      "title": "Best Practices",
+      "type": "content"
+    },
+    {
+      "slug": "10-quiz",
+      "title": "Knowledge Check",
+      "type": "quiz"
+    },
+    {
+      "slug": "11-hands-on-labs",
+      "title": "Hands-on Labs",
+      "type": "labs"
+    }
+  ]
+}

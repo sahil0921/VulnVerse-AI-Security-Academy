@@ -1,0 +1,15 @@
+Remote VPN Configuration Guide — NimbleTech IT
+================================================
+To connect to the corporate network remotely:
+1. Download GlobalProtect client from https://vpn.nimbletech.local
+2. Enter portal address: vpn.nimbletech.local
+3. Sign in with your AD credentials (firstname.lastname@nimbletech.com)
+4. Complete MFA via Duo push notification
+5. You will be assigned an IP in the 10.50.0.0/16 range
+Troubleshooting:
+- Connection refused: ensure port 443 outbound is open
+- MFA timeout: re-register your Duo token at https://duo.nimbletech.local/enroll
+- Credential rejected: contact IT helpdesk at ext. 4242
+Split Tunneling:
+Only traffic to 10.0.0.0/8 and *.nimbletech.local is tunneled.
+Internet traffic exits via your local ISP.

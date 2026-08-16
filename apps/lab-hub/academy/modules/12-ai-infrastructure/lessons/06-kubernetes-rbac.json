@@ -1,0 +1,59 @@
+{
+  "slug": "06-kubernetes-rbac",
+  "title": "Kubernetes RBAC Abuse",
+  "type": "content",
+  "readingtime": "12 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Kubernetes RBAC Abuse\n\nMost serious AI systems run on **Kubernetes**. It is the standard way to run AI at scale. That also makes it a huge target. This lesson explains Kubernetes from zero, then shows how attackers abuse its permission system.\n\n## What Is Kubernetes?\n\n**Kubernetes** (often shortened to **K8s**) is a system for running many containers across many machines automatically.\n\n**Analogy:** Think of Kubernetes as an air traffic controller for containers. You say \"I need 5 copies of this app running.\" Kubernetes decides which machines to place them on, restarts them if they crash, and moves them if a machine dies. You describe *what* you want; K8s figures out *how*.\n\n## The Core Building Blocks\n\nLet's define each piece with a simple analogy.\n\n| Term | Simple Meaning | Analogy |\n|---|---|---|\n| **Cluster** | The whole group of machines | The entire airport |\n| **Node** | One machine in the cluster | One runway |\n| **Pod** | The smallest unit; holds containers | One airplane |\n| **Container** | The actual running app | A passenger |\n| **Namespace** | A logical folder to group things | A terminal (A, B, C) |\n| **Service** | A stable address for pods | The gate number |\n| **Deployment** | A recipe to keep pods running | The flight schedule |\n| **Secret** | Stored sensitive data | A locked briefcase |"
+    },
+    {
+      "type": "content",
+      "body": "## Why AI Loves Kubernetes\n\nAI needs expensive **GPUs**. Kubernetes lets teams share GPUs efficiently: a pod requests a GPU, and the scheduler places it on a machine that has one free. This maximizes the use of costly hardware.\n\nA typical AI cluster contains:\n\n- **Jupyter notebooks** for experiments (long-lived, powerful pods)\n- **Training jobs** that consume GPUs in batches\n- **Inference services** serving live predictions\n- **Support tools** like MLflow (tracking) and MinIO (storage)\n\nEach usually lives in its own **namespace** with its own **identity**."
+    },
+    {
+      "type": "content",
+      "body": "## What Is RBAC?\n\n**RBAC** stands for **Role-Based Access Control**.\n\nIt answers the question: *\"What is this identity allowed to do in the cluster?\"*\n\nThree key pieces:\n\n- **Service Account** — the identity a pod runs as (like a robot's badge).\n- **Role / ClusterRole** — a list of allowed actions (verbs on resources).\n  - A **Role** applies to ONE namespace.\n  - A **ClusterRole** applies to the WHOLE cluster.\n- **RoleBinding / ClusterRoleBinding** — connects an identity to a role.\n\n**Verbs** are actions like `get`, `list`, `watch`, `create`, `delete`. **Resources** are things like `pods`, `secrets`, `services`.\n\n**Example rule in plain English:** *\"The identity `inference-sa` can `get` and `list` `secrets`.\"*"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    SA[Service Account<br/>inference-sa] -->|bound by| RB[ClusterRoleBinding]\n    RB -->|grants| CR[ClusterRole<br/>read secrets everywhere]\n    CR --> P1[Namespace: ml-inference]\n    CR --> P2[Namespace: monitoring]\n    CR --> P3[Namespace: pipeline-system]\n    style CR fill:#ef4444,color:#fff\n    style SA fill:#4f8cff,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## The Core Attack: Check What You Can Do\n\nWhen an attacker lands in a pod, the first question is: *\"What does my identity allow?\"*\n\nEvery pod has a **service account token** mounted at a fixed path:\n\n```\n/var/run/secrets/kubernetes.io/serviceaccount/token\n```\n\nThis token *is* the identity. Whoever holds it authenticates as that service account.\n\nTo check permissions with the kubectl tool:\n\n```bash\nkubectl auth can-i --list -n ml-inference\n```\n\nThis lists exactly what you can and cannot do. It is the map for planning your attack."
+    },
+    {
+      "type": "content",
+      "body": "## The RBAC Mistakes Attackers Hunt For\n\nHere are the most common misconfigurations, from most to least dangerous.\n\n### 1. Can Create Pods = Cluster Admin\n\nIf your identity can **create pods**, you effectively own the cluster. Why? You can launch a new pod that:\n\n- Mounts the host filesystem, or\n- Runs as a more powerful service account.\n\nThat one permission is a master key.\n\n### 2. Can Read Secrets Everywhere\n\nA ClusterRole that grants `get secrets` across all namespaces lets you read *every* credential in the cluster — database passwords, API keys, and even *other service account tokens*.\n\n### 3. Stealing Another Identity\n\nIf you can read a secret containing a more powerful service account's token, you can **become** that identity. This is **identity chaining**."
+    },
+    {
+      "type": "content",
+      "body": "## Identity Chaining Explained\n\nThis is the most important concept in Kubernetes attacks. Let's walk it through.\n\n**Identity A** (your pod) can *read secrets* but *cannot create pods*.\n\n**Identity B** (a pipeline controller like Argo) *can create pods* but you cannot reach it directly.\n\nThe trick: Identity B's token is *stored as a secret*. Since Identity A can read secrets, you read Identity B's token. Now you *become* Identity B — and gain its pod-creation power.\n\n**Analogy:** You have a key that opens the filing cabinet (read secrets) but not the vault (create pods). Inside the filing cabinet, someone left the vault key. Neither key alone was enough, but together they open everything.\n\n| Capability | Identity A (inference-sa) | Identity B (controller) |\n|---|---|---|\n| Read secrets everywhere | Yes | Yes |\n| List namespaces & RBAC | Yes | No |\n| **Create/delete pods** | **No** | **Yes** |\n\nNeither is complete. Chained together, they give full control."
+    },
+    {
+      "type": "content",
+      "body": "## Enumerating Without kubectl\n\nProduction images often lack `kubectl`. You can still talk to the API server using `curl`, the mounted token, and the CA certificate:\n\n```bash\nTOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\nCACERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt\nAPI=https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}\n\n# List all namespaces\ncurl -s --cacert $CACERT -H \"Authorization: Bearer $TOKEN\" \\\n  $API/api/v1/namespaces\n\n# List secrets in a target namespace\ncurl -s --cacert $CACERT -H \"Authorization: Bearer $TOKEN\" \\\n  $API/api/v1/namespaces/pipeline-system/secrets\n```\n\nThe API server address is always in the `KUBERNETES_SERVICE_HOST` environment variable inside any pod."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "body": "# VULNERABLE: a ClusterRole that is far too broad\napiVersion: rbac.authorization.k8s.io/v1\nkind: ClusterRole\nmetadata:\n  name: ml-inference-role\n  annotations:\n    description: \"read a couple of monitoring secrets\"  # intent\nrules:\n  # But the implementation grants ALL secrets in EVERY namespace:\n  - apiGroups: [\"\"]\n    resources: [\"secrets\"]\n    verbs: [\"get\", \"list\", \"watch\"]\n  - apiGroups: [\"rbac.authorization.k8s.io\"]\n    resources: [\"clusterroles\", \"rolebindings\"]\n    verbs: [\"get\", \"list\"]           # lets attacker map the whole RBAC\n# The gap between intent (a few secrets) and reality (all secrets)\n# is exactly what attackers exploit."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "body": "# SECURE: a namespaced Role scoped to specific named secrets\napiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata:\n  name: dashboard-secret-reader\n  namespace: ml-inference        # limited to ONE namespace\nrules:\n  - apiGroups: [\"\"]\n    resources: [\"secrets\"]\n    resourceNames: [\"dashboard-api-credentials\"]  # ONE specific secret\n    verbs: [\"get\"]               # read-only, minimal verb\n# Why better:\n# - Role (not ClusterRole) = one namespace only\n# - resourceNames limits it to a single secret\n# - No RBAC enumeration permission\n# - Follows least privilege"
+    },
+    {
+      "type": "note",
+      "body": "**The intent-vs-implementation gap:** almost every RBAC breach comes from a role whose *description* sounds reasonable (\"read dashboard secret\") but whose *rules* are far broader (\"read all secrets\"). When reviewing RBAC, always read the actual `rules`, never trust the name or comment."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **Kubernetes** runs containers at scale; AI uses it to share expensive GPUs.\n- **RBAC** controls what each identity can do via **Roles** and **Bindings**.\n- Every pod carries a **service account token** = its identity.\n- **Create pods = cluster admin.** **Read secrets everywhere = read all credentials.**\n- **Identity chaining:** combine a read-only identity with a stolen powerful token.\n- **Defense:** least-privilege Roles (not ClusterRoles), scope to named resources, avoid granting `create pods` or cluster-wide secret access.\n\nNext, we zoom in on those tokens themselves in **Service Account Tokens.**"
+    }
+  ]
+}

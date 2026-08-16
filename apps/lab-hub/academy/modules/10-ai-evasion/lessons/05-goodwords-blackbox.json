@@ -1,0 +1,73 @@
+{
+  "slug": "05-goodwords-blackbox",
+  "title": "GoodWords Black-Box",
+  "type": "content",
+  "readingtime": "11 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# The GoodWords Attack (Black-Box)\n\nIn the real world, you rarely get to see inside a model. You usually only get access to an API: you send text, and it returns a label and maybe a probability score. This is called the black-box setting.\n\nThe goal is the same as in the previous lesson, appending good words to flip spam into ham, but now you have to discover which words actually work through repeated querying, instead of reading them directly from the model's internal tables.\n\n**A simple comparison:** you're playing a guessing game where you can't see the answer, but after each guess you're told \"warmer\" or \"colder.\" Each guess costs you something, time, money, or the risk of being noticed, so you have to guess wisely, not randomly."
+    },
+    {
+      "type": "content",
+      "body": "## The core problem: exploration vs exploitation\n\nEvery query costs something: money, time, or detection risk. So you're constantly balancing two competing goals:\n\n- Exploration means trying new, untested words to discover what might actually work.\n- Exploitation means repeatedly using words you already know work well.\n\nToo much exploration wastes your limited queries chasing dead ends. Too much exploitation might mean you never even try the one word that would have worked far better. Balancing the two well is essentially the entire game in a black-box setting."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TB\n    A[Query budget] --> B[Phase 1: Exploration 40%]\n    A --> C[Phase 2: Exploitation 40%]\n    A --> D[Phase 3: Combination 20%]\n    B --> E[Discover promising words]\n    C --> F[Refine best words]\n    D --> G[Find word synergies]\n    E --> H[Ranked good words]\n    F --> H\n    G --> H\n    H --> I[Append and evade]"
+    },
+    {
+      "type": "content",
+      "body": "## The multi-armed bandit idea\n\nImagine a row of slot machines, each with an unknown payout rate. You want the most reward using a limited number of coins. Which machines do you play, and how often?\n\nThis is called the multi-armed bandit problem, and it maps perfectly onto our situation here: each candidate word is a slot machine. \"Pulling the lever\" means testing that word by adding it to a message and querying the classifier. The \"payout\" is how much that word lowered the spam probability:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "reward(word)  =  spam_score(original message)\n                  -  spam_score(message + word)\n\n(a positive reward means adding the word made the message\n look less like spam; a bigger positive number is better)"
+    },
+    {
+      "type": "content",
+      "body": "## Building a candidate vocabulary\n\nWithout access to the model's internals, you can't directly know which words the filter learned to associate with ham. So instead, you build your own candidate pool from two sources:\n\n1. **Mined words** — the most frequent words pulled from legitimate (ham) messages you already have access to, such as your own inbox, public datasets, or similar sources.\n2. **Curated words** — hand-picked, everyday conversational terms, such as \"thanks,\" \"tomorrow,\" \"meeting,\" or \"sorry,\" that show up constantly in real messages but almost never in spam.\n\nMerging both sources protects you against having a candidate pool that's too small, or accidentally biased toward one narrow topic."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "def build_candidate_vocabulary(ham_messages, max_words=100, min_freq=5):\n    \"\"\"Mine frequent ham words and merge with curated conversational terms.\"\"\"\n    freq = {}\n    for msg in ham_messages[:500]:\n        for w in str(msg).split():\n            if 2 < len(w) < 10:          # keep typical conversational tokens\n                freq[w] = freq.get(w, 0) + 1\n\n    mined = [w for w, c in sorted(freq.items(),\n             key=lambda x: (-x[1], x[0])) if c > min_freq][:max_words]\n\n    curated = [\"ok\", \"thanks\", \"sorry\", \"later\", \"today\", \"tomorrow\",\n               \"meeting\", \"sure\", \"yeah\", \"see\", \"know\", \"think\"]\n\n    return sorted(set(mined) | set(curated))"
+    },
+    {
+      "type": "content",
+      "body": "## Epsilon-greedy selection\n\nA simple, effective strategy for deciding which word to test next:\n\n- With a small probability called epsilon, for example 0.2, meaning 20% of the time, explore, meaning pick a new or rarely-tested word just to see what happens.\n- The rest of the time, exploit, meaning pick whichever word has performed the best so far based on everything you've learned.\n\n**A simple comparison:** you mostly eat at your favorite restaurant, because you know it's good, that's exploitation. But roughly one time in five, you try somewhere completely new, that's exploration, just in case it turns out to be even better than your current favorite."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import random\n\ndef epsilon_greedy_select(scorer, available_words):\n    if random.random() < scorer['exploration_rate']:\n        # EXPLORE: prefer words that have never been tested yet\n        untested = [w for w in available_words\n                    if w not in scorer['word_counts']]\n        if untested:\n            return random.choice(untested)\n        return min(available_words,\n                   key=lambda w: scorer['word_counts'].get(w, 0))\n    # EXPLOIT: pick the best-performing word discovered so far\n    return max(available_words,\n               key=lambda w: scorer['word_scores'].get(w, 0))\n\ndef update_word_score(scorer, word, impact, alpha=0.3):\n    \"\"\"Exponential moving average smooths out one lucky or unlucky test.\"\"\"\n    old = scorer['word_scores'].get(word, 0.0)\n    scorer['word_scores'][word] = (1 - alpha) * old + alpha * impact\n    scorer['word_counts'][word] = scorer['word_counts'].get(word, 0) + 1"
+    },
+    {
+      "type": "content",
+      "body": "## What a real attack run looks like\n\nPutting the pieces together, a typical black-box query session might print progress like this as it works through its budget:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "Query   1: testing 'thanks'    -> reward=+0.04  (explore)\nQuery   2: testing 'meeting'   -> reward=+0.11  (explore)\nQuery   3: testing 'meeting'   -> reward=+0.09  (exploit, best so far)\nQuery   4: testing 'invoice'   -> reward=-0.02  (explore, didn't help)\n...\nQuery  85: testing 'tomorrow'  -> reward=+0.07  (exploit)\nQuery  86: testing 'meeting tomorrow' (combo) -> reward=+0.25  (synergy phase)\n...\nQuery 150: budget exhausted. Final evasion rate: 91.4%\n\n(illustrative numbers — actual results depend on the target\n classifier and candidate vocabulary used)"
+    },
+    {
+      "type": "content",
+      "body": "## Finding synergies (combinations)\n\nSome words are noticeably stronger together than they are apart. This effect is called synergy: a combination performing better than simply adding up its individual parts would predict.\n\n**Example:** \"meeting\" alone might lower the spam score by 10%, and \"tomorrow\" alone by 8%. Added together separately, you'd expect roughly 18%, but you might actually observe 25%, because \"meeting tomorrow\" reads much more strongly as genuine scheduling language than either word does on its own. The third phase of a black-box attack spends its remaining query budget specifically hunting for these kinds of word pairs and triplets."
+    },
+    {
+      "type": "content",
+      "body": "## White-box vs black-box compared\n\n| | White-Box | Black-Box |\n|---|---|---|\n| Word selection | Read directly from the model's internals | Discovered through repeated queries |\n| Cost | Nearly free — just computation | Limited by however many queries you can afford |\n| Speed | Instant | Slower, and inherently iterative |\n| Typical evasion | Close to 100% | Roughly 85–95% of white-box effectiveness |\n| Realism | Rare in real deployments | Matches how most real systems are actually exposed |\n\nThe headline result worth remembering: a black-box attacker still reaches 85–95% of white-box effectiveness. Hiding a model's internals buys only limited protection against a patient, adaptive attacker who's willing to spend the queries."
+    },
+    {
+      "type": "note",
+      "body": "**Defender takeaway.** Obscurity is not security here. The vulnerability lives in the architecture of Naive Bayes itself, its additive, order-blind scoring, not in any leaked parameters or exposed internals. A query-only attacker simply rediscovers the same winning words empirically, through trial and error, and still largely succeeds. The real fixes remain the same ones covered in the previous lesson: order-aware models, ensembling multiple classifier types, and flagging messages that land suspiciously close to the decision boundary."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Black-box attacks discover good words through repeated queries, without ever seeing the model's internal probabilities directly.\n- Success depends on carefully balancing exploration and exploitation across a limited query budget.\n- The multi-armed bandit framing treats each candidate word as its own slot machine with an unknown payout.\n- Epsilon-greedy selection is a simple, effective strategy for balancing the two.\n- Synergistic combinations of words can boost impact well beyond what either word achieves alone.\n- Black-box attacks reach roughly 85–95% of white-box effectiveness, meaning hiding model internals alone is a weak defense."
+    }
+  ]
+}

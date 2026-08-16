@@ -1,0 +1,38 @@
+{
+  "slug": "06-beam-search",
+  "title": "Beam Search Inversion",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Beam Search Inversion\n\nThe template-bank method from the previous lesson has one weakness: it only works if the bank actually contains a template close to the original text. If the target uses an unusual structure, or comes from an unfamiliar domain, even 500,000 templates may still miss.\n\nBeam search inversion solves this problem by reconstructing text directly from the embedding, one word at a time, with no template bank required for the structure itself.\n\n## What is beam search?\n\nBeam search is a search technique that builds text step by step, keeping several of the best partial guesses, called beams, alive at each step instead of committing to just one.\n\n**A simple comparison:** imagine climbing a mountain in thick fog. Instead of following one single path, you send out several scouts, keep only the few who climbed highest, and repeat. Over many steps, you gradually converge on the actual peak."
+    },
+    {
+      "type": "content",
+      "body": "## How it inverts an embedding\n\nThe process, based on the ZSInvert research (Zhang et al., 2025), works like this:\n\n1. A small language model, GPT-2, proposes plausible next tokens.\n2. Each candidate extension is embedded and scored by cosine similarity against the target vector.\n3. The best few beams are kept; the rest are discarded entirely.\n4. Repeat this cycle for roughly 30 to 40 steps.\n\nOver time, the surviving beams converge on text that both reads like natural English and produces an embedding close to the actual target.\n\n## Why GPT-2?\n\nGPT-2 is old and relatively small, but that's exactly why it fits well here:\n\n- It runs comfortably on modest hardware.\n- Its vocabulary, roughly 50,000 tokens, is broad enough to propose sensible words.\n- We only need it to propose candidates; the embedding model handles all the actual scoring.\n\nA larger model, such as LLaMA-7B, would propose somewhat better tokens but would cost far more memory and time per step, usually not worth the tradeoff for this particular task."
+    },
+    {
+      "type": "content",
+      "body": "## Combining strengths\n\nBeam search recovers the structure well, but it still garbles high-entropy secrets. So a practical pipeline combines both techniques:\n\n1. Beam search recovers the overall sentence structure.\n2. Entropy detection, using Shannon entropy plus regex patterns for API keys, JWTs, and hashes, spots the secret region and replaces it with a typed slot like `{PASSWORD}`.\n3. The same membership-inference slot filler from the template method then recovers the actual value.\n\nSo beam search handles what templates miss, and membership inference handles what beam search can't reach, giving you the best of both approaches."
+    },
+    {
+      "type": "content",
+      "body": "## When to use which\n\n| Situation | Start with |\n| --- | --- |\n| Common enterprise domain, template bank covers it | Template bank (CPU-friendly, fast) |\n| Unusual structure, unknown domain, or weak template match | Beam search (needs a GPU, slower) |\n\nBecause beam search loads GPT-2 and runs many embedding computations per step, it effectively requires a GPU to be practical. Use the template method first, and fall back to beam search specifically when confidence in the template match is weak."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Conceptual sketch of embedding-guided beam search.\n# Real tools use GPT-2 for proposals; this shows the scoring loop.\nimport numpy as np\nfrom sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer(\"all-MiniLM-L6-v2\")\ntarget = np.load(\"chunk_23.npy\")[0]\ntarget = target / np.linalg.norm(target)\n\ndef score(text):\n    v = model.encode([text], normalize_embeddings=True)[0]\n    return float(np.dot(v, target))\n\n# A language model would PROPOSE these continuations each step.\nbeams = [\"Please\"]\nfor step in range(5):\n    proposals = []\n    for beam in beams:\n        for word in [\"navigate\", \"reset\", \"login\", \"the\", \"password\", \"portal\"]:\n            cand = beam + \" \" + word\n            proposals.append((score(cand), cand))\n    # keep the top 2 beams (beam width = 2)\n    proposals.sort(reverse=True)\n    beams = [text for _, text in proposals[:2]]\n    print(f\"step {step}: best beam -> {beams[0]!r}\")\n\n# Over many steps the top beam converges toward the target's meaning."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Empty text\"] --> B[\"GPT-2 proposes next tokens\"]\n    B --> C[\"Embed each candidate\"]\n    C --> D[\"Score vs target vector\"]\n    D --> E[\"Keep best beams\"]\n    E --> F{\"Converged?\"}\n    F -- \"No\" --> B\n    F -- \"Yes\" --> G[\"Detect high-entropy region\"]\n    G --> H[\"Membership inference fills slot\"]"
+    },
+    {
+      "type": "note",
+      "body": "**Dual-embedder mode:** advanced beam-search tools can score candidates with a local embedding model, then map those results to the victim model via a small regression matrix. This cuts queries to the victim from thousands down to dozens per step, which becomes vital when the victim is a paid API or when stealth genuinely matters, at a small cost to overall accuracy."
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "slug": "02-tokens-and-embeddings",
+  "title": "Tokens & Embeddings",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Beginner",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Tokens & Embeddings\n\nTo understand how LLMs process input, and how they can leak information through details like token counts, you need to understand two core concepts: **tokens** and **embeddings**.\n\n## What is a token?\n\nAn LLM doesn't read whole words directly. It breaks text down into smaller pieces called **tokens**. A token can be a full word, part of a word, or even a single character.\n\n**Simple comparison:** think of Lego bricks. A sentence is the finished model, and tokens are the individual bricks it's built from. The LLM processes one brick at a time.\n\n**Practical example:** the sentence \"Reconnaissance is fun\" might be broken into:\n\n- `Recon`\n- `naissance`\n- ` is`\n- ` fun`\n\nThat's 4 tokens for 3 words. A rough rule of thumb in English: 1 token is approximately 4 characters, or about 0.75 words."
+    },
+    {
+      "type": "content",
+      "body": "## What is tokenization?\n\n**Tokenization** is the process of splitting text into tokens. Different model families use different tokenizers, which makes tokenization behavior a useful fingerprinting signal.\n\nWhy this matters for security:\n\n- Many APIs return token counts in fields like `prompt_tokens` and `completion_tokens`. This confirms that real model processing is happening and can hint at how large the underlying prompt is.\n- Attackers can exploit unusual tokenization to evade keyword filters. For example, spacing out letters as `s e c r e t` can prevent a simple keyword filter from matching, while the model itself may still understand the intended meaning."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Counting tokens the way an LLM would, using tiktoken (OpenAI's tokenizer)\nimport tiktoken\n\nenc = tiktoken.get_encoding(\"cl100k_base\")\ntext = \"Reconnaissance is fun\"\ntokens = enc.encode(text)\n\nprint(\"Number of tokens:\", len(tokens))\nprint(\"Token IDs:\", tokens)\n# Each ID corresponds to a specific piece of text the model recognizes."
+    },
+    {
+      "type": "content",
+      "body": "## What is an embedding?\n\nComputers can't perform math directly on words. So each token, or chunk of text, is converted into a list of numbers called an **embedding**, also referred to as a *vector*.\n\n**Simple comparison:** think of GPS coordinates on a map. Cities that are geographically close to each other have similar coordinates. An embedding works the same way, but for meaning instead of geography: words with similar meanings end up with similar numeric values, placing them close together in this numerical space.\n\n**Practical example:** the words \"king\" and \"queen\" will have embeddings that are close to each other, since their meanings are related. \"King\" and \"banana\" will be far apart, since they have no meaningful relationship."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n  A[Raw text] --> B[Tokenizer]\n  B --> C[Tokens]\n  C --> D[Embedding model]\n  D --> E[Vectors<br/>list of numbers]\n  E --> F[Stored in Vector DB<br/>for RAG]"
+    },
+    {
+      "type": "content",
+      "body": "## Why embeddings matter in AI security\n\nEmbeddings are the foundation of **RAG (Retrieval-Augmented Generation)**. An organization stores its private documents as embeddings inside a **vector database**, such as ChromaDB, Pinecone, or Milvus. When a user submits a question, that question is also converted into an embedding, and the system retrieves the documents whose embeddings are closest to it.\n\nThis creates a real attack surface:\n\n- The embedding model in use can often be fingerprinted by its vector dimensions, for example 768 or 1536 numbers per vector.\n- Vectors can sometimes be exported and reverse-engineered back into readable text, a technique called embedding inversion, covered in a later module.\n- The names of retrieved documents often leak directly in API responses."
+    },
+    {
+      "type": "note",
+      "body": "**Recon tip:** if an API response includes a field such as `\"dimensions\": 768`, that's a strong indicator of which embedding model is being used. This alone fingerprints part of the RAG stack without needing to interact with the model directly."
+    },
+    {
+      "type": "content",
+      "body": "## Comparison: Token vs Embedding\n\n| Concept | What it is | Example | Security relevance |\n|---|---|---|---|\n| Token | A small piece of text | `Recon` | Token counts are exposed by APIs; can be exploited for filter evasion |\n| Embedding | A list of numbers representing meaning | `[0.12, -0.98, ...]` | Powers RAG systems; dimension count can fingerprint the model |\n\n## Key Takeaways\n\n- LLMs process tokens, not whole words.\n- Tokenization varies by model family and serves as a fingerprinting signal.\n- Embeddings convert meaning into numbers so it can be compared mathematically.\n- Embeddings power RAG systems and vector databases, which represent a significant part of the AI attack surface.\n\n## Mini Quiz\n\n1. Roughly how many tokens would a 100-word English paragraph contain?\n2. Why might an attacker space out letters, such as writing `s e c r e t`?\n3. What does the number of dimensions in an embedding typically reveal?"
+    }
+  ]
+}

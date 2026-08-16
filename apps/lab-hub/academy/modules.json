@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "modules": [
+    {
+      "id": 1,
+      "slug": "01-ai-ml-fundamentals"
+    },
+    {
+      "id": 2,
+      "slug": "02-llm-fundamentals"
+    },
+    {
+      "id": 3,
+      "slug": "03-prompt-injection"
+    },
+    {
+      "id": 4,
+      "slug": "04-rag-pipeline-security"
+    },
+    {
+      "id": 5,
+      "slug": "05-ai-agent-security"
+    },
+    {
+      "id": 6,
+      "slug": "06-multi-agent-security"
+    },
+    {
+      "id": 7,
+      "slug": "07-llm-output-attacks"
+    },
+    {
+      "id": 8,
+      "slug": "08-ai-data-attacks"
+    },
+    {
+      "id": 9,
+      "slug": "09-mcp-security"
+    },
+    {
+      "id": 10,
+      "slug": "10-ai-evasion"
+    },
+    {
+      "id": 11,
+      "slug": "11-embeddings-vector-db-security"
+    },
+    {
+      "id": 12,
+      "slug": "12-ai-infrastructure"
+    },
+    {
+      "id": 13,
+      "slug": "13-threat-modeling"
+    },
+    {
+      "id": 14,
+      "slug": "14-ai-red-teaming-tools"
+    },
+    {
+      "id": 15,
+      "slug": "15-final-assessment"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to Threat Modeling",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## What Is Threat Modeling?\n\n**Threat modeling is the practice of thinking like an attacker *before* an attacker shows up.**\n\nYou look at a system, ask *\"what could go wrong here?\"*, and write down the answers in a structured way. Then you decide what to fix first.\n\nThat's it. No magic. It is organized worrying, turned into an action plan.\n\n**A simple analogy.** Before you leave your house for a long trip, you walk around and think: *Is the back door locked? Is the window latched? Did I leave a spare key under the mat where a burglar might look?* You are not being attacked right now. You are imagining the attack so you can prevent it. That mental walk-through is a threat model.\n\n**A practical example.** Your team is building an AI chatbot that answers customer questions using company documents. Before writing a single line of code, you ask:\n\n- What if a user tricks the bot into leaking internal data?\n- What if someone poisons the documents the bot reads?\n- What if the bot has a tool that can send emails, and an attacker abuses it?\n\nEach of those questions is a *threat*. Listing them, ranking them, and planning fixes is *threat modeling*."
+    },
+    {
+      "type": "content",
+      "body": "## Why Threat Modeling Matters\n\nMost security work happens *after* something breaks. A bug is found, an incident occurs, and everyone scrambles. Threat modeling flips this around. You find the weak spots on paper, where fixing them costs almost nothing.\n\n**The cost curve is brutal.** A design flaw caught in a whiteboard session costs an hour of discussion. The same flaw caught after launch can cost a data breach, legal fees, and lost customer trust.\n\nFor AI systems, this matters even more. AI applications have **new kinds of weak spots** that traditional apps never had:\n\n- A model that can be *tricked with words* (prompt injection).\n- A knowledge base that can be *quietly poisoned*.\n- An AI agent that can *take real actions* like running code or moving money.\n\nYou cannot defend what you have not mapped. Threat modeling is how you make the map."
+    },
+    {
+      "type": "note",
+      "body": "**Threat modeling is not a one-time document.** It is a living activity. You update it every time the system changes, every time you learn something new, and every time an assumption turns out to be wrong. Treat it like a notebook, not a stone tablet."
+    },
+    {
+      "type": "content",
+      "body": "## The Four Core Questions\n\nEvery good threat model, no matter how fancy the framework, answers four plain questions. This model comes from security engineer Adam Shostack and it is the cleanest way to remember the whole discipline.\n\n1. **What are we building?** — Understand the system. Draw it. Know its pieces.\n2. **What can go wrong?** — Find the threats. Think like an attacker.\n3. **What are we going to do about it?** — Plan the fixes and controls.\n4. **Did we do a good job?** — Review, validate, and repeat.\n\nIf you can answer these four honestly, you have done threat modeling. Everything else in this module is just tools to answer them better."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"What are we\\nbuilding?\"] --> B[\"What can\\ngo wrong?\"]\n    B --> C[\"What do we do\\nabout it?\"]\n    C --> D[\"Did we do\\na good job?\"]\n    D -->|System changes| A"
+    },
+    {
+      "type": "content",
+      "body": "## Where Threat Modeling Fits\n\nThreat modeling is not a single job title. It shows up in many security roles:\n\n| Role | How they use threat modeling |\n|---|---|\n| **AI Pentester** | Decides which part of the AI system to attack first |\n| **AI Red Teamer** | Plans a full attack chain against an AI target |\n| **Security Architect** | Reviews a design before it ships |\n| **Developer** | Spots risky code patterns while building |\n| **Blue Team / Defender** | Knows what to monitor and where to place controls |\n\nWhether you *attack* or *defend*, you start from the same map. The attacker uses it to find the shortest path in. The defender uses it to block that path."
+    },
+    {
+      "type": "content",
+      "body": "## The Attacker's Mindset\n\nHere is the mental shift that makes threat modeling work.\n\nA normal engineer asks: *\"How do I make this feature work?\"*\n\nA threat modeler asks: *\"How do I make this feature work **against its owner**?\"*\n\nExamples of that shift:\n\n- Feature: *The bot summarizes any web page a user pastes.*\n  - Attacker view: *I'll host a page with hidden instructions and make the bot follow them.*\n- Feature: *The agent can run helpful shell commands.*\n  - Attacker view: *I'll smuggle in a command that reads secret files.*\n- Feature: *The chatbot pulls answers from our internal wiki.*\n  - Attacker view: *I'll edit the wiki so the bot repeats my lie.*\n\nEvery convenient feature is a potential doorway. Threat modeling is the habit of checking every door."
+    },
+    {
+      "type": "content",
+      "body": "## What This Module Teaches\n\nThis module builds your skills from the ground up. By the end you will be able to:\n\n- **Reconstruct** an AI system's architecture from scattered clues.\n- **Track assumptions** honestly so you never mistake a guess for a fact.\n- **Identify and rank** the most valuable targets (the *crown jewels*).\n- **Map trust boundaries** — the invisible lines where danger crosses.\n- **Enumerate threats** using proven frameworks like STRIDE and PASTA.\n- **Score and prioritize** risks so you fix the right things first.\n- **Plan mitigations** with layered, practical controls.\n- **Produce professional artifacts** like assumption registers, risk registers, and intelligence briefs.\n\nWe use a single fictional AI company throughout, so every concept lands on a real, concrete example."
+    },
+    {
+      "type": "note",
+      "body": "**Meet our running example.** Throughout this module we assess **Aetherlink**, a fictional company that runs an internal AI assistant called **Sentri**. Sentri helps employees by reading company documents, answering questions, and taking actions through connected tools. Every technique you learn, you'll practice against Sentri."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **Threat modeling** = organized worrying turned into an action plan — structured, proactive thinking about what can go wrong in a system.\n- It is far cheaper to fix flaws on paper than after they reach production.\n- Every threat model answers four questions: *What are we building? What can go wrong? What do we do about it? Did we do a good job?*\n- AI systems introduce new threats: prompt injection, data poisoning, agent abuse, and more.\n- The core skill is the **attacker's mindset** — using a feature against its own owner.\n- A threat model is a **living artifact**, updated as the system and your knowledge change, never a one-time document."
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "slug": "06-multi-agent-security",
+  "name": "Multi-Agent Security",
+  "lessons": [
+    {
+      "slug": "01-introduction",
+      "title": "Introduction to Multi-Agent Systems",
+      "type": "content"
+    },
+    {
+      "slug": "02-a2a-protocol",
+      "title": "The A2A Protocol",
+      "type": "content"
+    },
+    {
+      "slug": "03-orchestration",
+      "title": "Orchestration Pipelines",
+      "type": "content"
+    },
+    {
+      "slug": "04-agent-cards",
+      "title": "Agent Cards",
+      "type": "content"
+    },
+    {
+      "slug": "05-workflow-integrity",
+      "title": "Workflow Integrity Attacks",
+      "type": "content"
+    },
+    {
+      "slug": "06-history-injection",
+      "title": "History Injection",
+      "type": "content"
+    },
+    {
+      "slug": "07-rogue-agents",
+      "title": "Rogue Agent Registration",
+      "type": "content"
+    },
+    {
+      "slug": "08-defenses",
+      "title": "Defenses & Mitigations",
+      "type": "content"
+    },
+    {
+      "slug": "09-best-practices",
+      "title": "Best Practices",
+      "type": "content"
+    },
+    {
+      "slug": "10-quiz",
+      "title": "Knowledge Check",
+      "type": "quiz"
+    },
+    {
+      "slug": "11-hands-on-labs",
+      "title": "Hands-on Labs",
+      "type": "labs"
+    }
+  ]
+}

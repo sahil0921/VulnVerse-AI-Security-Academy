@@ -1,0 +1,47 @@
+{
+  "slug": "08-defenses",
+  "title": "Defenses & Mitigations",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Defenses & Mitigations\n\nWe've spent several lessons breaking multi-agent systems. Now we flip to the defender's chair. To secure these systems, you need to protect the exact places attackers strike: identity, registration, messages, workflow, and data.\n\nThink of a multi-agent system like a company office. You need ID badges (identity), a sign-in desk (authentication), locked doors between departments (isolation), and security cameras (monitoring). Miss even one of these, and an intruder can get in.\n\n## The root causes we must fix\n\nEvery attack covered in this module traces back to one of four root problems:\n\n| Root cause | Attack it enables |\n|---|---|\n| No agent identity | Spoofing, impersonation |\n| Open registration | Rogue agents |\n| Blind message trust | History/context injection, confused deputy |\n| No workflow enforcement | Security-step skipping |\n\nGood defense means genuinely closing all four of these gaps."
+    },
+    {
+      "type": "diagram",
+      "src": "graph TD\n    A[Multi-Agent Defense] --> B[Strong Identity: mTLS + signed cards]\n    A --> C[Authenticated Registration + allow-list]\n    A --> D[Message Validation each hop]\n    A --> E[Enforced Workflow in code]\n    A --> F[Least Privilege per agent]\n    A --> G[Monitoring & Detection]"
+    },
+    {
+      "type": "content",
+      "body": "## Defense 1: Strong agent identity\n\nThe biggest gap in A2A systems is that any agent can pretend to be another. Fix this with two layers working together:\n\n- **Mutual TLS (mTLS)** — both agents present certificates and verify each other before communicating at all. An attacker without a valid certificate simply cannot connect in the first place.\n- **Signed Agent Cards** — each card carries a cryptographic signature. If an attacker tampers with a card, or forges one entirely, the signature check fails immediately.\n\n**A simple comparison:** mTLS is like both people showing government ID before a meeting even begins. A signed card is like a document with a tamper-proof seal, break the seal and everyone immediately knows something is wrong.\n\n## Defense 2: Authenticated registration\n\nRogue agents get in specifically because registration is left open. Require:\n\n- A valid token or certificate in order to register at all.\n- Signature verification on the submitted card.\n- An allow-list of approved agent hosts, so unknown IPs are rejected outright."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Secure agent registration\nAPPROVED_HOSTS = {\"payroll.nexora.local\", \"customer.nexora.local\"}\n\n@app.post(\"/agents/register\")\ndef register(card_url: str, token: str):\n    require_valid_token(token)                 # 1. authentication\n    card = fetch_card(card_url)\n    if not verify_signature(card):             # 2. signed cards only\n        abort(403, \"Unsigned or tampered card\")\n    host = urlparse(card[\"url\"]).hostname\n    if host not in APPROVED_HOSTS:             # 3. allow-list\n        abort(403, \"Host not approved\")\n    registry.add(card)\n    return {\"status\": \"registered\"}"
+    },
+    {
+      "type": "content",
+      "body": "## Defense 3: Validate every message\n\nThe confused deputy problem happens because agents blindly trust each other's output. The fix is to treat every incoming message as untrusted data, never as instructions to follow.\n\n- Don't let one agent's text output silently become another agent's command.\n- Keep the data plane (actual content) clearly separated from the control plane (instructions).\n- Re-check permissions at each hop, rather than simply inheriting them from a peer agent.\n\n## Defense 4: Enforce the workflow in code\n\nThis directly kills workflow-integrity attacks at the root. Never let the LLM decide whether a safety step actually runs. Put every mandatory step into fixed code that no prompt can turn off, no matter how it's phrased."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Workflow steps are enforced, not optional\ndef run_workflow(prompt):\n    data = data_agent.run(prompt)\n    deck = presentation_agent.run(data)\n\n    # SECURITY SCAN IS MANDATORY - no prompt can skip this\n    report = security_agent.scan(deck)\n    if report.risk_level == \"HIGH\":\n        raise SecurityError(\"Blocked: unsafe content detected\")\n\n    return deliver(deck, report)"
+    },
+    {
+      "type": "content",
+      "body": "## Defense 5: Least privilege and isolation\n\nGive each agent only the access it genuinely needs, and keep agents properly isolated from one another.\n\n- The Presentation Agent shouldn't hold database credentials it doesn't need.\n- The Data Agent should have read-only access, not the ability to run arbitrary OS commands.\n- Run agents as low-privilege service accounts, never as admin or root.\n\n**A simple comparison:** a cashier can open the register but not the safe. Least privilege means each agent only ever gets a key to its own drawer, and nothing more.\n\n## Defense 6: History and context integrity\n\n- Keep conversation history server-side, tied directly to an authenticated session.\n- Never trust client-supplied history for any security-relevant decision.\n- Tag each message with its true source, whether that's user, system, or agent.\n\n## Defense 7: Monitoring and detection\n\nEven with strong prevention in place, you still need real visibility. A SIEM, short for Security Information and Event Management system, such as the ELK stack, collects logs and raises alerts based on them. Useful detection rules for A2A systems include:\n\n| Detection rule | What it catches |\n|---|---|\n| Agent registration from unknown IP | Rogue agents |\n| Agent Card URL change | Spoofing / hijack |\n| Traffic to previously-unseen IP | Data redirection |\n| Security step skipped | Workflow bypass |\n| Dangerous command patterns in logs | SQLi / command execution |\n| PII appearing where it should not | Data exfiltration |\n\n**A simple comparison:** prevention is the locked door; monitoring is the camera that catches whoever tries the handle anyway."
+    },
+    {
+      "type": "note",
+      "body": "**Defense in depth:** no single control stops every possible attack. Layer them together. If an attacker gets past identity checks, least privilege limits the resulting damage. If they slip past that too, monitoring is there to catch the anomaly. Always assume any single layer can fail."
+    },
+    {
+      "type": "content",
+      "body": "## Defense summary table\n\n| Attack | Primary Defense |\n|---|---|\n| Agent Card spoofing | Signed cards + mTLS |\n| Rogue agent registration | Authenticated registration + allow-list |\n| History injection | Server-side authenticated history |\n| Workflow bypass | Hard-coded mandatory steps |\n| Confused deputy | Per-hop permission checks + least privilege |\n| Data poisoning | Input validation + data/instruction separation |\n\n## Summary\n\n- Every attack in this module maps back to a root cause: weak identity, open registration, blind trust, or unenforced workflow.\n- Fix identity using mTLS and signed cards.\n- Fix registration using authentication and allow-lists.\n- Enforce workflows and least privilege in code, never in prompts.\n- Add monitoring on top to catch whatever prevention inevitably misses.\n\n## Key Takeaways\n\n- Security decisions belong in code, never inside an LLM prompt.\n- Treat every inter-agent message as untrusted input by default.\n- Layer your defenses, and always assume each individual layer can eventually fail."
+    }
+  ]
+}

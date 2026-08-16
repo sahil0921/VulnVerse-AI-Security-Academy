@@ -1,0 +1,62 @@
+{
+  "slug": "08-intelligence-briefs",
+  "title": "Intelligence Briefs",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## The Deliverable That Ties It All Together\n\nYou've reconstructed the target, tracked assumptions, ranked crown jewels, mapped trust boundaries, planned escalation paths, and mapped everything to ATLAS. Now you package it all into one clear document: the **intelligence brief**.\n\nAn intelligence brief is a structured snapshot of everything you currently know about a target, what you assume, what constrains you, and what you plan to do next.\n\n**An analogy.** Think of a military briefing before a mission. It states the objective, the known terrain, the uncertainties, the rules, and the plan — all on a single page the whole team can act from. The intelligence brief does the same for a security engagement."
+    },
+    {
+      "type": "content",
+      "body": "## What Makes a Good Brief\n\nA strong brief is not judged by how *complete* it is. It's judged by how *honest* it is. A good brief clearly separates three things:\n\n- **What you know** (validated facts).\n- **What you assume** (unvalidated hypotheses).\n- **What blocks you** (rules and constraints).\n\nAnyone reading it should instantly understand which decisions are settled, which are pending, and what information would unlock the pending ones. There should be zero ambiguity about what's ready to execute versus what's still on hold."
+    },
+    {
+      "type": "content",
+      "body": "## The Sections of a Brief\n\nA well-structured intelligence brief usually contains these sections:\n\n| Section | What it captures |\n|---|---|\n| **Target Summary** | The system, environment, and confirmed components |\n| **Crown Jewels** | Ranked assets and their current access status |\n| **Assumption Status** | Counts of validated / unvalidated / invalidated |\n| **Scope Constraints** | The rules that limit what you may do |\n| **Escalation Paths** | Prioritized paths with go/no-go status |\n| **Next Actions** | The concrete steps for the next work period |\n\nEach section maps directly to a skill from earlier lessons. The brief is where all those skills converge."
+    },
+    {
+      "type": "content",
+      "body": "## A Sample Brief for Aetherlink Sentri\n\nHere is a compact intelligence brief for our running example, written as it might look partway through an engagement."
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "INTELLIGENCE BRIEF — AETHERLINK SENTRI\nClassification: Client Confidential\nEngagement Day: 3 of 10\nBrief Version: 1.2\n\n=== TARGET SUMMARY ===\nPlatform:    Sentri (internal AI assistant)\nEnvironment: Kubernetes, hybrid cloud\nComponents:  7 confirmed (3 agents, 1 orchestrator,\n             1 tool server, 1 vector DB, 1 secrets manager)\nArchitecture confidence: HIGH (major components VALIDATED)\n\n=== CROWN JEWELS (ranked) ===\n#1  Cloud credentials   Secrets manager   [BEHIND 3 BOUNDARIES]\n#2  Detection rules     Vector DB         [OBTAINED]\n#3  Runbook corpus      Vector DB         [ACCESSIBLE]\n#4  Agent tokens        K8s secrets       [OBTAINED]\n#5  Model weights       Model registry    [ACCESS UNVALIDATED]\n#6  Tool schemas        Tool server       [OBTAINED]\n\n=== ASSUMPTION STATUS ===\nTotal: 12 | VALIDATED: 8 | UNVALIDATED: 3 | INVALIDATED: 1\n\nCritical unvalidated:\n  A-08: Action token authorizes cloud tool   [BLOCKS Path 1]\n  A-11: Tool requests unmonitored by content [BLOCKS Path 1]\n  Path 2 gate: Action Agent reads staging KB [BLOCKS Path 2]\n\n=== SCOPE CONSTRAINTS ===\nBLOCKED: Production knowledge base writes\nBLOCKED: Denial-of-service testing\nREQUIRED: Tool invocations reported within 24 hours\nREQUIRED: Testing window 08:00-20:00, Mon-Fri\n\n=== ESCALATION PATHS ===\nPATH-01: Direct Tool Abuse\n  Status: HOLD — pending A-08 + A-11\n  Priority: PRIMARY (if both hold)\n  Objective: Crown Jewel #1\n  Detection Risk: LOW (if requests unmonitored)\n\nPATH-02: Knowledge Poisoning\n  Status: HOLD — pending Path 2 gate\n  Priority: SECONDARY\n  Objective: Crown Jewel #1 (indirect)\n  Advantage: Agent-generated requests look normal\n\nPATH-03: Intelligence Extraction\n  Status: GO — executing now\n  Priority: SUPPORT (enables other paths)\n  Objective: Crown Jewel #2 (obtained), #3\n  Detection Risk: MEDIUM (bulk read may alert)\n\n=== NEXT ACTIONS ===\n1. Execute Path 3 — extract remaining collections\n2. Validate A-08 — test Action token on cloud tool\n3. Validate A-11 — check for content monitoring\n4. Test Path 2 gate — observe agent knowledge source\n5. Update brief to v1.3 with findings"
+    },
+    {
+      "type": "content",
+      "body": "## Reading the Brief\n\nLook at how much clarity that one page provides. Anyone picking it up immediately sees:\n\n- **Two crown jewels are already obtained** (#2 and #4). We don't need to work for those anymore.\n- **The primary target (#1) is behind three boundaries** and needs two assumptions validated first.\n- **Path 3 is running now**; Paths 1 and 2 are explicitly on HOLD with named blockers.\n- **The exact next actions** are numbered and ready.\n\nThere's no guessing. The brief converts a messy investigation into a crisp, shared understanding."
+    },
+    {
+      "type": "content",
+      "body": "## Version History Is a Decision Log\n\nNotice the brief says **Version 1.2**. Briefs are versioned, and the version history becomes a **decision log** — a record of how your understanding evolved.\n\n- **v1.0** — pre-engagement hypotheses only.\n- **v1.1** — updated after active recon; corrected wrong assumptions.\n- **v1.2** — added detection-rule intelligence and defined go/no-go gates.\n\nBy the end, the version history documents every assumption you formed, tested, and resolved. This is enormously valuable. It shows the client *how you navigated uncertainty*, not just what you found. Good reasoning under incomplete information is itself a deliverable."
+    },
+    {
+      "type": "note",
+      "body": "**The brief's honesty is its greatest strength.** A brief that pretends to know everything is dangerous — it hides risk. A brief that clearly labels its unknowns lets the whole team make smart decisions. Never dress up a guess as a fact in a brief. The status labels exist precisely to keep everyone honest."
+    },
+    {
+      "type": "content",
+      "body": "## The Brief as a Living Document\n\nThe intelligence brief is never \"finished\" mid-engagement. It updates constantly:\n\n1. You gather new intelligence.\n2. You update the assumption register.\n3. You revise crown-jewel rankings and paths.\n4. You bump the brief version and record what changed.\n\nThis loop mirrors the whole threat-modeling cycle. The brief is simply the place where the current state of that cycle is written down for everyone to see."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Gather new\\nintelligence\"] --> B[\"Update assumption\\nregister\"]\n    B --> C[\"Revise crown jewels\\n& paths\"]\n    C --> D[\"Bump brief\\nversion\"]\n    D --> A"
+    },
+    {
+      "type": "content",
+      "body": "## Briefs for Different Audiences\n\nThe same underlying intelligence can be presented differently depending on who reads it.\n\n| Audience | What they want |\n|---|---|\n| **Engagement team** | Detailed paths, gates, and next actions |\n| **Client technical staff** | Findings, risks, and recommended fixes |\n| **Executives / CISO** | The single biggest risk and its business impact |\n\nA CISO doesn't want your assumption register. They want one clear sentence: *\"The most impactful fix is X, because we proved Y.\"* Learn to compress the brief for each audience without losing honesty."
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes\n\n- **Hiding uncertainty.** A brief that omits unknowns is a brief that misleads.\n- **No version history.** Without it, you lose the decision log — half the value.\n- **Mixing facts and guesses.** Always keep validated and unvalidated clearly separated.\n- **Writing for the wrong audience.** A raw brief overwhelms an executive; a summary underserves an engineer.\n- **Never updating it.** A stale brief is worse than no brief."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- An **intelligence brief** is a structured snapshot of everything known, assumed, constrained, and planned — one honest page can align an entire team.\n- Its value comes from **honesty**, not completeness — separate what you know, what you assume, and what blocks you.\n- Standard sections: target summary, crown jewels, assumption status, scope constraints, escalation paths, next actions.\n- Briefs are **versioned**, and the version history is a valuable **decision log** — as valuable as the findings themselves.\n- The brief is a **living document**, updated every cycle.\n- Tailor the presentation to the **audience** without losing honesty — a CISO wants one sentence, an engineer wants the whole tree.\n\nNext, we consolidate the discipline into **best practices**."
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "slug": "03-orchestration",
+  "title": "Orchestration Pipelines",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Orchestration Pipelines\n\nOnce you have several agents, something has to decide who does what, and in what order. That job belongs to orchestration.\n\nOrchestration is the process of coordinating multiple agents to complete a task together. The agent, or piece of logic, that does this coordinating is often called the orchestrator, coordinator, or supervisor.\n\n**A simple comparison:** an orchestrator works like a movie director. The actors, in this case the agents, each have their own talent, but the director decides who's on stage, when they speak, and how their individual scenes connect together.\n\n## Common agent roles\n\nBefore looking at specific patterns, it helps to know the common job titles agents tend to take on:\n\n- **Planner Agent** — breaks a large request down into smaller, manageable steps.\n- **Worker Agent** — does one specific job, such as fetching data or writing text.\n- **Supervisor Agent** — checks or approves the work produced by other agents.\n- **Coordinator / Orchestrator** — routes tasks and passes results back and forth between agents.\n\n## Coordination patterns\n\nThere are four common ways to wire agents together. Each one comes with different strengths and different security weaknesses. Understanding them is essential, because each pattern hands an attacker a different way in."
+    },
+    {
+      "type": "content",
+      "body": "### 1. Orchestrator pattern (hub-and-spoke)\n\nA central agent sits in the middle and controls everyone else. All requests flow through it.\n\n- Strength: easy to manage and monitor centrally.\n- Weakness: it's a single point of failure. If an attacker compromises the orchestrator itself, they effectively control the entire system."
+    },
+    {
+      "type": "diagram",
+      "src": "graph TD\n    O((Orchestrator)) --> A[Agent A]\n    O --> B[Agent B]\n    O --> C[Agent C]"
+    },
+    {
+      "type": "content",
+      "body": "### 2. Peer-to-peer pattern (mesh)\n\nAgents talk directly to each other with no central boss coordinating them.\n\n- Strength: no single point of failure exists.\n- Weakness: trust propagation. If one agent is compromised, it can poison all of its peers. It's also relatively easy to sneak a rogue agent directly into the mesh."
+    },
+    {
+      "type": "diagram",
+      "src": "graph LR\n    A[Agent A] --- B[Agent B]\n    B --- C[Agent C]\n    C --- A\n    A --- C"
+    },
+    {
+      "type": "content",
+      "body": "### 3. Hierarchical pattern (tree)\n\nAgents are arranged in layers, similar to a company org chart. Higher-level agents supervise the lower-level ones.\n\n- Strength: a clear, well-defined chain of command.\n- Weakness: vertical privilege escalation. If an attacker successfully fakes a message from a high-level agent, low-level agents may end up obeying unauthorized commands."
+    },
+    {
+      "type": "diagram",
+      "src": "graph TD\n    S[Supervisor] --> M1[Manager 1]\n    S --> M2[Manager 2]\n    M1 --> W1[Worker 1]\n    M1 --> W2[Worker 2]\n    M2 --> W3[Worker 3]"
+    },
+    {
+      "type": "content",
+      "body": "### 4. Pipeline pattern (chain)\n\nAgents run one after another in sequence. Each agent's output becomes the next agent's input, similar to an assembly line.\n\n- Strength: simple and highly predictable.\n- Weakness: capability jumping. A malicious payload injected at an early, low-privilege stage can survive down the entire chain and end up executing at a later, high-privilege stage."
+    },
+    {
+      "type": "diagram",
+      "src": "graph LR\n    I[Input] --> A[Stage 1: Fetch]\n    A --> B[Stage 2: Build]\n    B --> C[Stage 3: Review]\n    C --> O[Output]"
+    },
+    {
+      "type": "content",
+      "body": "## A sneaky real-world detail\n\nSystems often look like one pattern on the surface but are actually built as another underneath. For example, the sales workflow attacked later in this module behaves like a pipeline (fetch, then build, then scan), but under the hood it actually uses a hub-and-spoke orchestrator that calls each agent in turn.\n\nThis matters a great deal for attackers: because the orchestrator decides everything using natural language, it may be possible to talk it into changing that order, for example, by skipping the security scan step entirely.\n\n## How LLM orchestration creates risk\n\nHere's the heart of the danger. Many orchestrators today are powered by an LLM that reads the user's request in plain English and decides which agents to call based on that.\n\nThe same flexibility that makes this approach powerful also makes it relatively easy to manipulate. If a request is phrased cleverly enough, the LLM orchestrator might:\n\n- Skip a safety step it was originally supposed to run.\n- Call an agent it shouldn't have called at all.\n- Pass along data it should have filtered out first.\n\nThis exact behavior is exploited directly in the Workflow Integrity Attacks lesson later in this module."
+    },
+    {
+      "type": "note",
+      "body": "**Key insight:** when an LLM decides the workflow using natural language, that workflow becomes attackable using natural language too. Words effectively become control commands."
+    },
+    {
+      "type": "content",
+      "body": "## Popular orchestration frameworks\n\nYou'll encounter these specific tools in real engagements. Each one has its own typical weak spots worth knowing.\n\n| Framework | Style | Common Weakness |\n|---|---|---|\n| LangGraph | Graph-based, stateful | State/checkpoint data can leak or be tampered |\n| AutoGen | Conversation-driven | Code-execution agents give direct RCE; any agent can hijack the chat |\n| CrewAI | Role-based delegation | Role prompts can be overridden; memory can be poisoned |\n| OpenAI Swarm | Lightweight handoffs | Weak handoff checks; context variables carry injection |\n\n## Summary\n\n- Orchestration decides which agents act, and in what order.\n- There are four main patterns: Orchestrator (hub), Peer-to-peer (mesh), Hierarchical (tree), and Pipeline (chain).\n- Each pattern carries its own signature weakness: single point of failure, trust propagation, privilege escalation, and capability jumping.\n- LLM-driven orchestration can be manipulated through clever wording alone.\n\n## Key Takeaways\n\n- Learn all four patterns and their respective weaknesses well, since both exams and real engagements test this knowledge.\n- The real underlying implementation may differ from the pattern that's visible on the surface, so always verify it directly.\n- Natural-language orchestration is the doorway that leads directly to workflow attacks."
+    }
+  ]
+}

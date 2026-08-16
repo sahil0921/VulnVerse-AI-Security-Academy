@@ -1,0 +1,50 @@
+{
+  "slug": "08-defense-modes",
+  "title": "Defense Modes",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Defending Against Evasion\n\nNow we switch sides. How do we actually stop GoodWords-style attacks? No single fix here is perfect, so real systems layer several defenses together, a strategy known as defense-in-depth.\n\nYour lab hub exposes three defense modes on the evasion labs: VULN (no defense at all), HARD (defenses turned on), and GUARD (detection focus). Understanding what each one actually does builds real, practical intuition."
+    },
+    {
+      "type": "content",
+      "body": "## The three modes at a glance\n\n| Mode | Meaning | What it teaches |\n|---|---|---|\n| VULN | Fully vulnerable, no protection | How the raw attack works |\n| HARD | Hardened with active mitigations | How defenses change attack cost |\n| GUARD | Detection and monitoring emphasis | How to catch an attack in progress |\n\n**A simple comparison:** VULN is an unlocked house. HARD adds locks and reinforced doors. GUARD adds cameras and an alarm that actually calls for help."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TB\n    A[Incoming message] --> B{Defense mode}\n    B -->|VULN| C[Classify directly]\n    B -->|HARD| D[Apply mitigations then classify]\n    B -->|GUARD| E[Classify plus log and alert]\n    C --> F[Decision]\n    D --> F\n    E --> F\n    E --> G[Anomaly signals to SIEM]"
+    },
+    {
+      "type": "content",
+      "body": "## Defense 1: feature-level mitigations (HARD)\n\nSince GoodWords works by padding messages with unrelated words, several countermeasures attack that padding directly:\n\n- **Length and ratio checks** — flag messages where appended tokens far outnumber the actual core content.\n- **Semantic coherence checks** — does the message genuinely make sense, or is it spam text glued together with random ham words?\n- **Feature capping** — limit how much a single word can shift the overall score, reducing the payoff of simply piling on more words.\n- **N-gram features** — consider word pairs, or bigrams, so \"free money\" stays suspicious even when good words follow it. This directly breaks the naive independence assumption the attack relies on."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "def coherence_guard(message, max_pad_ratio=0.5):\n    \"\"\"HARD-mode style check: reject obvious good-word padding.\n    Flags messages where too many low-context words are appended.\"\"\"\n    words = message.split()\n    if len(words) < 5:\n        return {\"suspicious\": False}\n\n    # crude 'padding' heuristic: burst of short conversational fillers\n    fillers = {\"ok\", \"thanks\", \"later\", \"sure\", \"yeah\", \"meeting\",\n               \"tomorrow\", \"sorry\", \"today\", \"see\", \"know\"}\n    pad = sum(1 for w in words if w.lower() in fillers)\n    ratio = pad / len(words)\n    return {\"suspicious\": ratio > max_pad_ratio, \"pad_ratio\": round(ratio, 2)}"
+    },
+    {
+      "type": "content",
+      "body": "## Defense 2: model hardening (HARD)\n\nStronger models resist evasion far better than plain Naive Bayes:\n\n- **Ensembles** — combine several different models together so one single word set can't fool all of them at once.\n- **Adversarial training** — train the model directly on examples that include GoodWords attacks, essentially teaching it the trick in advance.\n- **Non-linear models** — logistic regression with interaction terms, or neural networks, that actually consider context rather than relying on pure word counts.\n\nEach of these approaches raises the cost of a successful attack, meaning the attacker needs more queries, more words, or a genuinely cleverer approach to succeed."
+    },
+    {
+      "type": "content",
+      "body": "## Defense 3: detection and monitoring (GUARD)\n\nYou can't block every possible attack, so you need to at least be able to see one happening. GUARD mode focuses specifically on catching attacks while they're still in progress:\n\n- **Query pattern analysis** — many near-identical messages differing only by which words were appended is a massive red flag.\n- **Rate anomalies** — a sudden burst of borderline, near-0.5 classifications signals active probing underway.\n- **Message drift** — the same user sending steadily longer, increasingly padded messages over time.\n- **Logging to a SIEM** — ship these signals to a proper monitoring system. Your platform ships a Kibana plus Elasticsearch stack for exactly this purpose."
+    },
+    {
+      "type": "content",
+      "body": "## Comparing defense effectiveness\n\n| Defense | Stops attack? | Slows attack? | Detects attack? |\n|---|---|---|---|\n| Coherence checks | Sometimes | Yes | Partly |\n| Feature capping | No | Yes | No |\n| N-gram features | Often | Yes | No |\n| Ensembles | Often | Yes | No |\n| Adversarial training | Often | Yes | No |\n| Query monitoring | No | No | Yes |\n\nThe honest truth here: no single row in this table is enough on its own. Blocking, slowing, and detecting are three genuinely different jobs, and you need all three working together."
+    },
+    {
+      "type": "note",
+      "body": "**Why detection matters even when blocking fails:** a determined black-box attacker will eventually find a working word set no matter what. If you can't prevent that outright, you at least need to notice it happening, ideally before the attack has a chance to scale up. GUARD mode exists specifically to make that noise visible in your logs."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- No single defense fully stops evasion on its own, so use defense-in-depth instead.\n- VULN, HARD, and GUARD modes teach attack, mitigation, and detection respectively.\n- HARD directly attacks the padding technique through coherence checks, capping, n-grams, ensembles, and adversarial training.\n- GUARD watches for probing patterns and ships signals to a proper SIEM.\n- Blocking, slowing, and detecting are three separate jobs, make sure to cover all three."
+    }
+  ]
+}

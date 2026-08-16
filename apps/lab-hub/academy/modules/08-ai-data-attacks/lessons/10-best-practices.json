@@ -1,0 +1,42 @@
+{
+  "slug": "10-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Best Practices for AI Data Security\n\nThis lesson pulls everything covered in this module together into a practical defense playbook. If you secure your data lifecycle well, most of the attacks covered here become far harder to actually pull off.\n\nThe core mindset: treat data with the same suspicion you'd treat code. Every dataset, every label, and every model file is a potential attack vector until proven otherwise."
+    },
+    {
+      "type": "content",
+      "body": "## Map the defenses to the attacks\n\n| Attack | Primary Defense |\n|--------|-----------------|\n| Label flipping | Trusted, audited, consensus labeling |\n| Clean-label | Feature-integrity checks, robust training |\n| Backdoors/Trojans | Trusted sources, model scanning, provenance |\n| Pickle RCE | safetensors, weights_only=True, sandboxing |\n| Tensor steganography | Model scanning, integrity hashes |\n| Package hallucination | Verify + allowlist packages |\n| Abuse evasion | Normalise input, semantic detection |\n| Online poisoning | Rate limiting, human review of feedback |"
+    },
+    {
+      "type": "content",
+      "body": "## Secure the data lifecycle, stage by stage\n\n**Collection**\n- Rate-limit and de-duplicate user submissions.\n- Validate the format, range, and type of every incoming record.\n- Track the source of every single data point, meaning its provenance.\n\n**Labeling**\n- Restrict who can assign or edit labels, following the principle of least privilege.\n- Use consensus labeling along with clear audit trails.\n- Cross-check labels regularly against a trusted reference model.\n\n**Storage**\n- Encrypt data both at rest and in transit.\n- Enforce strict access controls on datasets and model files alike.\n- Store cryptographic hashes to detect any tampering after the fact.\n\n**Training / Retraining**\n- Never auto-retrain on data that hasn't been validated first.\n- Keep a clean \"golden\" dataset around for comparison purposes.\n- Monitor for distribution shifts, which are a warning sign of possible poisoning.\n\n**Deployment**\n- Load only from safe formats, such as safetensors.\n- Scan and verify model files before ever loading them.\n- Sandbox any untrusted models before trusting them fully."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TB\n    A[Provenance: know the source] --> B[Validation: check every input]\n    B --> C[Integrity: hash + verify]\n    C --> D[Least Privilege: limit access]\n    D --> E[Monitoring: watch for drift]\n    E --> F[Human Review: for the risky cases]\n    style A fill:#4f8cff,color:#fff\n    style F fill:#22c55e,color:#000"
+    },
+    {
+      "type": "content",
+      "body": "## The six pillars of AI data security\n\n1. **Provenance** — know exactly where every piece of data and every model came from. If you can't trace it, you shouldn't trust it.\n2. **Validation** — check all incoming data for format, range, and anomalies before it's allowed into the pipeline.\n3. **Integrity** — use hashes and signatures so that any tampering becomes immediately detectable.\n4. **Least Privilege** — give both people and systems the minimum access they genuinely need. A compromised account shouldn't be able to edit training data freely.\n5. **Monitoring** — watch closely for data drift, unusual submission patterns, and behavior changes that hint at ongoing poisoning.\n6. **Human Oversight** — keep humans in the loop for high-stakes decisions and any genuinely suspicious samples."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# A defensive data intake function combining several best practices\nimport hashlib\n\ndef secure_intake(record, user_id):\n    # 1. Rate limiting (stops mass poisoning)\n    if submissions_today(user_id) > MAX_PER_USER:\n        raise ValueError(\"Rate limit exceeded\")\n\n    # 2. Validation (format, range, type)\n    if not is_valid_schema(record):\n        raise ValueError(\"Invalid record format\")\n\n    # 3. Duplicate / bot detection\n    if is_duplicate(record):\n        raise ValueError(\"Duplicate submission\")\n\n    # 4. Anomaly detection -> route odd data to a human\n    if is_outlier(record):\n        queue_for_human_review(record)\n        return \"queued\"\n\n    # 5. Provenance + integrity: record source and a content hash\n    record[\"source\"] = user_id\n    record[\"hash\"] = hashlib.sha256(str(record[\"data\"]).encode()).hexdigest()\n\n    store_trusted(record)\n    return \"accepted\""
+    },
+    {
+      "type": "note",
+      "body": "**Remember:** no single control stops every attack on its own. Real security comes from layering these practices together, so that defeating one control doesn't defeat the entire system. This is defense in depth, applied specifically to data."
+    },
+    {
+      "type": "content",
+      "body": "## Framework alignment\n\nThese practices map directly onto established industry standards:\n\n- **OWASP LLM04 (Data and Model Poisoning)** — addressed directly through provenance, validation, and monitoring.\n- **OWASP LLM03 (Supply Chain)** — addressed through trusted sources, model scanning, and integrity checks.\n- **Google SAIF** — its principles of Secure Data, Secure Supply Chain, and Secure Monitoring & Response line up closely with the six pillars covered above.\n\nKnowing these frameworks helps you justify security work to stakeholders and structure assessments in a way that's easy to communicate.\n\n## Summary\n\n- Treat data like code: assume it's hostile until it's been properly validated.\n- Secure every single stage of the data lifecycle, not just one part of it.\n- Follow the six pillars: provenance, validation, integrity, least privilege, monitoring, and human oversight.\n- Layer your defenses, since no single control is ever enough on its own.\n\n## Key Takeaways\n\n- Provenance, validation, and integrity together stop most poisoning attempts.\n- Safetensors, scanning, and sandboxing together stop most model-file attacks.\n- Defense in depth is the unifying principle behind all of AI data security."
+    }
+  ]
+}

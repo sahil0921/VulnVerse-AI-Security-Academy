@@ -1,0 +1,38 @@
+{
+  "slug": "09-defenses",
+  "title": "Defenses & Mitigations",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Defending the RAG Pipeline\n\nNow we flip perspective. You've seen how each component of a RAG system can be attacked. This lesson shows how defenders actually secure those same components, detect ongoing attacks, and respond effectively.\n\nThe guiding principle here: treat retrieved content as untrusted data, and tightly control who can read or write to the knowledge base. Almost every meaningful RAG defense flows directly from those two ideas."
+    },
+    {
+      "type": "content",
+      "body": "## Defense by layer\n\n| Pipeline stage | Threat | Primary defense |\n|---|---|---|\n| Upload / ingestion | Poisoning, collision | Authenticated, role-based upload + content review |\n| Chunking / storage | Hidden instructions | Unicode normalization, full-document scanning |\n| Vector + keyword store | Unauthorized retrieval | Per-chunk access control via metadata |\n| Retrieval | Hijacking, injection | Separate data from instructions in the prompt |\n| Tool execution | File read, web request abuse | Re-validate every tool argument, least privilege |\n| Output | Secret leakage | Meaning-based redaction, output validation |\n| All stages | Stealthy campaigns | Tracing, anomaly detection, version history |\n\n---\n\n## Defense 1: Access control on the knowledge base\n\nThis is the single most effective fix for information extraction attacks. Tag every chunk with metadata, such as department, clearance level, and sensitivity, and filter retrieval based on the caller's actual identity. A chunk the user isn't authorized to access should never reach the model in the first place.\n\nLeast privilege means giving each part of the system only the permissions it genuinely needs. The RAG service itself should run as a low-privilege user, and its file-read or web-request tools should be tightly scoped to only what's necessary."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Defense-in-depth retrieval: access control + Unicode normalization.\n\nimport unicodedata\n\ndef normalize_text(text):\n    # Strip zero-width and control characters that hide instructions.\n    cleaned = \"\".join(\n        ch for ch in text\n        if unicodedata.category(ch)[0] != \"C\"  # drop control/format chars\n    )\n    # Collapse homoglyphs to a canonical form.\n    return unicodedata.normalize(\"NFKC\", cleaned)\n\ndef secure_retrieve(query, user, vector_db, bm25, embed, k=6):\n    query = normalize_text(query)\n    candidates = vector_db.search(embed(query), top_k=30)\n    candidates += bm25.search(query, limit=30)\n\n    # Enforce per-chunk access control.\n    allowed = [\n        c for c in candidates\n        if user.clearance >= c.metadata[\"required_clearance\"]\n        and not c.metadata.get(\"is_secret\", False)\n    ]\n    return allowed[:k]"
+    },
+    {
+      "type": "content",
+      "body": "## Defense 2: Separate data from instructions\n\nRetrieval hijacking works precisely because the model treats retrieved text as commands. The real fix here is architectural: clearly mark retrieved content as reference data only, and never let it directly drive privileged actions.\n\n- Wrap retrieved chunks in explicit markers and instruct the model to treat that content purely as reference material.\n- Re-apply your input filters to tool arguments as well, regardless of where those arguments actually came from. A file path is dangerous whether the user typed it directly or a document happened to contain it.\n- Maintain a strict allow-list of readable paths and reachable URLs at all times.\n\n## Defense 3: Sanitize before ingestion\n\nDon't pour raw data directly into the knowledge base. Before indexing anything:\n\n- Redact secrets, such as keys, passwords, and connection strings, so they're never retrievable in the first place.\n- Normalize Unicode and reject documents containing suspicious invisible characters.\n- Scan the full document, not just a preview, for embedded instructions and off-topic content.\n- Record provenance: who uploaded it, when, and from where it originated."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    U[Upload] --> AUTH[Authenticate and authorize uploader]\n    AUTH --> SCAN[Full-document scan and Unicode normalize]\n    SCAN --> RED[Redact secrets before indexing]\n    RED --> TAG[Tag chunks with source and access level]\n    TAG --> IDX[Index into vector and keyword stores]\n    Q[User query] --> AC[Access-control filter by identity]\n    IDX --> AC\n    AC --> SEP[Mark chunks as data only]\n    SEP --> LLM[LLM]\n    LLM --> TOOLG[Re-validate any tool call]\n    TOOLG --> OUT[Output redaction and validation]\n    OUT --> LOG[Trace and anomaly detection]"
+    },
+    {
+      "type": "content",
+      "body": "## Defense 4: Detection and monitoring\n\nEvery attack covered in this module leaves some kind of trace, if you know exactly where to look.\n\n**What to log and watch closely:**\n\n- **Ingestion events** — full content, uploader, timestamp, and a diff against previous versions of the same document.\n- **Retrieval traces** — exactly which chunks were returned for which query, along with their scores.\n- **Tool calls** — every single file read and web request made, along with their arguments.\n\n**Anomalies that tend to signal an attack:**\n\n| Signal | Likely attack |\n|---|---|\n| One document matching many unrelated query clusters | Embedding collision |\n| Identical URL or instruction across many topics | Ingestion poisoning / collision |\n| Invisible Unicode or off-topic paths in a document | Encoding evasion |\n| A document with a slowly evolving edit history | Slow-drip poisoning |\n| Tool call to a sensitive path from retrieved context | Retrieval hijacking |\n| Sudden flood of benign edits | Event-fatigue cover |\n\nCrucially, always compare cumulative version history, not just the latest change. That's the only reliable way to actually catch slow-drip poisoning in progress."
+    },
+    {
+      "type": "note",
+      "body": "**Guardrails are necessary but not sufficient.** Input and output filters catch the obvious and the lazy attacks. They don't reliably stop encoding tricks, indirect instructions, or trusted-context injection on their own. Real security comes from architecture: access control, data-instruction separation, least privilege, ingestion sanitization, and active monitoring, all layered together. No single control here is ever enough on its own."
+    }
+  ]
+}

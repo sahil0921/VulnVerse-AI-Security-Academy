@@ -1,0 +1,34 @@
+{
+  "slug": "03-model-fingerprinting",
+  "title": "Embedding Model Fingerprinting",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Vector Databases and Similarity Search\n\nNow that we know what embeddings actually are, let's understand where they live and how they get searched. This lesson also covers the most important reconnaissance skill in this module: fingerprinting the embedding model.\n\n## Why a special database?\n\nA normal SQL database is built to answer questions like \"find the row where id = 42.\" A vector database answers a completely different kind of question:\n\n> \"Find the vectors that are most similar to this one.\"\n\nThis is called Nearest Neighbor Search. Doing it across millions of vectors, quickly, is genuinely hard, which is exactly why dedicated vector databases exist.\n\n| Vector DB | Style | Notes |\n| --- | --- | --- |\n| FAISS | Library | Local, fast, no server |\n| Chroma | Embedded / server | Popular for RAG prototypes |\n| Qdrant | Server | Rich filtering + metadata |\n| Milvus | Server | Built for huge scale |\n| Weaviate | Server | GraphQL API, built-in vectorizers |\n| Pinecone | Managed cloud | Fully hosted |"
+    },
+    {
+      "type": "content",
+      "body": "## How similarity is measured\n\nTo find \"similar\" vectors, the database needs a way to measure distance between two number lists. Three methods dominate in practice:\n\n| Method | Idea (plain English) | Best for |\n| --- | --- | --- |\n| Cosine similarity | Do the two vectors point in the same direction? | Meaning comparison (most common) |\n| Euclidean distance | How far apart are the two points? | When magnitude matters |\n| Dot product | Direction + length combined | Fast, used in many models |\n\nCosine similarity ranges from -1, meaning opposite, to 1, meaning identical direction. In practice, two chunks about the same topic typically score around 0.85 or higher, while unrelated chunks score around 0.1 to 0.5. This gap is exactly what powers both search and, later, attacks against it.\n\n## Fast search: ANN and indexing\n\nChecking every single vector, called exact search, is far too slow at real scale. So vector DBs use Approximate Nearest Neighbor (ANN) search instead, slightly less accurate, but massively faster.\n\n- **HNSW** — builds a layered graph of vectors, then walks the graph to find neighbors quickly. The most common ANN index used today.\n- **IVF** — groups vectors into clusters, and only searches the nearest clusters rather than everything.\n- **PQ (Product Quantization)** — compresses vectors into smaller codes to save memory. Important for attackers to know: PQ destroys fine detail, which makes inversion attacks meaningfully harder."
+    },
+    {
+      "type": "content",
+      "body": "## Reconnaissance: fingerprinting the model\n\nMost embedding inversion attacks require knowing exactly which embedding model produced the vectors in the first place. Here's how a red teamer figures that out, from easiest to hardest.\n\n**1. Check the config.** Many vector DBs can generate embeddings themselves. The schema, environment variables, or config files often name the model directly.\n\n**2. Fingerprint by dimensionality.** Count the numbers in one vector. A length of 384 strongly suggests all-MiniLM-L6-v2. But many models share the same dimension count, so this only narrows down the list.\n\n**3. OSINT.** Company GitHub repositories, requirements.txt files, conference talks, and public documentation often reveal the exact model in use.\n\n**4. Inference probing.** The most powerful technique available when OSINT comes up empty, covered in detail below."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\nfrom sentence_transformers import SentenceTransformer\n\n# Suppose we exported the target's vectors\nstolen = np.load(\"export/embeddings.npy\")\nprint(\"Dimension:\", stolen.shape[1])   # e.g. 384\n\n# 384 narrows it to a handful of candidate models.\n# Inference probing then confirms WHICH one:\n#   1. Ask the RAG chatbot questions.\n#   2. Split each answer into sentences and sentence-pairs.\n#   3. Embed those segments with each candidate model.\n#   4. Compare to the stolen vectors using cosine similarity.\n# The CORRECT model produces segments that score ~0.90+,\n# while wrong models score ~0.5-0.6 even on identical text,\n# because their embedding spaces have different geometry.\n\ncandidates = [\"all-MiniLM-L6-v2\", \"multi-qa-MiniLM-L6-cos-v1\"]\nfor name in candidates:\n    m = SentenceTransformer(name)\n    probe = m.encode([\"navigate to the login portal to reset your password\"])\n    sim = float(np.dot(probe[0], stolen[0]) /\n                (np.linalg.norm(probe[0]) * np.linalg.norm(stolen[0])))\n    print(f\"{name}: cosine={sim:.3f}\")"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Stolen vectors\"] --> B[\"Count dimensions\"]\n    B --> C[\"Shortlist candidate models\"]\n    C --> D[\"Ask RAG chatbot questions\"]\n    D --> E[\"Embed the answers with each candidate\"]\n    E --> F[\"Compare to stolen vectors\"]\n    F --> G{\"Which model scores highest?\"}\n    G --> H[\"Identified embedding model\"]"
+    },
+    {
+      "type": "note",
+      "body": "**Why inference probing works:** every RAG query silently embeds your question and retrieves stored chunks behind the scenes. The chatbot's answer therefore leaks the actual content of those stored chunks. By embedding those answers with each candidate model and comparing them to the stolen vectors, only the true model lines up correctly, because embedding geometry is model-specific even when the dimension counts happen to match."
+    }
+  ]
+}

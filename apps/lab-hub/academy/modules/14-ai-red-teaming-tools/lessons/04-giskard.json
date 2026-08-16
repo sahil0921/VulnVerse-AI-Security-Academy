@@ -1,0 +1,17 @@
+{
+  "slug": "04-giskard",
+  "title": "Giskard",
+  "type": "content",
+  "difficulty": "Advanced",
+  "reading_time": "8 min read",
+  "sections": [
+    {"type": "content", "body": "## What Is Giskard\n\nGiskard is a testing framework built around **dynamic, multi-turn stress testing** of RAG pipelines, chatbots, and agents — rather than a fixed probe library, it generates adversarial test cases tailored to your specific application by first learning what your bot is supposed to do, then trying to break that behavior."},
+    {"type": "content", "body": "## Best For\n\n- RAG chatbots and customer-support-style bots where you need to test hallucination, factual consistency, and off-topic drift — not just jailbreaks\n- Multi-turn conversations where an attack unfolds over several messages rather than a single payload\n- CI integration — Giskard can run as a scheduled test suite against a staging deployment, similar to how you'd run unit tests"},
+    {"type": "code", "language": "bash", "body": "pip install giskard\n\n# Optional: LLM-specific extras\npip install \"giskard[llm]\""},
+    {"type": "content", "body": "## Core Workflow\n\n1. **Wrap** your model/chatbot in a Giskard `Model` object\n2. **Scan** — Giskard auto-generates test cases across categories (hallucination, harmfulness, prompt injection, sensitive info disclosure, robustness)\n3. **Review** the generated report — each finding includes the exact input that triggered it and the problematic output"},
+    {"type": "code", "language": "python", "body": "import giskard\n\ndef model_predict(df):\n    # df has a 'question' column; return the chatbot's answers\n    return [call_my_rag_chatbot(q) for q in df[\"question\"]]\n\ngiskard_model = giskard.Model(\n    model=model_predict,\n    model_type=\"text_generation\",\n    name=\"Support RAG Bot\",\n    description=\"Answers customer questions using the internal knowledge base.\",\n    feature_names=[\"question\"],\n)\n\nreport = giskard.scan(giskard_model)\nreport.to_html(\"giskard_report.html\")"},
+    {"type": "content", "body": "## Example Output\n\n```\nScanning model 'Support RAG Bot'...\n\n[Hallucination]        3 issues found\n  - Bot invented a refund policy not present in the knowledge base\n[Prompt Injection]     2 issues found\n  - Bot leaked internal system prompt when asked to 'repeat everything above'\n[Sensitive Disclosure] 1 issue found\n  - Bot revealed an internal API endpoint name when pressed for 'debug info'\n[Robustness]           4 issues found\n  - Bot's answer changed materially when the same question was rephrased\n\nFull report: giskard_report.html\n```"},
+    {"type": "note", "body": "Giskard's hallucination and factual-consistency checks are its real edge over pure jailbreak scanners — it's built to answer 'is this RAG bot lying to users,' not just 'can I jailbreak it.' Pair it with Garak (broad jailbreak coverage) rather than treating it as a replacement."},
+    {"type": "content", "body": "## When to Reach for Giskard\n\nUse Giskard specifically when your target is a **RAG or knowledge-grounded chatbot** and you care about factual reliability as much as jailbreak resistance — it's the tool built for that exact combination."}
+  ]
+}

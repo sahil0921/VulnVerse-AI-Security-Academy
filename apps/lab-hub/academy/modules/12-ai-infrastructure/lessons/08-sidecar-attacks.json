@@ -1,0 +1,51 @@
+{
+  "slug": "08-sidecar-attacks",
+  "title": "Sidecar Container Attacks",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Sidecar Container Attacks\n\nUp to now we attacked *between* pods. This lesson goes *inside* a single pod. Pods often run several containers together, and that closeness creates a special attack surface unique to AI pipelines.\n\n## What Is a Sidecar?\n\nA **pod** can hold more than one container. The main container does the real work. The extra helper containers are called **sidecars**.\n\n**Analogy:** Picture a motorcycle with a sidecar attached. The motorcycle (main container) does the driving. The sidecar carries a passenger who helps — reads the map, handles the radio, takes photos. They travel together and share the same ride.\n\nCommon sidecar jobs in AI:\n\n- **Pre-processor** — cleans and prepares input before the model sees it\n- **Post-processor** — formats the model's output\n- **Log collector** — gathers logs and metrics\n- **Proxy** — handles network traffic (service mesh)\n\n## What Is an Init Container?\n\nAn **init container** runs *once, before* the main containers start, then exits. Its job is setup.\n\n**Common use:** pulling model files from storage and placing them in a shared folder so the main container can load them.\n\n**Analogy:** The init container is the stagehand who sets up the props before the play begins, then leaves the stage."
+    },
+    {
+      "type": "content",
+      "body": "## Why Sidecars Are a Security Risk\n\nAll containers in a pod **share two things**:\n\n1. **The same network** — they can talk to each other on `localhost`.\n2. **Shared volumes** — folders both containers can read and write.\n\nThis sharing is the whole point (easy data handoff), but it is also the danger:\n\n> **If an attacker controls ONE container in a pod, they can often reach data flowing through ALL of them.**\n\nA compromised sidecar sits right next to the model, sharing its data pipes. That is a powerful position."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    subgraph Pod\n    Init[Init Container<br/>model-loader] -.writes.-> V[Shared Volume<br/>/models]\n    PRE[Pre-processor<br/>sidecar] <-->|read/write| Q[Shared Volume<br/>/queue]\n    INF[Inference<br/>main container] <-->|read/write| Q\n    POST[Post-processor<br/>sidecar] <-->|read/write| Q\n    INF -.reads.-> V\n    end\n    ATT[Attacker in sidecar] -->|tampers| Q\n    style ATT fill:#ef4444,color:#fff\n    style Q fill:#f59e0b,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## The Shared Volume Attack\n\nHere is the key attack. Imagine a data pipeline where requests flow through a shared folder (`/queue`) that three containers can all write to:\n\n1. Pre-processor writes cleaned input to `/queue`.\n2. Inference container reads from `/queue`, runs the model.\n3. Post-processor reads results from `/queue`.\n\nIf you compromise the pre-processor sidecar, you can:\n\n- **Read every request** flowing through (data theft)\n- **Modify requests** before the model sees them (tampering)\n- **Inject fake requests** to probe the model\n- **Write false log entries** to hide your tracks\n\n### A Concrete Example\n\nSuppose the model classifies safety incidents as `critical`, `elevated`, or `routine`. From the sidecar you rewrite incoming reports — swapping `critical` keywords for `routine` ones — so genuine emergencies get downgraded and ignored. You never touched the model, yet you broke its results."
+    },
+    {
+      "type": "content",
+      "body": "## Reading the Shared Data\n\nIf your identity has `pods/exec`, you can enter any specific container in a pod using `-c`:\n\n```bash\n# Exec into the pre-processor sidecar specifically\nkubectl exec -it model-pipeline -c pre-processor \\\n  -n ml-inference -- /bin/sh\n\n# Now read the shared request queue\nls /queue/requests/\ncat /queue/requests/req_0001.json\n```\n\nYou are now reading live data flowing through the AI pipeline."
+    },
+    {
+      "type": "content",
+      "body": "## Init Container Leftovers\n\nInit containers often leave things behind in shared volumes that they should have cleaned up. Because they run setup tasks, they might:\n\n- Download a model *and* its config with embedded credentials\n- Leave a **temporary credentials file** used to fetch the model\n- Write scripts containing secrets\n\nAfter the init container exits, these leftovers stay in the shared volume where the main container — and any attacker in the pod — can read them:\n\n```bash\nls -la /models/\n# model.bin\n# config.json\n# .aws-creds        <-- leftover credentials from the init container\n```\n\nAlways inspect what init containers left behind."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "body": "# VULNERABLE: shared volume writable by all containers\napiVersion: v1\nkind: Pod\nmetadata:\n  name: model-pipeline\nspec:\n  volumes:\n    - name: request-queue\n      emptyDir: {}\n  containers:\n    - name: pre-processor\n      image: preprocessor:latest\n      volumeMounts:\n        - name: request-queue\n          mountPath: /queue          # writable - can tamper\n    - name: inference\n      image: model-server:latest\n      volumeMounts:\n        - name: request-queue\n          mountPath: /queue          # reads what sidecar wrote\n# Problem: a compromised pre-processor can alter every request\n# before the inference container ever sees it."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "body": "# SECURE: minimize sharing and use read-only mounts + integrity checks\napiVersion: v1\nkind: Pod\nmetadata:\n  name: model-pipeline\nspec:\n  automountServiceAccountToken: false\n  volumes:\n    - name: model-artifacts\n      emptyDir: {}\n  containers:\n    - name: inference\n      image: model-server:latest\n      securityContext:\n        readOnlyRootFilesystem: true\n        runAsNonRoot: true\n      volumeMounts:\n        - name: model-artifacts\n          mountPath: /models\n          readOnly: true             # model files cannot be modified\n# Additional protections:\n# - Prefer network APIs with authentication over shared file volumes\n# - Verify a checksum/signature on model files before loading\n# - Init containers must delete any temp credential files before exiting\n# - Run each container as a non-root user"
+    },
+    {
+      "type": "note",
+      "body": "**Trust boundary insight:** containers in the same pod are NOT isolated from each other the way separate pods are. Treat every container in a pod as sharing the same trust level. If one is compromised, assume the whole pod is compromised."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Pods can run **multiple containers**: a main container plus **sidecars**.\n- **Init containers** run setup once, then exit — often leaving files behind.\n- All containers in a pod **share network and volumes**.\n- A compromised sidecar can **read, modify, and inject** data flowing through the pipeline — breaking the model without touching it.\n- **Init container leftovers** (like credential files) are a common find.\n- **Defense:** minimize shared volumes, use read-only mounts, verify model integrity, clean up init leftovers, run as non-root.\n\nNext, we go all the way down to the hardware in the most advanced attack: **GPU Container Escape.**"
+    }
+  ]
+}

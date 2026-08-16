@@ -1,0 +1,38 @@
+{
+  "slug": "05-zero-shot-inversion",
+  "title": "Zero-Shot Inversion",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Embedding Inversion: The Core Attack\n\nThis is the heart of the module. Embedding inversion means turning a stolen vector back into readable text. If embeddings were truly one-way, this would be impossible. They are not.\n\n## The three attack categories\n\nWhen you obtain embeddings, there are three main things you can try to do:\n\n| Attack | Question it answers | Difficulty |\n| --- | --- | --- |\n| Embedding inversion | \"What did the original text say?\" | Hardest, most valuable |\n| Membership inference | \"Is this specific value present?\" (yes/no) | Easy, limited alone |\n| Attribute inference | \"What kind of document is this?\" | Easy, great for triage |\n\nThese three complement each other nicely. Attribute inference finds which chunks matter in the first place, which is triage. Inversion recovers the actual text. Membership inference fills in the parts inversion can't reach, such as high-entropy passwords."
+    },
+    {
+      "type": "content",
+      "body": "## Four inversion approaches\n\nInversion methods differ mainly in how much preparation they need before an engagement can even begin.\n\n| Approach | Prep time | Needs model? | Needs training pairs? |\n| --- | --- | --- | --- |\n| Zero-shot | None | Yes (known) | No |\n| Few-shot | Moderate | Can be unknown | Small number (leaked/injected) |\n| Supervised | Heavy (days) | Yes (known) | Millions (self-generated) |\n| Surrogate/transfer | Moderate | No | None from target |\n\nWe start with zero-shot because it needs no training at all. \"Zero-shot\" doesn't mean zero preparation, you still need to know the embedding model in use. It simply means you don't train a model against the target's specific embedding space."
+    },
+    {
+      "type": "content",
+      "body": "## Zero-shot in action: templates + membership inference\n\nHere's the clever trick behind this technique. Embedding models can't reconstruct random passwords directly, since a random string carries no real meaning, so all guesses look equally noisy to the model. But they can reconstruct the semantic structure surrounding that secret.\n\nSo we split the problem into two distinct stages:\n\n1. **Recover the structure** — the sentence pattern itself, leaving placeholders like `{PASSWORD}` and `{URL}` where the secret goes.\n2. **Fill the placeholders with membership inference** — for each slot, try thousands of candidate values from a wordlist, embed the filled-in template, and keep whichever value produces the highest cosine similarity to the target vector.\n\nTo make this reliable, we don't rely on just one template. We generate a large template bank, hundreds of thousands of variations, and use the best matches together as a kind of voting panel. If the same password wins consistently across many structurally different templates, that gives us real confidence in the result."
+    },
+    {
+      "type": "content",
+      "body": "## Why some values are recoverable and others aren't\n\nThis is the single most important limitation to internalize about this technique:\n\n- Meaningful values, such as usernames, hostnames, URLs, or dictionary-word passwords like `Spring2026!`, are recoverable, since the model encodes them distinctively.\n- Truly random strings, such as `1qaz2wsx3edc4rfv`, are not reliably recoverable, since they tokenize into meaningless fragments the model treats essentially as noise. Swapping one random string for another barely moves the resulting vector at all."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\nfrom sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer(\"all-MiniLM-L6-v2\")\ntarget = np.load(\"chunk_23.npy\")[0]        # the stolen vector\ntarget = target / np.linalg.norm(target)\n\n# A template recovered for the chunk's structure\ntemplate = (\"Please navigate to https://login.example.ai and reset. \"\n            \"The default password after resetting is {PASSWORD}.\")\n\n# Membership inference over a small, targeted wordlist\nwordlist = [\"Summer2026!\", \"N0=Acc3ss\", \"Welcome123\", \"P@ssw0rd\", \"Change_Me1\"]\n\nbest_word, best_sim = None, -1.0\nfor word in wordlist:\n    filled = template.replace(\"{PASSWORD}\", word)\n    v = model.encode([filled], normalize_embeddings=True)[0]\n    sim = float(np.dot(v, target))\n    print(f\"{word:15s} -> cosine {sim:.4f}\")\n    if sim > best_sim:\n        best_sim, best_word = sim, word\n\nprint(f\"\\nRecovered password: {best_word}  (similarity {best_sim:.4f})\")\n# The correct value produces a measurably higher score than the rest."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Stolen vector\"] --> B[\"Score huge template bank\"]\n    B --> C[\"Pick best matching templates\"]\n    C --> D[\"Structure recovered with slots like PASSWORD\"]\n    D --> E[\"Membership inference over wordlist\"]\n    E --> F[\"Value that scores highest wins\"]\n    F --> G[\"Consensus vote across templates\"]\n    G --> H[\"Recovered secret\"]"
+    },
+    {
+      "type": "note",
+      "body": "**The two-stage insight:** inversion handles the meaningful structure; membership inference handles the high-entropy secret. Neither approach alone is enough. Together, they can reconstruct passwords straight out of a vector database, proving that embeddings are not truly one-way functions."
+    }
+  ]
+}

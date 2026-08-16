@@ -1,0 +1,55 @@
+{
+  "slug": "06-query-budgets",
+  "title": "Query Budgets & Strategy",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Managing a Query Budget\n\nIn a black-box attack, queries are your currency. Real systems impose rate limits, charge per request, or flag suspicious bursts of traffic. A smart attacker treats every single query as genuinely precious.\n\nA query budget is simply the total number of times you're allowed to ask the model before you have to stop. Spending it wisely is the difference between a working attack and a completely wasted one."
+    },
+    {
+      "type": "content",
+      "body": "## Why budgets exist\n\n- **Cost** — hosted AI APIs often bill per individual request.\n- **Rate limits** — many services cap requests per minute or per day.\n- **Detection** — thousands of odd queries sent in a row look suspicious and trip monitoring systems.\n\n**A simple comparison:** you're a detective with a limited number of questions before the suspect stops talking entirely. Ask the wrong questions and you learn nothing useful from the exchange."
+    },
+    {
+      "type": "content",
+      "body": "## The 40-40-20 allocation\n\nA proven way to split a budget across the three discovery phases:\n\n| Phase | Share | Purpose |\n|---|---|---|\n| Exploration | 40% | Cast a wide net; test many candidate words |\n| Exploitation | 40% | Refine estimates for the best words found |\n| Combination | 20% | Hunt for synergistic word pairs/triplets |\n\nExploration and combination together, 60% of the budget, form the discovery effort, while exploitation focuses purely on reliability."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "def estimate_budget_allocation(total_budget):\n    explore = int(0.4 * total_budget)\n    exploit = int(0.4 * total_budget)\n    combine = total_budget - explore - exploit   # absorb rounding\n    return {\n        'exploration': explore,\n        'exploitation': exploit,\n        'combination': combine,\n    }\n\nallocation = estimate_budget_allocation(1000)\nfor phase, n in allocation.items():\n    print(f\"{phase:12}: {n:4d} queries\")\n# exploration : 400  |  exploitation: 400  |  combination : 200"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Total Budget 1000] --> B[Exploration 400]\n    A --> C[Exploitation 400]\n    A --> D[Combination 200]\n    B --> E[Broad word discovery]\n    C --> F[Reliable best words]\n    D --> G[Synergy pairs]\n    E --> H[High evasion within budget]\n    F --> H\n    G --> H"
+    },
+    {
+      "type": "content",
+      "body": "## Information gain: which query teaches the most?\n\nThink of your uncertainty as a fog surrounding the target. Each query lifts a small part of that fog. The value of a given query is essentially how much fog it clears, referred to as its information gain: the difference between your uncertainty before asking the question and your uncertainty after getting the answer back.\n\nEarly on, testing brand-new words clears the most fog, since you know so little. Later in the process, refining your top few candidate words becomes more valuable than testing yet another random, unproven word."
+    },
+    {
+      "type": "content",
+      "body": "## Two queries per test\n\nMeasuring a single word's impact usually costs two queries: one for the baseline message, and one for the same message with the word added. The difference between the two results is that word's actual reward.\n\nThis is exactly why a 1000-query budget does not mean 1000 word tests, it really means roughly 500 measurements. Your budgeting math needs to account for this factor of two."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "def measure_word_impact(message, word):\n    \"\"\"Costs 2 queries: baseline + augmented.\"\"\"\n    base_prob = classifier.predict_proba(\n        vectorizer.transform([message]))[0][1]\n    aug_prob  = classifier.predict_proba(\n        vectorizer.transform([message + \" \" + word]))[0][1]\n    return base_prob - aug_prob   # positive = helpful word"
+    },
+    {
+      "type": "content",
+      "body": "## Adapting the split\n\nThe 40-40-20 split is a solid starting point, not a fixed rule. Adjust it based on your specific goal:\n\n| Situation | Shift toward | Why |\n|---|---|---|\n| Very small budget | Exploitation | Get a quick reliable win |\n| Large budget | Exploration | Afford to discover more |\n| Highly-defended target | Combination | Synergies overcome strong filters |\n| One-shot attack | Exploitation | No room for guessing |"
+    },
+    {
+      "type": "note",
+      "body": "**Stealth reminder:** a tight budget isn't just about cost, it's also about staying invisible. A defender watching request logs will notice 5,000 near-identical probes far more easily than 200 carefully chosen ones. Efficient budgeting is also genuinely good tradecraft on its own."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Queries function as currency, driven by cost, rate limits, and detection risk.\n- A solid default split is roughly 40% exploration, 40% exploitation, and 20% combination.\n- Information gain tells you that early queries, testing new words, teach the most.\n- Each word test typically costs two queries: one baseline and one augmented.\n- Adapt the split based on your budget size, the target's defenses, and your stealth requirements."
+    }
+  ]
+}

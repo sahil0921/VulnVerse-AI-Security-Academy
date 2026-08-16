@@ -1,0 +1,46 @@
+{
+  "slug": "09-safeguards",
+  "title": "Safeguards & Guardrails",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Safeguards & Guardrails\n\nWe've spent this entire module attacking data and models. Now we flip to defense. Guardrails are protective layers that sit around an AI system to check both what goes in and what comes out.\n\n**A simple comparison:** think of airport security. Before you board, your bags are scanned. When you land, customs checks what you're carrying. The plane itself, representing the model, does its job in between, but the checkpoints on either side keep dangerous things from entering or leaving.\n\nGuardrails don't actually fix a poisoned model, but they contain the resulting damage and stop many attacks right at the door."
+    },
+    {
+      "type": "content",
+      "body": "## The two-stage guardrail pipeline\n\nA strong AI system checks data at two distinct points:\n\n| Stage | Guards against | Examples |\n|-------|----------------|----------|\n| Input guardrail | Malicious or unsafe requests | Prompt injection, banned queries, hate speech, oversized inputs |\n| Output guardrail | Harmful or leaky responses | Toxic text, leaked secrets, dangerous instructions, PII |\n\nThink of it as a filter operating on both ends: nothing bad gets in, and nothing bad gets out."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[User Input] --> B[Input Guardrail]\n    B -->|blocked| X[Reject]\n    B -->|allowed| C[AI Model]\n    C --> D[Output Guardrail]\n    D -->|blocked| Y[Filter/Redact]\n    D -->|allowed| E[Safe Response]\n    style B fill:#4f8cff,color:#fff\n    style D fill:#a855f7,color:#fff\n    style X fill:#ef4444,color:#fff\n    style Y fill:#f59e0b,color:#000"
+    },
+    {
+      "type": "content",
+      "body": "## What guardrails actually check\n\nInput guardrails commonly check for:\n- Prompt injection attempts\n- Hateful, violent, or illegal requests\n- Attempts to extract system prompts or hidden secrets\n- Excessively long or malformed inputs\n- Off-topic or policy-violating queries\n\nOutput guardrails commonly check for:\n- Toxic or harmful language in the response\n- Leaked API keys, passwords, or personal data (PII)\n- Dangerous instructions, such as those related to weapons or malware\n- Hallucinated or unverified claims appearing in sensitive contexts\n- Markdown or HTML content that could enable exfiltration, covered in the LLM Output Attacks module"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# A simple two-stage guardrail wrapper around a model call\n\ndef input_guard(user_input):\n    if len(user_input) > 5000:\n        return False, \"Input too long\"\n    if contains_injection_pattern(user_input):\n        return False, \"Possible prompt injection\"\n    if hate_speech_detector(user_input):\n        return False, \"Policy violation\"\n    return True, None\n\ndef output_guard(response):\n    response = redact_pii(response)          # remove leaked personal data\n    response = redact_secrets(response)        # remove API keys / tokens\n    if dangerous_content(response):\n        return \"I can't help with that.\"       # block unsafe output\n    return response\n\ndef safe_chat(user_input):\n    ok, reason = input_guard(user_input)       # STAGE 1: input\n    if not ok:\n        return f\"Blocked: {reason}\"\n    raw = model.generate(user_input)\n    return output_guard(raw)                    # STAGE 2: output"
+    },
+    {
+      "type": "note",
+      "body": "**Defense in depth:** guardrails are not a silver bullet on their own. A determined attacker may find a way to bypass any single check. The real goal is layering: combine input filtering, output filtering, validation, monitoring, and least privilege together, so that beating just one layer isn't nearly enough to succeed."
+    },
+    {
+      "type": "content",
+      "body": "## Tools and approaches\n\nModern guardrails are often built from dedicated safety models and frameworks working together:\n\n- **Safety classifier models** — small models trained specifically to score content for safety, either before or after the main model runs.\n- **Rule-based filters** — regex and keyword checks targeting known-bad patterns.\n- **Semantic filters** — embedding-based checks that catch underlying meaning, not just literal words.\n- **Structured validation** — enforcing that outputs match an expected, safe format before they're used.\n\nThe strongest systems combine several of these approaches together, so evading one layer doesn't automatically mean evading all of them."
+    },
+    {
+      "type": "content",
+      "body": "## Guardrails specific to data attacks\n\nBringing this back to the rest of the module, guardrails also play a role in protecting the data pipeline itself:\n\n- **Ingestion validation** — check incoming training data carefully before it's ever stored.\n- **Provenance enforcement** — reject any data that doesn't come from a known, trusted source.\n- **Integrity checks** — verify dataset hashes regularly to detect any tampering.\n- **Model scanning** — scan model files for malicious pickle payloads before ever loading them.\n- **Anomaly monitoring** — watch for sudden, unexplained shifts in data distribution, often a sign of ongoing poisoning."
+    },
+    {
+      "type": "content",
+      "body": "## Common mistakes\n\n- Relying on a single guardrail layer as if it were sufficient on its own.\n- Guarding input carefully but ignoring output entirely, or the reverse.\n- Hardcoding rigid rules that attackers quickly learn to work around.\n- No logging in place, so bypass attempts go completely unnoticed.\n\n## Best practices\n\n- Guard both input and output, not just one side.\n- Layer multiple detection methods together, combining rules, ML, and semantic checks.\n- Log and monitor every block and every near-miss carefully.\n- Apply least privilege so that a successful bypass still causes only limited damage.\n- Regularly test your guardrails using real red-team attacks.\n\n## Summary\n\n- Guardrails are protective layers wrapped around the model, applied at both input and output.\n- They stop many attacks before they ever reach or leave the model.\n- Defense in depth, meaning proper layering, is the core underlying principle.\n- Guardrails also help protect the data pipeline itself, not just live user traffic.\n\n## Key Takeaways\n\n- Guard both ends of the system: input and output.\n- No single layer is ever enough on its own; always layer your defenses.\n- Guardrails help contain real damage even when a model has already been compromised."
+    }
+  ]
+}

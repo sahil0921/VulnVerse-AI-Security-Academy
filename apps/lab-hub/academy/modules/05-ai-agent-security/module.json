@@ -1,0 +1,71 @@
+{
+  "slug": "05-ai-agent-security",
+  "name": "AI Agent Security",
+  "lessons": [
+    {
+      "slug": "01-introduction",
+      "title": "Introduction to AI Agents",
+      "type": "content"
+    },
+    {
+      "slug": "02-agent-architecture",
+      "title": "Agent Architecture",
+      "type": "content"
+    },
+    {
+      "slug": "03-tools-and-actions",
+      "title": "Tools & Actions",
+      "type": "content"
+    },
+    {
+      "slug": "04-output-filter-bypass",
+      "title": "Output Filter Bypass",
+      "type": "content"
+    },
+    {
+      "slug": "05-document-chaining",
+      "title": "Document Chaining",
+      "type": "content"
+    },
+    {
+      "slug": "06-browsing-agents",
+      "title": "Browsing Agents",
+      "type": "content"
+    },
+    {
+      "slug": "07-code-review-agents",
+      "title": "Code Review Agents",
+      "type": "content"
+    },
+    {
+      "slug": "08-memory-enumeration",
+      "title": "Memory Enumeration",
+      "type": "content"
+    },
+    {
+      "slug": "09-supply-chain",
+      "title": "Supply Chain Attacks",
+      "type": "content"
+    },
+    {
+      "slug": "10-defenses",
+      "title": "Defenses & Mitigations",
+      "type": "content"
+    },
+    {
+      "slug": "11-best-practices",
+      "title": "Best Practices",
+      "type": "content"
+    },
+    {
+      "slug": "12-quiz",
+      "title": "Knowledge Check",
+      "type": "quiz"
+    },
+    {
+      "slug": "13-hands-on-labs",
+      "title": "Hands-on Labs",
+      "type": "labs"
+    }
+  ]
+}

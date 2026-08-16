@@ -1,0 +1,21 @@
+{
+  "slug": "02-history-of-ml",
+  "title": "History of Machine Learning",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "6 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# A Short History of Machine Learning\n\nYou don't need to memorize every date and name here. But knowing how AI systems evolved helps you understand **why they are built the way they are**, and why they have the weaknesses they do today.\n\n## The core shift\n\nFor most of computing history, humans wrote **fixed rules** by hand. For example, a spam filter might work like this:\n\n> \"If the email contains the word 'lottery', mark it as spam.\"\n\nThis approach worked for a while, but it was slow to update and easy to bypass. Spammers just avoided the flagged words.\n\nMachine Learning changed this approach. Instead of a person writing every rule, the system is given thousands of examples and learns the patterns on its own."
+    },
+    {
+      "type": "content",
+      "body": "## The journey in simple steps\n\n- **1950s** — Researchers begin asking whether machines can \"think.\" Alan Turing proposes an early test for machine intelligence, and the first simple learning programs are built.\n- **1980s–1990s** — Neural networks (systems loosely modeled on how brain cells connect) become more practical. Early systems start recognizing handwritten digits and simple patterns.\n- **2000s** — The internet generates massive amounts of data. More data means models can learn richer, more accurate patterns.\n- **2012** — A major breakthrough: a deep learning model wins a well-known image recognition competition by a large margin, proving deep learning works at scale. This kicks off rapid industry investment.\n- **2017** — A new model design called the **Transformer** is introduced. This architecture becomes the foundation for almost every modern language model, including today's chatbots.\n- **2020s** — Large Language Models (LLMs) like ChatGPT become widely available. For the first time, AI systems can hold natural conversations and be used directly by non-technical people.\n\n## Why this history matters for security\n\nEach stage of this evolution added more data, more automation, and more trust placed in the machine's output. Modern AI systems now make real decisions, connect to real databases, and trigger real actions in other systems. That combination of automation and trust is exactly what makes AI systems worth attacking, and worth defending properly."
+    },
+    {
+      "type": "note",
+      "body": "**Key takeaway:** AI moved from humans writing every rule by hand to machines learning rules directly from data. This shift is the root cause of most AI security problems, because now the data itself controls the model's behavior, and data can be poisoned, manipulated, or tricked."
+    }
+  ]
+}

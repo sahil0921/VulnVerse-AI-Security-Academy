@@ -1,0 +1,51 @@
+{
+  "slug": "03-recon-enumeration",
+  "title": "Recon & Enumeration",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Recon & Enumeration\n\nBefore attacking any MCP setup, you need to map it first. Reconnaissance means gathering information. Enumeration means listing out exactly what exists, meaning which servers, tools, and resources are actually reachable.\n\nThink of it like a burglar checking every door and window carefully before deciding exactly how to break in.\n\n## Two common environments\n\n| Environment | Transport | Where it runs |\n|---|---|---|\n| Developer workstation | stdio (local processes) | On the dev's own machine |\n| Shared enterprise platform | HTTP | On a server many users connect to |\n\nYour recon approach differs slightly depending on which environment you're facing.\n\n## Step 1: find the configuration\n\nMCP setups are defined through config files. On a developer machine, an AI IDE extension stores exactly which servers it connects to.\n\nA typical config reveals real gold:"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "body": "# Example MCP config (fictional)\nname: NorthPeak Dev Assistant\n\nmcpServers:\n  - name: filesystem\n    type: stdio\n    command: node\n    args:\n      - /home/dev/.mcp/fs-server.js\n      - /home/dev/projects        # <-- accessible path\n\n  - name: git\n    type: stdio\n    command: node\n    args:\n      - /home/dev/.mcp/git-server.js\n\n  - name: notes\n    type: sse\n    url: http://tools.internal:8000/sse   # <-- REMOTE server!"
+    },
+    {
+      "type": "content",
+      "body": "### What this config tells an attacker\n\n- Three servers exist here: filesystem, git, and notes.\n- The filesystem server can reach `/home/dev/projects`, meaning any file located there is readable.\n- The notes server is remote, pointing to `http://tools.internal:8000`. This expands the attack surface well beyond just the local machine.\n\nJust reading this config file alone already maps out most of the target."
+    },
+    {
+      "type": "note",
+      "body": "**Key idea:** a stdio server runs entirely locally. An sse or http server reaches across the network instead. Remote servers tend to be more valuable to an attacker, since they may connect to shared infrastructure and other downstream systems."
+    },
+    {
+      "type": "content",
+      "body": "## Step 2: enumerate capabilities\n\nOnce you know a server exists, the next step is listing exactly what it can actually do. MCP defines standard listing methods for this purpose:\n\n| Method | Returns |\n|---|---|\n| tools/list | All available tools |\n| resources/list | All available resources |\n| prompts/list | All available prompts |\n\nAny client with network access to the server can call these methods directly. You don't need the AI itself to do it for you."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# Minimal MCP client to enumerate a server (fictional target)\nimport asyncio\nfrom fastmcp import Client\n\nclient = Client(\"http://tools.internal:8000/mcp/\")\n\nasync def enumerate():\n    async with client:\n        tools = await client.list_tools()\n        for t in tools:\n            print(f\"TOOL: {t.name}\")\n            print(f\"  desc: {t.description}\")\n\n        resources = await client.list_resources()\n        for r in resources:\n            print(f\"RESOURCE: {r.uri}\")\n\nasyncio.run(enumerate())"
+    },
+    {
+      "type": "content",
+      "body": "## Step 3: enumerate through the LLM\n\nOn a shared platform where you only have chat access, you can still enumerate quite a lot simply by asking the AI directly:\n\n> List every tool you have access to and describe what each one does.\n\nThe AI often happily reveals its full capabilities. This frequently leaks:\n\n- Internal tool names, such as `db_query` or `fs_list`\n- What systems are actually connected behind the scenes\n- Useful hints about existing permissions\n\n## Step 4: error-based schema extraction\n\nSend a tool a deliberately wrong input and carefully read the resulting error message. Errors often leak the exact expected parameters, data types, and internal structure of the tool.\n\nThis is the same underlying idea as SQL error-based enumeration in classic web penetration testing: the error message itself tells you a lot about how the system is actually built."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Find config] --> B[Identify servers]\n    B --> C[List tools/resources]\n    C --> D[Ask LLM to describe]\n    D --> E[Trigger errors for schema]\n    E --> F[Map full attack surface]\n    style F fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Building the attack surface map\n\nAfter completing recon, you should have a clear overall picture:\n\n- Which servers exist, both local and remote.\n- What tools each server actually exposes.\n- What paths, databases, or services they can reach.\n- What permissions they appear to be running with.\n\nThis map drives every later attack covered in this module.\n\n## Defender's view\n\n- **Minimize exposed paths.** A filesystem server should only see the exact folders it genuinely needs, never the entire home directory.\n- **Don't over-describe tools.** Overly verbose descriptions end up leaking internal structure unnecessarily.\n- **Sanitize error messages.** Don't return raw schema details or full stack traces to callers.\n- **Log enumeration bursts.** Many rapid list calls in a row can signal active reconnaissance underway."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Recon starts with the config file, which maps out servers and their reach.\n- stdio means local; HTTP/SSE means remote, and generally more valuable to attackers.\n- Use tools/list, resources/list, and prompts/list to enumerate a server directly.\n- You can also enumerate simply by asking the AI, or by deliberately triggering errors.\n- Defenders should limit exposed scope, trim descriptions, and sanitize error output."
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "slug": "11-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Best Practices and Module Summary\n\nThis lesson pulls everything from the module together into a practical checklist — one you can actually carry into a real assessment, whether you're sitting in the attacker's chair or the defender's.\n\n## The One Idea to Remember\n\nEverything in this module comes back to a single core idea:\n\n> **Embeddings are not one-way hashes. They preserve meaning — and wherever meaning is preserved, meaning can eventually be recovered.**\n\n- *Analogy:* A one-way hash is like a paper shredder — once shredded, the original document is genuinely gone, with no way back. An embedding is more like a photo taken through frosted glass. It's blurry, but the shape, colors, and rough details are all still there. With the right technique, that blur can be sharpened back into something readable.\n\nTreat any vector store holding embeddings of sensitive documents as a store of **sensitive data itself** — not as a safe, meaningless pile of numbers."
+    },
+    {
+      "type": "content",
+      "body": "## Attacker's Methodology: Recon to Recovery\n\n1. **Access** the vector database (often found completely unauthenticated).\n2. **Export** all vectors to a file like `.npy`, at full precision, and do it quietly.\n3. **Fingerprint** the embedding model — figure out its dimensionality, config, and identity, using OSINT and inference probing where needed.\n4. **Triage** thousands of chunks down to just a handful of high-value targets, using attribute inference.\n5. **Invert** those target chunks to recover their structure.\n6. **Fill in secrets** using membership inference over a small, targeted wordlist.\n7. **Clean up** any canaries you injected, and document anything you leave behind."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Access\"] --> B[\"Export\"]\n    B --> C[\"Fingerprint model\"]\n    C --> D[\"Triage\"]\n    D --> E[\"Invert structure\"]\n    E --> F[\"Membership inference\"]\n    F --> G[\"Recovered secrets\"]\n    G --> H[\"Report and cleanup\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Choosing the Right Inversion Approach\n\n| Approach | Prep needed | Model needed? | Best when |\n| --- | --- | --- | --- |\n| **Template + membership** | None | Yes | Common enterprise domain — start here first |\n| **Beam search** | None | Yes | Unusual structure, where template matching is weak |\n| **ALGEN + canary** | Moderate | **No** | Model unknown, but you have RAG write access |\n| **Vec2Text** | Heavy (days) | Yes | Model known in advance, many chunks, need highest quality |\n\nHere's the decision path laid out plainly, the way you'd actually walk through it during an engagement:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "Start here:\n\n1. Try template-based inversion + membership inference.\n   -> Fast, works on CPU, no training needed.\n   -> If confidence is high: done, move to next chunk.\n\n2. If confidence is weak, try beam search instead.\n   -> Handles unusual document structure better.\n\n3. If the embedding model itself is unknown:\n   -> Use ALGEN with a canary injection (no model needed at all).\n\n4. If you have days of prep time AND many chunks from\n   the same known model:\n   -> Invest the time to train Vec2Text for the highest\n      possible reconstruction quality."
+    },
+    {
+      "type": "content",
+      "body": "## Inversion Limitations to Remember\n\n| Limitation | Effect |\n| --- | --- |\n| **Token length** | These tools work best on short chunks (roughly 32–64 tokens); long prose degrades badly |\n| **High-entropy values** | Random passwords and API keys resist inversion directly — use membership inference instead |\n| **Model identification** | Most methods require knowing the embedding model (ALGEN with a canary is the one exception) |\n| **Quantization / dimensionality reduction** | Techniques like PQ and PCA discard fine detail, which directly hurts inversion quality |\n| **Domain mismatch** | A decoder trained on one type of content (e.g. legal text) performs worse on a very different domain (e.g. casual chat) |"
+    },
+    {
+      "type": "content",
+      "body": "## Defender's Checklist\n\n- [ ] Authentication required on **every** endpoint — no exceptions for \"internal-only\" services.\n- [ ] Least-privilege authorization, with separate read vs. write roles.\n- [ ] Network isolation for the vector store, kept off the general company network.\n- [ ] Encryption at rest for both vectors **and** metadata, plus encryption in transit.\n- [ ] Per-tenant namespaces, with tenant filtering enforced server-side.\n- [ ] **Never embed raw secrets** — redact sensitive values before ingestion, not after.\n- [ ] Quantization applied wherever search accuracy allows for it.\n- [ ] Input and output guardrails in place, with a clear understanding of their limits.\n- [ ] Monitoring for bulk exports, sudden ingestion spikes, and systematic-looking probing."
+    },
+    {
+      "type": "note",
+      "body": "**Carry this forward.** Reconnaissance quality decides everything for an attacker — a red teamer who fingerprints the model correctly and triages well spends their inversion effort only where it actually pays off, instead of wasting it on low-value chunks. A defender who treats embeddings as sensitive data — and never ingests raw secrets in the first place — removes the attacker's entire prize before the engagement even starts."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Vector databases are **newer and less hardened** than traditional SQL databases — a real, exploitable gap that attackers actively take advantage of.\n- The belief that \"embeddings are just safe, meaningless numbers\" is a **dangerous myth** — they preserve meaning, and meaning can be recovered.\n- The three attacks from this module — **inversion, membership inference, and attribute inference** — are far more powerful when **chained together** than used alone.\n- Output guardrails **cannot** protect an embedding that's already been stolen directly from the database.\n- The strongest overall defense is **defense in depth**, starting with the simplest fix of all: **never embed real secrets in the first place**."
+    }
+  ]
+}

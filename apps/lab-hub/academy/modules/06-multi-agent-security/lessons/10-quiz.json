@@ -1,0 +1,228 @@
+{
+  "slug": "10-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 20,
+  "questions": [
+    {
+      "q": "What is the key difference between a plain chatbot and an AI agent?",
+      "options": [
+        "An agent can only answer in a single language",
+        "An agent can take real actions, such as calling tools, not just produce text",
+        "A chatbot always runs faster than an agent",
+        "There is no meaningful difference between them"
+      ],
+      "answer": 1,
+      "explanation": "A chatbot only replies with text. An agent connects a language model to real tools, letting it take actions like reading files, sending emails, or calling other agents."
+    },
+    {
+      "q": "Why do companies build multi-agent systems instead of one large agent?",
+      "options": [
+        "Specialization, scalability, and safer separation of duties",
+        "It reduces the total number of trust boundaries to zero",
+        "A single agent cannot legally be deployed",
+        "Multi-agent systems require no orchestration at all"
+      ],
+      "answer": 0,
+      "explanation": "Specialized agents tend to perform better, individual agents can be upgraded independently, and giving each agent only the access it needs is inherently safer."
+    },
+    {
+      "q": "What is a 'trust boundary' in a multi-agent system?",
+      "options": [
+        "The maximum number of agents allowed in a system",
+        "A firewall rule blocking external traffic",
+        "The invisible line crossed whenever two agents communicate with each other",
+        "The physical server hosting all the agents"
+      ],
+      "answer": 2,
+      "explanation": "Every time two agents exchange a message, a trust boundary is crossed. If that boundary isn't protected, an attacker can inject, intercept, or impersonate along it."
+    },
+    {
+      "q": "What does the A2A protocol primarily standardize?",
+      "options": [
+        "How agents describe themselves, get discovered, and exchange task messages",
+        "The programming language agents must be written in",
+        "The physical hardware agents must run on",
+        "How many agents a company is allowed to deploy"
+      ],
+      "answer": 0,
+      "explanation": "A2A defines a shared standard so agents built by different companies can discover each other, format task messages consistently, and return results in a common format."
+    },
+    {
+      "q": "Where is an Agent Card typically served from?",
+      "options": [
+        "A random port chosen at runtime",
+        "A private database only the orchestrator can query",
+        "An encrypted file sent via email",
+        "A fixed, predictable path: /.well-known/agent.json"
+      ],
+      "answer": 3,
+      "explanation": "Every A2A agent publishes its Agent Card at the standard, predictable path /.well-known/agent.json, making it easy for both legitimate orchestrators and attackers to find."
+    },
+    {
+      "q": "Which coordination pattern creates a single point of failure, where compromising one central component means controlling the entire system?",
+      "options": [
+        "Peer-to-Peer (mesh) pattern",
+        "Pipeline (chain) pattern",
+        "Orchestrator (hub-and-spoke) pattern",
+        "Hierarchical (tree) pattern"
+      ],
+      "answer": 2,
+      "explanation": "In the Orchestrator/hub-and-spoke pattern, a central agent controls all task distribution. Compromising it gives an attacker control over the whole system."
+    },
+    {
+      "q": "In the peer-to-peer (mesh) coordination pattern, what is the main weakness?",
+      "options": [
+        "Trust propagation, where one compromised agent can poison all its peers",
+        "It requires a single central orchestrator to function",
+        "It cannot support more than two agents",
+        "It has no communication between agents at all"
+      ],
+      "answer": 0,
+      "explanation": "Since agents in a mesh talk directly to each other with no central authority, a compromised agent can spread poisoned data or fake trust to all its peers."
+    },
+    {
+      "q": "What is 'capability jumping' in a pipeline (chain) coordination pattern?",
+      "options": [
+        "Agents gaining new skills automatically over time",
+        "A malicious payload injected at an early, low-privilege stage surviving to execute at a later, high-privilege stage",
+        "The pipeline randomly skipping stages for performance",
+        "Two agents swapping their roles mid-task"
+      ],
+      "answer": 1,
+      "explanation": "Since each agent's output becomes the next agent's input, a payload planted early in the chain can ride along undetected until it reaches a stage with more power."
+    },
+    {
+      "q": "Why is LLM-driven orchestration considered risky?",
+      "options": [
+        "It uses more electricity than rule-based orchestration",
+        "It cannot process JSON data",
+        "Since the orchestrator decides actions based on natural language, that same language can be used to manipulate its decisions",
+        "It only works with a single agent at a time"
+      ],
+      "answer": 2,
+      "explanation": "When an LLM decides the workflow using natural language, that workflow becomes attackable using natural language too, since words effectively become control commands."
+    },
+    {
+      "q": "What does an empty 'security' field in an Agent Card typically indicate?",
+      "options": [
+        "The agent has the strongest possible security",
+        "The card is corrupted and cannot be read",
+        "No authentication is required to interact with that agent, a red flag",
+        "The agent has been deprecated and removed"
+      ],
+      "answer": 2,
+      "explanation": "An empty security field means no authentication scheme is defined for the agent, signaling that anyone who finds it can potentially call it directly."
+    },
+    {
+      "q": "What is the core idea behind Agent Card spoofing?",
+      "options": [
+        "Publishing a fake card that copies a real agent's name and skills but points the URL to an attacker-controlled server",
+        "Deleting a legitimate agent's card from the registry",
+        "Encrypting an Agent Card so no one can read it",
+        "Changing an agent's name to something unrelated"
+      ],
+      "answer": 0,
+      "explanation": "Since cards are usually unsigned, an attacker can copy a real agent's identity and skills while redirecting the URL field to their own server, silently intercepting traffic."
+    },
+    {
+      "q": "Why does the 'incremental trust' technique (hiding a bypass in conversation history) evade detection better than a direct request?",
+      "options": [
+        "It uses a different network protocol entirely",
+        "It disables the LLM's ability to read text",
+        "The malicious signal sits in history rather than the main prompt, and is phrased in calm, business-like language scanners don't flag",
+        "It requires the attacker to have admin credentials"
+      ],
+      "answer": 2,
+      "explanation": "Many detection tools only scan the current prompt for obvious keywords. Placing the bypass instruction in history, phrased like a normal business note, avoids those triggers entirely."
+    },
+    {
+      "q": "Why is history injection so effective against LLM-based agents?",
+      "options": [
+        "It requires admin access to the orchestrator",
+        "The LLM treats all conversation history as trusted, and scanners usually check only the current prompt",
+        "It disables the agent's network connection",
+        "It encrypts the attacker's payload so it cannot be read"
+      ],
+      "answer": 1,
+      "explanation": "An LLM cannot distinguish real history from attacker-supplied history, and most detection tools inspect only the current prompt, so malicious instructions hidden in history slip through."
+    },
+    {
+      "q": "After a workflow-integrity bypass attempt, which two response fields confirm whether the security scan was actually skipped?",
+      "options": [
+        "http_status and content_length",
+        "server_name and timestamp",
+        "steps_completed and security_report",
+        "user_id and session_token"
+      ],
+      "answer": 2,
+      "explanation": "If security_scan is missing from steps_completed, or security_report returns null, that confirms the mandatory scan step was skipped entirely."
+    },
+    {
+      "q": "In a rogue agent registration attack, why does the victim usually notice nothing wrong?",
+      "options": [
+        "The attack only runs at night",
+        "The rogue agent forwards requests to the real agent, so a valid response is still returned",
+        "The orchestrator stops working entirely",
+        "The rogue agent deletes all logs on the orchestrator"
+      ],
+      "answer": 1,
+      "explanation": "The intercept-and-forward pattern logs the data but still forwards the request to the real agent, so the victim receives a correct answer and suspects nothing."
+    },
+    {
+      "q": "Which evasion technique involves adding a random delay to a rogue agent's responses?",
+      "options": [
+        "Capability subset",
+        "Timing mimicry (jitter)",
+        "Selective interception",
+        "Registration timing"
+      ],
+      "answer": 1,
+      "explanation": "Jitter adds a small random delay so the rogue agent's response time matches the real agent's latency profile, since instant replies can look robotic and suspicious."
+    },
+    {
+      "q": "What is the 'confused deputy' problem in multi-agent systems?",
+      "options": [
+        "An agent forgetting its own configuration",
+        "Two agents arguing over which one should run first",
+        "A trusted component being tricked into handing valuable data or access to the wrong party",
+        "An agent that has no tools assigned to it"
+      ],
+      "answer": 2,
+      "explanation": "The confused deputy pattern describes a trusted component, like an orchestrator, being manipulated into granting access or data to an attacker instead of the legitimate party."
+    },
+    {
+      "q": "What is the correct defense against workflow integrity attacks that skip a security scan?",
+      "options": [
+        "Only run the scan when the user requests it",
+        "Remove the security agent entirely",
+        "Ask the LLM more politely to run the scan",
+        "Hard-code the security scan as a mandatory step in fixed code, outside the LLM's control"
+      ],
+      "answer": 3,
+      "explanation": "If the LLM can decide whether a security step runs, a prompt can talk it out of running. Enforcing the step in fixed code means no prompt, however clever, can skip it."
+    },
+    {
+      "q": "What is the primary reason Agent Card spoofing is so easy in default A2A systems?",
+      "options": [
+        "Agent Cards require a password to read",
+        "Agent Cards are stored in a hidden database",
+        "Agent Cards are encrypted end-to-end",
+        "Agent Cards are, by default, not cryptographically signed, so a forged card cannot be detected"
+      ],
+      "answer": 3,
+      "explanation": "By default, A2A Agent Cards are unsigned. Without a signature, nothing proves a card is genuine, so an attacker can forge one or tamper with the URL field undetected."
+    },
+    {
+      "q": "According to the module's three-question mental model, what should you ask about any multi-agent system?",
+      "options": [
+        "How fast is it, how much does it cost, and how big is it?",
+        "Who is talking, what are they allowed to do, and can I trust what they said?",
+        "What language is it written in, who deployed it, and when was it built?",
+        "How many agents exist, what is their uptime, and who pays for hosting?"
+      ],
+      "answer": 1,
+      "explanation": "These three questions map directly to identity verification, authorization/least privilege, and message integrity, the three pillars that most multi-agent attacks exploit when left unanswered."
+    }
+  ]
+}

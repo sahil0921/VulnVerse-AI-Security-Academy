@@ -1,0 +1,25 @@
+{
+  "slug": "11-common-misconceptions",
+  "title": "Common Misconceptions",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "6 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Common Misconceptions\n\nBeginners often hold assumptions about AI that turn out to be incorrect, and these assumptions can lead to poor security decisions. This lesson addresses the most common ones directly."
+    },
+    {
+      "type": "content",
+      "body": "## \"The AI actually understands what it's saying\"\n\nThis is incorrect. An LLM predicts the most likely next word based on patterns learned during training. It has no real understanding, beliefs, or awareness of truth. This is exactly why it can state false information with full confidence, a behavior known as a **hallucination**. Never assume a model \"knows\" that something is true simply because it states it.\n\n## \"AI is too advanced to be tricked\"\n\nThis is incorrect. AI systems can be tricked fairly easily. A simple, well-crafted sentence can bypass a model's safety restrictions. Being good at generating natural language does not mean a system is good at security.\n\n## \"If the model refuses a request once, it's safe\"\n\nThis is incorrect. A model might refuse a request phrased one way, then comply with the same underlying request phrased differently. AI safety behavior is often inconsistent and fragile."
+    },
+    {
+      "type": "content",
+      "body": "## \"The system prompt is a secret\"\n\nThis is incorrect. The hidden instructions a developer gives the model, known as the **system prompt**, can very often be extracted with the right input. Real secrets, such as API keys or credentials, should never be placed inside a system prompt.\n\n## \"AI output is safe to use directly\"\n\nThis is incorrect. AI-generated output should be treated as untrusted, the same way user input is treated. If that output is inserted directly into a web page, a database query, or a shell command without validation, it can lead to XSS, SQL injection, or code execution.\n\n## \"More safety training fixes everything\"\n\nThis is incorrect. Safety training helps reduce harmful behavior, but it can almost always be bypassed by a sufficiently creative attacker. Real security comes from proper system design, including input validation, limiting what actions the AI is allowed to take, and checking its output, not from training the model alone to behave safely."
+    },
+    {
+      "type": "note",
+      "body": "The core lesson to take away: an AI model is a pattern-based prediction system, not a security control. Never rely on the model itself to protect a system. Real defenses need to be built around it."
+    }
+  ]
+}

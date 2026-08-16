@@ -1,0 +1,228 @@
+{
+  "slug": "10-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 20,
+  "questions": [
+    {
+      "q": "What best describes an AI evasion attack?",
+      "options": [
+        "Poisoning the training data so the model learns wrong patterns",
+        "Stealing the model's weights and parameters",
+        "Crafting inputs at inference time to make a trained model produce a wrong output, without changing the model",
+        "Overloading the model with too many requests until it crashes"
+      ],
+      "answer": 2,
+      "explanation": "Evasion attacks trick an already-trained model at the moment it makes a decision. The model itself is never changed, only the input it receives is crafted to slip past it."
+    },
+    {
+      "q": "What is the key difference between a training-time attack and an evasion (inference-time) attack?",
+      "options": [
+        "Training-time attacks change what the model learned; evasion attacks only change the current input",
+        "Evasion attacks require access to the training pipeline; training-time attacks do not",
+        "There is no meaningful difference between the two",
+        "Training-time attacks only work on image models"
+      ],
+      "answer": 0,
+      "explanation": "Training-time attacks corrupt the model's memory, affecting all future predictions. Evasion attacks leave the model untouched and only manipulate the specific input being evaluated right now."
+    },
+    {
+      "q": "What does 'transferability' mean in the context of evasion attacks?",
+      "options": [
+        "The ability to move a model from one server to another",
+        "An attack built against one model often fools a different model too, even a black-box one the attacker never inspected",
+        "The process of retraining a model on new data",
+        "Transferring stolen data to an external server"
+      ],
+      "answer": 1,
+      "explanation": "Transferability lets attackers prepare and test their attack on a surrogate model they control, then successfully use that same attack against a real, unseen black-box system."
+    },
+    {
+      "q": "Why is the Naive Bayes 'independence assumption' a weakness the GoodWords attack exploits?",
+      "options": [
+        "It makes the model too slow to respond in time",
+        "It causes the model to reject any unusual word combination outright",
+        "It encrypts the word probabilities so attackers cannot read them",
+        "It treats each word's evidence separately and additively, so unrelated appended words simply shift the total without penalty"
+      ],
+      "answer": 3,
+      "explanation": "Because Naive Bayes sums up evidence from each word independently, appending enough 'good' words can mathematically outweigh the spam signal, regardless of whether the words make contextual sense together."
+    },
+    {
+      "q": "For a classifier with a decision boundary at 0.5, which statement is TRUE about successful evasion?",
+      "options": [
+        "The attacker must drive the spam probability all the way to 0.01",
+        "Crossing the 0.5 threshold is enough; a score of 0.499 evades just as well as 0.01",
+        "The attacker must change the model's threshold to below 0.5",
+        "Evasion is impossible unless the model is retrained"
+      ],
+      "answer": 1,
+      "explanation": "Classification is a binary decision at the threshold. Once the score crosses to the other side of 0.5, the label flips, so there's no benefit to pushing the score further than necessary."
+    },
+    {
+      "q": "In a black-box GoodWords attack, what does the 40-40-20 budget allocation refer to?",
+      "options": [
+        "40% ham words, 40% spam words, 20% neutral words",
+        "40 queries per word, 40 words per message, 20 messages per test",
+        "40% accuracy, 40% recall, 20% precision",
+        "40% exploration, 40% exploitation, 20% combination search"
+      ],
+      "answer": 3,
+      "explanation": "This is a proven split for allocating a limited query budget: 40% discovering new candidate words, 40% refining the best ones found, and 20% hunting for synergistic word combinations."
+    },
+    {
+      "q": "In the multi-armed bandit framing of a black-box GoodWords attack, what does 'pulling the lever' correspond to?",
+      "options": [
+        "Restarting the target server",
+        "Testing a candidate word by adding it to a message and querying the classifier",
+        "Changing the classifier's decision threshold",
+        "Downloading the model's source code"
+      ],
+      "answer": 1,
+      "explanation": "Each candidate word is treated like a slot machine with an unknown payout. Testing it, by adding it to a message and querying the model, is the equivalent of pulling that machine's lever."
+    },
+    {
+      "q": "What is the purpose of epsilon in an epsilon-greedy word selection strategy?",
+      "options": [
+        "It sets the maximum message length allowed",
+        "It controls the probability of exploring a new word instead of exploiting the best-known word",
+        "It determines how many queries the API allows per second",
+        "It encrypts the query traffic"
+      ],
+      "answer": 1,
+      "explanation": "Epsilon is the small probability, such as 0.2, of choosing to explore an untested word rather than exploiting the current best-performing word, balancing discovery against reliability."
+    },
+    {
+      "q": "Why does measuring a single word's impact typically cost two queries rather than one?",
+      "options": [
+        "One query for the baseline message and one for the message with the word added, so the difference reveals the word's true impact",
+        "APIs always require duplicate requests for verification",
+        "One query is for training and one is for testing",
+        "The classifier randomly fails half the time"
+      ],
+      "answer": 0,
+      "explanation": "You need a baseline probability and an augmented probability to calculate the actual reward of adding a word, which is why a 1000-query budget yields roughly 500 word measurements, not 1000."
+    },
+    {
+      "q": "What is 'synergy' in the context of combining words during a GoodWords attack?",
+      "options": [
+        "When two words together produce a larger effect than simply adding their individual effects would predict",
+        "When a word works on one classifier but not another",
+        "When the attacker uses two different query budgets simultaneously",
+        "When a word is tested twice for reliability"
+      ],
+      "answer": 0,
+      "explanation": "Synergy occurs when a combination like 'meeting tomorrow' scores much better together than the sum of 'meeting' alone plus 'tomorrow' alone would suggest, since together they read as more genuinely coherent language."
+    },
+    {
+      "q": "Roughly how effective is a black-box GoodWords attack compared to a white-box attack against the same target?",
+      "options": [
+        "About 10-20% as effective",
+        "Roughly equal, at 100% effectiveness",
+        "Roughly 85-95% of white-box effectiveness",
+        "Black-box attacks are always more effective than white-box"
+      ],
+      "answer": 2,
+      "explanation": "Even without access to the model's internals, a patient black-box attacker using query-based discovery typically achieves 85-95% of what a white-box attacker with full model access could achieve."
+    },
+    {
+      "q": "Why can the GoodWords technique be generalized from spam filters to sentiment classifiers?",
+      "options": [
+        "Sentiment classifiers use a completely different mathematical approach",
+        "The technique works against any additive text classifier that reads bag-of-words, regardless of what labels it predicts",
+        "Sentiment classifiers cannot be attacked at all",
+        "Sentiment analysis requires physical access to the server"
+      ],
+      "answer": 1,
+      "explanation": "Since GoodWords exploits the additive, order-blind nature of certain classifiers rather than anything spam-specific, the same technique applies to sentiment models or any other bag-of-words classifier."
+    },
+    {
+      "q": "In sentiment flipping, what would an attacker append to push a negative review toward a positive classification?",
+      "options": [
+        "Random punctuation marks",
+        "Strongly negative-leaning words",
+        "Strongly positive-leaning words, such as 'excellent' or 'wonderful'",
+        "The same review text repeated twice"
+      ],
+      "answer": 2,
+      "explanation": "To flip a negative review to positive, the attacker appends words strongly associated with the positive class, which pushes the overall additive score across the decision boundary."
+    },
+    {
+      "q": "Which defense most directly breaks the assumption that GoodWords relies on?",
+      "options": [
+        "Increasing the server's rate limit",
+        "Returning only the label and hiding the probability score",
+        "Storing the model in an encrypted file",
+        "Adding n-gram (word-pair) features so context is considered, not just isolated word counts"
+      ],
+      "answer": 3,
+      "explanation": "N-gram features consider word pairs like 'free money' together, breaking the independence assumption that lets isolated good words simply outvote suspicious phrases in an additive model."
+    },
+    {
+      "q": "What does 'feature capping' do as a defense against GoodWords-style attacks?",
+      "options": [
+        "It deletes all features associated with negative words",
+        "It limits how much a single word can shift the overall classification score, reducing the payoff of piling on words",
+        "It caps the number of users allowed to query the model",
+        "It encrypts individual word features"
+      ],
+      "answer": 1,
+      "explanation": "By limiting the maximum influence any single word can have on the final score, feature capping reduces the effectiveness of an attacker simply appending many good words to overwhelm the classifier."
+    },
+    {
+      "q": "According to the module, why is hiding a model's internals (obscurity) considered a weak defense on its own?",
+      "options": [
+        "Obscurity makes models run slower",
+        "A determined black-box attacker can empirically rediscover the same winning words through repeated querying",
+        "Hiding internals is illegal under most security frameworks",
+        "Obscurity only works against white-box attacks"
+      ],
+      "answer": 1,
+      "explanation": "The vulnerability lives in the model's architecture itself, not in exposed parameters. A query-only attacker can still discover effective words through trial and error, achieving most of white-box effectiveness."
+    },
+    {
+      "q": "In the module's VULN / HARD / GUARD defense modes, what is the primary purpose of GUARD mode?",
+      "options": [
+        "To make the model completely immune to all evasion attempts",
+        "To emphasize detection and monitoring, catching attacks in progress even when they can't be fully blocked",
+        "To disable the classifier entirely for safety",
+        "To encrypt all incoming messages before classification"
+      ],
+      "answer": 1,
+      "explanation": "GUARD mode focuses on visibility rather than prevention: logging query patterns, rate anomalies, and message drift so that an in-progress attack can be noticed and escalated to a SIEM."
+    },
+    {
+      "q": "Why does the module recommend testing both white-box and black-box evasion during a real assessment?",
+      "options": [
+        "Because white-box testing is illegal in most jurisdictions",
+        "Because black-box access reflects how most real attackers actually interact with deployed systems, while white-box reveals the theoretical worst case",
+        "Because clients always insist on both tests",
+        "Because white-box and black-box use completely unrelated techniques"
+      ],
+      "answer": 1,
+      "explanation": "White-box testing is faster and shows the worst-case scenario, but real attackers rarely have model access, so confirming the attack also works black-box reflects genuine, realistic risk."
+    },
+    {
+      "q": "Why should a penetration tester report the full effectiveness curve (evasion rate vs. words added) rather than a single evasion number?",
+      "options": [
+        "A single number is always more accurate than a curve",
+        "The curve reveals exactly where the filter's defenses collapse, which a single number would hide",
+        "Curves are required by law in security reports",
+        "It makes the report longer and therefore more credible"
+      ],
+      "answer": 1,
+      "explanation": "Reporting only one evasion percentage hides useful detail. The full curve shows the client precisely how many words it takes before their filter fails, which is far more actionable information."
+    },
+    {
+      "q": "Which industry framework is specifically referenced in the module as the adversarial-ML knowledge base under which evasion attacks are categorized?",
+      "options": [
+        "ISO 27001",
+        "MITRE ATLAS",
+        "PCI DSS",
+        "HIPAA"
+      ],
+      "answer": 1,
+      "explanation": "MITRE ATLAS is the adversarial machine learning threat knowledge base, where evasion attacks fall under categories like ML Model Access and Evade ML Model techniques."
+    }
+  ]
+}

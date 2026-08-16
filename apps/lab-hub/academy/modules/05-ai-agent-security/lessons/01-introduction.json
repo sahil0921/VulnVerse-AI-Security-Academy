@@ -1,0 +1,25 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to AI Agents",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Introduction to AI Agents\n\nA normal chatbot can only talk. You ask it something, it replies with text, and that's the end of the interaction.\n\nAn AI Agent can actually do things. It can read files, send emails, run code, search the web, and call other software. It doesn't just answer you. It takes real actions in the world.\n\nThink of the difference this way:\n\n- A chatbot is like a person on the phone who can only give you advice.\n- An AI Agent is like a personal assistant who can actually pick up your keys, drive your car, and pay your bills on your behalf.\n\nThat power is exactly why agents are useful. It's also exactly why they're dangerous.\n\n## Why AI agents exist\n\nBusinesses want automation. They don't want a human manually clicking buttons all day. An agent can:\n\n- Answer a customer, look up their order in a database, and issue a refund.\n- Read an incoming email, summarize it, and reply automatically.\n- Review code, run tests, and open a fix.\n\nThe agent connects a language model, essentially its \"brain,\" to real tools, essentially its \"hands.\" This overall approach is called agentic AI.\n\n## A simple mental model\n\nEvery agent follows roughly the same basic loop:\n\n1. Receive a goal or request.\n2. Think about what steps are needed to accomplish it.\n3. Act by calling a tool.\n4. Observe the result of that action.\n5. Repeat this cycle until the goal is complete.\n\n**A concrete example:** a user asks an agent, \"Cancel my flight and refund me.\" The agent thinks: \"I need to find the booking first.\" It calls a `lookup_booking` tool, observes the returned booking ID, then thinks: \"Now I need to cancel it.\" It calls a `cancel_flight` tool, observes a success response, then calls a `process_refund` tool, and finally reports back to the user that the cancellation and refund are complete. Each of those tool calls is a real action taken in a real system, not just a sentence generated in a chat window.\n\n---\n\n## Why this matters for security\n\nA chatbot that says something wrong is embarrassing. An agent that does something wrong can delete data, leak secrets, or move real money.\n\nThe attacker's goal shifts accordingly. With a plain chatbot, an attacker tries to make it say bad things. With an agent, an attacker tries to make it take bad actions, using the agent's own tools and permissions against the business itself.\n\nThis is the core idea running through the entire module: an AI Agent is a new attack surface where untrusted text can turn directly into real actions."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"User request\"] --> B[\"LLM brain: think\"]\n    B --> C{\"Need a tool?\"}\n    C -->|\"Yes\"| D[\"Call tool\"]\n    D --> E[\"Observe result\"]\n    E --> B\n    C -->|\"No\"| F[\"Final answer / action\"]"
+    },
+    {
+      "type": "note",
+      "body": "**Key shift:** in classic application security, code decides what runs. In agent security, an LLM interprets natural language and decides what runs. And critically, that language can come from an attacker."
+    },
+    {
+      "type": "content",
+      "body": "## What you will learn in this module\n\n- How an agent is actually built, covering architecture, planning, memory, and tools.\n- Where the trust boundaries are, and exactly where they tend to break down.\n- The main attack paths: tool abuse, memory poisoning, output bypass, chaining, and supply chain attacks.\n- How to test agents safely and responsibly.\n- How developers build genuinely secure agents using least privilege, sandboxing, and human approval steps.\n\n## Key takeaways\n\n- An AI Agent equals an LLM plus tools plus a repeating loop.\n- Agents take real actions, not just produce text output.\n- The core danger is that untrusted input can end up driving real-world actions.\n- Securing agents means controlling what actions are actually possible, not just what words are allowed in a response."
+    }
+  ]
+}

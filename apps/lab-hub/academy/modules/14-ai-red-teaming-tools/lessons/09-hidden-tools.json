@@ -1,0 +1,53 @@
+{
+  "slug": "09-hidden-tools",
+  "title": "Hidden & Lesser-Known Tools",
+  "type": "content",
+  "difficulty": "Advanced",
+  "reading_time": "11 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## Beyond the Mainstream Tools\n\nEvery tool covered so far has documentation, an active community, and shows up in the first page of search results. This lesson covers tools that are real, functional, and used by researchers and practitioners — but rarely mentioned in beginner material, either because they're research-grade, narrowly scoped, or simply less marketed. Knowing they exist is often the difference between a generic assessment and one that catches what automated mainstream scanners miss."
+    },
+    {
+      "type": "content",
+      "body": "## Optimization-Based Jailbreak Generators\n\nThese don't rely on a fixed prompt library — they algorithmically *search* for adversarial suffixes or prompt structures that break a target model, often transferring across models."
+    },
+    {
+      "type": "content",
+      "body": "### GCG / llm-attacks\n\nThe reference implementation behind the \"Universal and Transferable Adversarial Attacks on Aligned Language Models\" research (Zou et al.). It uses **Greedy Coordinate Gradient** optimization to find a suffix string that, appended to almost any harmful prompt, dramatically increases the chance the model complies. Suffixes generated against one open-weight model often transfer to other models, including some closed ones.\n\n```bash\ngit clone https://github.com/llm-attacks/llm-attacks\ncd llm-attacks && pip install -e .\n# Requires local model weights (white-box) — GPU strongly recommended\npython main.py --config configs/individual_vicuna.py\n```"
+    },
+    {
+      "type": "content",
+      "body": "### PAIR (Prompt Automatic Iterative Refinement)\n\nUses one LLM as an *attacker* to iteratively refine a jailbreak prompt against a second LLM as the *target*, using the target's own refusals as feedback — no gradient access needed, so it works black-box. Typically converges in under 20 queries, which is drastically fewer than brute-force approaches.\n\n```bash\ngit clone https://github.com/patrickrchao/JailbreakingLLMs\ncd JailbreakingLLMs && pip install -r requirements.txt\npython main.py --attack-model vicuna --target-model gpt-3.5-turbo --n-iterations 20\n```"
+    },
+    {
+      "type": "content",
+      "body": "### TAP (Tree of Attacks with Pruning)\n\nAn evolution of PAIR — it branches multiple candidate jailbreak prompts at each step like a search tree, then *prunes* branches that an evaluator model judges unlikely to succeed, before continuing to refine the survivors. Generally more query-efficient than PAIR for well-defended targets.\n\n```bash\ngit clone https://github.com/RICommunity/TAP\ncd TAP && pip install -r requirements.txt\npython main_TAP.py --target-model gpt-4 --attack-model gpt-4 --n-streams 3\n```"
+    },
+    {
+      "type": "content",
+      "body": "## Evaluation & Benchmarking Frameworks\n\n### JailbreakBench\n\nA standardized benchmark and leaderboard for jailbreak attacks and defenses — rather than a single attack tool, it's a shared dataset of harmful behaviors plus a reproducible evaluation harness, so you can compare your custom attack's success rate against published baselines using the same methodology.\n\n```bash\npip install jailbreakbench\n```\n\n### HarmBench\n\nA large-scale standardized evaluation framework covering both automated red teaming methods and defenses, spanning 18+ red teaming methods and 33+ target models in its published results — useful as a reference for which attack classes are currently hardest for models to resist."
+    },
+    {
+      "type": "content",
+      "body": "## Text-Perturbation Attack Frameworks\n\n### TextAttack\n\nOriginally built for adversarial NLP against classifiers (sentiment, spam, toxicity detectors) rather than generative LLMs — but directly relevant for attacking the classifier-based guardrails that sit in front of many production LLM deployments (content filters, safety classifiers). Implements dozens of published perturbation techniques (synonym substitution, character-level swaps, paraphrase attacks) in one consistent framework.\n\n```bash\npip install textattack\ntextattack attack --recipe textfooler --model bert-base-uncased-imdb --num-examples 20\n```"
+    },
+    {
+      "type": "content",
+      "body": "## Prompt Injection-Specific Scanners\n\n### Rebuff\n\nA prompt-injection detection layer (not just an attack tool) that combines heuristics, an LLM-based judge, a vector-similarity database of known attack patterns, and canary-token leak detection. Worth knowing about even as an attacker — it tells you what a well-defended target's guardrail stack might actually look like, so you can test whether canary-token or heuristic-based defenses can be bypassed.\n\n```bash\npip install rebuff\n```"
+    },
+    {
+      "type": "content",
+      "body": "## Multi-Agent / Automated Jailbreak Orchestration\n\n### AutoDAN\n\nUses a genetic-algorithm-style search to evolve jailbreak prompts that remain fluent and readable (unlike GCG's often-gibberish suffixes), which matters if the target has perplexity-based filters that flag obviously unnatural text.\n\n```bash\ngit clone https://github.com/SheltonLiu-N/AutoDAN\ncd AutoDAN && pip install -r requirements.txt\npython autodan_ga_eval.py --model llama2\n```"
+    },
+    {
+      "type": "note",
+      "body": "Most of these research-grade tools require white-box access (model weights) or heavy GPU compute for the optimization-based ones (GCG, AutoDAN). PAIR and TAP are the most practical for black-box, API-only targets since they only need query access to the target, not its weights."
+    },
+    {
+      "type": "content",
+      "body": "## Why 'Hidden' Doesn't Mean Obscure or Illegitimate\n\nEvery tool in this lesson is published academic research code, on GitHub, cited in peer-reviewed papers. They're 'hidden' only in the sense that most beginner-level red teaming material never mentions them — mainstream coverage stops at Garak and Promptfoo. Knowing this layer exists lets you go beyond what a scanner catches, and understand *why* published attacks against production LLMs (that you'll read about in security news) actually work under the hood."
+    }
+  ]
+}

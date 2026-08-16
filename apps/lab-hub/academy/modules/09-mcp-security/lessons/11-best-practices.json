@@ -1,0 +1,34 @@
+{
+  "slug": "11-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Best Practices\n\nThis lesson is your field checklist, a set of practical rules for building, deploying, and using MCP safely. Keep it handy when you're reviewing real systems.\n\n## For MCP Server developers\n\n**Design**\n\n- One tool, one job. Small, focused tools are genuinely easier to secure and reason about.\n- Static, short descriptions. Avoid dynamic or overly verbose descriptions that could hide instructions or leak internal structure.\n- Least privilege by default. Request only the minimum access the tool truly needs.\n\n**Code**\n\n- Validate and sanitize every parameter. Assume all input is hostile until proven otherwise.\n- Resolve paths with realpath, then check the allowed prefix against the resolved result.\n- Use parameterized queries only, never string-built SQL.\n- Use sandboxed template engines, never raw evaluation on user data.\n- No shell=True. Use safe command APIs with proper argument lists instead.\n- Sanitize error messages, don't leak schemas or full stack traces to callers."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# A well-secured MCP tool (fictional example)\nimport os\nfrom fastmcp import FastMCP\n\nmcp = FastMCP(\"docs\")\nSAFE_ROOT = \"/srv/docs\"\n\n@mcp.tool(description=\"Read a document from the docs library.\")\ndef read_doc(name: str) -> str:\n    # 1. Resolve symlinks and '..' FIRST\n    full = os.path.realpath(os.path.join(SAFE_ROOT, name))\n    # 2. THEN verify it stays inside the sandbox\n    if not full.startswith(SAFE_ROOT + os.sep):\n        raise ValueError(\"Access denied\")\n    # 3. Read only - no network calls, no encoding, no shell\n    with open(full, \"r\", encoding=\"utf-8\") as f:\n        return f.read()"
+    },
+    {
+      "type": "content",
+      "body": "## For MCP Host / platform builders\n\n- Enforce a strict CSP on any rendered tool UI.\n- Block or tightly gate postMessage traffic from app iframes back to the parent.\n- Show clear human approval prompts for sensitive tool calls.\n- Log every single tool call, including arguments, results, and the initiating user.\n- Isolate tool execution inside sandboxes or containers.\n- Never let the model self-authorize its own actions, always check permissions in code.\n\n## For operators / deployment\n\n- Use HTTPS/TLS for all remote MCP traffic.\n- Check Origin headers, and bind local servers to localhost only.\n- Require authentication for access to sensitive servers.\n- Apply egress filtering so servers can't make arbitrary outbound connections on their own.\n- Patch MCP packages promptly whenever updates are released.\n- Rotate any exposed secret immediately, without delay."
+    },
+    {
+      "type": "note",
+      "body": "**Golden rule for users:** never share secrets, such as passwords or API keys, with an AI that has MCP tools connected to it. A poisoned or malicious server may exfiltrate anything the model happens to see."
+    },
+    {
+      "type": "content",
+      "body": "## For MCP users\n\n- Verify the source of any MCP server before connecting to it.\n- Distrust unexpected login prompts appearing inside an AI chat, since a real assistant won't ask you to sign in to corporate accounts through it.\n- Don't paste sensitive data into chats that are backed by MCP tools.\n- Prefer well-reviewed, official servers over random community-built ones whenever possible."
+    },
+    {
+      "type": "content",
+      "body": "## Quick reference checklist\n\n| Area | Do this |\n|---|---|\n| Permissions | Least privilege, non-root |\n| Paths | realpath then prefix check |\n| SQL | Parameterized queries |\n| Templates | Sandboxed engine |\n| Descriptions | Short, static, reviewed |\n| Transport | HTTPS + Origin check |\n| Secrets | Never in git or chat; rotate if leaked |\n| Sensitive actions | Human approval |\n| Monitoring | Log calls, alert on anomalies |\n\n## The mindset\n\nGood MCP security isn't really about one clever fix. It's a genuine habit built on five principles:\n\n1. Assume every input is hostile from the start.\n2. Grant the least access possible in every case.\n3. Verify trust actively instead of simply assuming it holds.\n4. Watch closely for anomalies as they appear.\n5. Contain damage before it can spread further.\n\n## Key Takeaways\n\n- Developers: build focused tools, validate inputs, use realpath, parameterized queries, and sandboxed engines.\n- Platforms: enforce strict CSP, require human approval, log everything, and enforce authorization in code.\n- Operators: use TLS, apply egress filtering, patch promptly, and rotate secrets quickly.\n- Users: verify servers, distrust in-chat logins, and never share secrets.\n- Security here is a layered habit, not a single one-time control."
+    }
+  ]
+}

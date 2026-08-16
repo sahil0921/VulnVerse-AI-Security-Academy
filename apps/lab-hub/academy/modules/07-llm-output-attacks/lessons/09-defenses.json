@@ -1,0 +1,51 @@
+{
+  "slug": "09-defenses",
+  "title": "Defenses & Mitigations",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Defenses & Mitigations\n\nEvery attack covered in this module shares the same root cause and, happily, the same family of fixes. Defending against insecure output handling isn't exotic. It's the disciplined application of well-known secure-coding practices, applied to a new source of untrusted data: the model itself.\n\n## The three-layer strategy\n\n1. Validate, sanitize, and encode all model output, context-appropriately, at every single sink.\n2. Enforce access control in code, never in the prompt.\n3. Add hardening, such as sandboxes, CSP, and least privilege, so that even a successful attack has limited impact.\n\nWe'll take each of these in turn."
+    },
+    {
+      "type": "content",
+      "body": "## Layer 1: context-aware output handling\n\nApply the right protection for the actual destination of the output. This is genuinely the single most important table in the entire module:\n\n| Sink | Protection |\n|---|---|\n| HTML page | HTML-encode; insert via textContent, not innerHTML |\n| SQL query | Parameterized queries; model emits intent, not raw SQL |\n| OS command | No shell; fixed program + argument list; sandbox |\n| File path | Validate against an allowlist; block .. traversal |\n| Rendered Markdown | Sanitize; restrict image/link URLs; CSP |\n| Email / HTTP header | Strip newlines; validate structure |\n\nBecause the correct protection depends entirely on the sink, you have to apply it exactly where the output is actually used, on every single path, including secondary paths like a chatbot echoing back stored data."
+    },
+    {
+      "type": "content",
+      "body": "## Layer 2: real access control\n\nRepeat this to yourself: prompt engineering is not access control. A system prompt saying \"only admins may call this\" or \"never reveal secrets\" is trivially bypassed, as you saw repeatedly throughout this module.\n\nThe practical consequences of this:\n\n- Treat everything the model can reach, meaning every function and every data source, as if it were publicly accessible.\n- Don't give the model access to sensitive data or destructive functions in the first place.\n- Enforce permissions in code, using the real authenticated session and role, checked before executing any action the model requests."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    O[\"Model output\"] --> V[\"Validate: expected shape?\"]\n    V -->|fail| Reject[\"Reject / log\"]\n    V -->|pass| S[\"Sanitize: remove dangerous parts\"]\n    S --> E[\"Encode for the target sink\"]\n    E --> AC{\"Action requested?\"}\n    AC -->|yes| Auth[\"Authorize in code vs real role\"]\n    Auth -->|denied| Reject\n    Auth -->|allowed| Sandbox[\"Execute in sandbox / least privilege\"]\n    AC -->|no| Use[\"Safe use of output\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Layer 3: hardening to shrink the blast radius\n\nEven with layers 1 and 2 fully in place, always assume something will eventually slip through. This layer focuses on reducing what an attacker actually gains when that happens:\n\n- **Sandboxing** — run any generated code or commands inside a disposable, isolated container with no secrets, no network access, and minimal permissions.\n- **Least privilege** — the database user should be read-only wherever possible, and the service account should hold no more rights than it genuinely needs.\n- **Content Security Policy** — blocks external scripts and restricts image sources, undercutting both XSS and Markdown exfiltration at once.\n- **Guardrail models / output filters** — a second model or filter inspects output for dangerous content before it's actually used. This technique is important enough to deserve its own closer look below."
+    },
+    {
+      "type": "content",
+      "body": "## A closer look at guardrail models\n\nEverything covered in Layers 1 and 2 is a hard, deterministic rule: encode this character, block that table name, reject this file path. Rules like that are reliable, but only against the specific patterns you thought to write a rule for. A **guardrail model** is a second, usually smaller and faster model, or a lightweight classifier, whose only job is to look at a piece of text and decide: is this dangerous?\n\nIt doesn't replace the encoding and access-control layers already covered in this lesson. It sits *alongside* them, catching the fuzzy cases that a fixed rule was never written to catch, such as a cleverly reworded SQL-injection attempt, or an output that technically contains no banned characters but is still clearly trying to exfiltrate data through a Markdown image URL.\n\n**Two places a guardrail model typically runs:**\n\n- **On the way in (input guard)** — scans the user's prompt, or any retrieved document, before the main model ever sees it. If it looks like an attempt to manipulate the model into producing dangerous output, the request is blocked before generation even happens.\n- **On the way out (output guard)** — scans the main model's generated response before your application ever uses it. If the output looks like a SQL injection payload, a shell metacharacter chain, or a Markdown image pointed at an unfamiliar domain, the output guard withholds it instead of letting it reach the sink.\n\n**A simple comparison:** think of Layers 1 and 2 as a locked door with a specific key shape. It reliably stops anyone without that exact key. A guardrail model is more like a security guard standing next to that door, someone who can look at a person's behavior and say \"something about this feels wrong,\" even if they can't point to a specific broken rule. Neither replaces the other. A determined attacker who slips past the guard still hits the locked door, and a strange-but-harmless case that confuses the guard still gets through the door correctly."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# A minimal output guard sitting in front of the sink-specific handler\n# from earlier in this lesson. Note that it does NOT replace encoding,\n# parameterization, or sandboxing -- it runs alongside them.\n\ndef guardrail_check(model_out: str) -> bool:\n    \"\"\"\n    Returns True if the output looks safe enough to pass to handle_output().\n    In production this would call a dedicated, small classifier model\n    trained specifically to spot injection-style text, not just keywords.\n    \"\"\"\n    suspicious_markers = [\n        \"UNION SELECT\", \"; DROP\", \"&&\", \"$(\", \"<script\",\n    ]\n    lowered = model_out.lower()\n    return not any(marker.lower() in lowered for marker in suspicious_markers)\n\n\ndef handle_output_guarded(model_out: str, sink: str, user):\n    # Guardrail model runs FIRST, as an extra layer, not a replacement.\n    if not guardrail_check(model_out):\n        log_blocked_output(model_out, user)\n        raise ValueError(\"Output blocked by guardrail check\")\n\n    # Layers 1 and 2 still run exactly as before -- encoding, authz, sandboxing.\n    return handle_output(model_out, sink, user)\n\n# Why this still isn't enough on its own:\n# - A keyword list like the one above is easy to bypass with encoding or\n#   rephrasing (see the Encoding & Obfuscation lesson in the Prompt\n#   Injection module). A real deployment uses a trained classifier instead.\n# - False positives are real: a legitimate order like \"AND button\" or a\n#   product literally named 'DROP' can get flagged. Log and review blocks\n#   rather than assuming every block is a true attack.\n# - It adds latency and cost, since it's an extra model call on every\n#   request. That's why guardrail models are usually kept small and fast,\n#   not the same large model doing the main generation."
+    },
+    {
+      "type": "content",
+      "body": "**The honest limitation:** a guardrail model is a probabilistic filter, not a guarantee. It reduces risk; it doesn't eliminate it. Treat it the same way you'd treat the input-side blocklists covered in earlier modules, useful, but only ever one layer among several. It should never be the *only* thing standing between model output and a sensitive sink. Least privilege, sandboxing, parameterized queries, and context-aware encoding, all covered earlier in this lesson, remain the layers that hold even if the guardrail model itself gets fooled. Deep-dive coverage of training and hardening guardrail classifiers specifically is in the AI Data Attacks module."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# A layered handler that ties the strategy together.\nimport html, ipaddress, subprocess\n\ndef handle_output(model_out, sink, user):\n    # Layer 1: context-aware encoding\n    if sink == \"html\":\n        return html.escape(model_out)\n\n    # Layer 2 + 3: actions require code-side authz + sandboxed execution\n    if sink == \"command\":\n        intent = parse_intent(model_out)\n        if not user.can(intent.action):          # real authorization\n            raise PermissionError(\"denied\")\n        if intent.action == \"ping\":\n            ip = ipaddress.ip_address(intent.target)   # validate\n            return sandbox_run([\"ping\", \"-c\", \"1\", str(ip)])  # no shell, isolated\n\n    raise ValueError(\"unknown sink\")\n\n# Notice: encoding differs by sink, authorization lives in code,\n# and execution is sandboxed. That is the whole defense in three lines of thought."
+    },
+    {
+      "type": "note",
+      "body": "**The mindset that prevents every attack in this module:** model output is untrusted data. Handle it like any other untrusted input: validate it, sanitize it, encode it for its actual destination, authorize actions in code, and sandbox anything genuinely dangerous."
+    }
+  ]
+}

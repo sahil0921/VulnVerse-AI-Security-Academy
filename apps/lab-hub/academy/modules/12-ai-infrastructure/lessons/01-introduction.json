@@ -1,0 +1,37 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to AI Infrastructure",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Introduction to AI Infrastructure\n\nWhen people think about AI security, they usually picture clever tricks like prompt injection or jailbreaking a chatbot. But there is a much bigger, quieter target sitting underneath every AI system: the **infrastructure** it runs on.\n\nThis lesson introduces that infrastructure and explains why it is one of the most valuable targets in modern security.\n\n## What is AI Infrastructure?\n\n**AI infrastructure** is all the technology needed to run an AI model in the real world.\n\nThink of it like a restaurant. The AI model is the *chef*. But a chef alone cannot serve customers. They need a kitchen, ingredients, delivery trucks, electricity, staff, and a building. **AI infrastructure is everything except the chef.**\n\nIt includes:\n\n- **Servers** that run the model\n- **GPUs** (special chips that make AI fast)\n- **Containers** that package the software\n- **Networks** that connect everything\n- **Storage** that holds models and data\n- **Cloud accounts** that own it all\n- **Secrets** (passwords, API keys) that unlock each piece\n\n## From a Laptop to Production\n\nA few years ago, an AI model was often just a file sitting on a data scientist's laptop. Today, that same model runs as a live service handling thousands of requests per second, sitting behind load balancers, inside Kubernetes clusters, spread across multiple cloud providers.\n\n- *A quick note on that last sentence, in plain terms:* a **load balancer** is a piece of software that spreads incoming traffic across many servers, so no single one gets overwhelmed. **Kubernetes** is a system that automatically manages and runs many containers (packaged pieces of software) across a cluster of machines. You'll get comfortable with both terms as this module goes on.\n\nThis shift happened *fast*. Security did not keep up. That gap is exactly what attackers target.\n\n---\n\n## Why Does AI Infrastructure Security Matter?\n\nHere is the key idea for this whole module:\n\n> **You do not always need to break the AI model. Sometimes you just break the box it lives in.**\n\nIf an attacker cannot trick the model, they can instead:\n\n- Steal the **cloud credentials** running the model\n- Read the **storage** where the model and training data live\n- Escape the **container** and take over the host machine\n- Abuse the **Kubernetes cluster** to move between systems\n\nThe model becomes irrelevant once you own the machine it runs on. It doesn't matter how well-defended the chatbot's prompt is, if the attacker already has the keys to the kitchen."
+    },
+    {
+      "type": "content",
+      "body": "## Two Worlds Meet\n\nAI infrastructure security is unique because it blends **two different attack surfaces** that used to be studied separately:\n\n| Traditional Infrastructure Risks | AI-Specific Risks |\n|---|---|\n| Cloud misconfigurations | Exposed model endpoints |\n| Container escapes | GPU isolation weaknesses |\n| Leaked credentials | Model & data theft |\n| Weak IAM / access control | Model registry secrets |\n| Kubernetes RBAC gaps | Poisoned model artifacts |\n\nA quick plain-language definition of a few terms from that table, since they'll come up often in this module:\n\n- **IAM (Identity and Access Management)** — the system that decides who or what is allowed to do what, inside a cloud account. Think of it as the master list of keycards and which doors each one opens.\n- **RBAC (Role-Based Access Control)** — a similar idea, but specifically for Kubernetes: it decides which actions each user or service is allowed to perform inside the cluster.\n- **Model registry** — a storage system specifically for AI models, similar to how a package registry (like PyPI) stores code libraries.\n\nAn attacker who understands **both** worlds — the traditional cloud/container side and the AI-specific side — is extremely dangerous. That is exactly what you will become by the end of this module."
+    },
+    {
+      "type": "content",
+      "body": "## Where You Will Focus\n\nThis module covers the deployment layer of AI, step by step:\n\n- **Cloud attacks** — SSRF (tricking a server into making requests on your behalf), IAM privilege escalation, credential hunting\n- **Exposed endpoints** — inference servers (the part of the system that actually runs the model and returns answers) left open to the internet\n- **Kubernetes attacks** — RBAC abuse, service account token theft\n- **Container attacks** — sidecar tampering (a \"sidecar\" is a helper container that runs alongside the main one), GPU container escape\n- **Defenses** — how to secure all of the above\n\nDon't worry if some of these terms feel unfamiliar right now — each one gets a full, dedicated lesson later in this module, with examples and hands-on practice."
+    },
+    {
+      "type": "content",
+      "body": "## A Quick Note on Ethics\n\nEverything in this module is for **authorized testing only**. The labs are intentionally vulnerable, and they run entirely on your own machine. In the real world, you must always have written permission before testing any system. If you ever discover systems or data outside your agreed scope, you stop, document what you found, and ask before going any further."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[User sends request] --> B[Load Balancer]\n    B --> C[API Gateway]\n    C --> D[Container running AI model]\n    D --> E[GPU Hardware]\n    D --> F[Model Storage]\n    D --> G[Cloud Secrets]\n    subgraph Cloud Account\n    B\n    C\n    D\n    E\n    F\n    G\n    end\n    style D fill:#4f8cff,stroke:#333,color:#fff\n    style G fill:#ef4444,stroke:#333,color:#fff"
+    },
+    {
+      "type": "note",
+      "body": "**Key mindset:** the AI model is just one component. Every arrow and every box in the diagram above is a potential attack surface. Learn to see the whole system, not just the model."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **AI infrastructure** is everything that runs an AI model except the model itself — servers, GPUs, containers, networks, storage, cloud accounts, and secrets.\n- AI moved from laptops to complex cloud deployments faster than security practices could keep up.\n- Attackers often skip trying to trick the model entirely, and target the **infrastructure** underneath it instead.\n- This field blends **traditional** cloud/container risks with **AI-specific** risks like model theft and poisoned artifacts.\n- Your goal throughout this module: learn to see the whole system, and find the weak link in it.\n\nIn the next lesson, we start with one of the most common and dangerous cloud attacks: **SSRF leading to cloud credential theft.**"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to Multi-Agent Systems",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Introduction to Multi-Agent Systems\n\nModern AI applications no longer rely on a single model doing everything at once. Instead, they split the work across several smaller AI programs, each specialized to do one job well. These programs are called agents, and when many of them work together, the overall setup is called a multi-agent system.\n\nThink of a busy restaurant kitchen. One person takes orders, another cooks, another plates the food, and a manager coordinates everyone. No single person does it all. A multi-agent system works in essentially the same way.\n\n## What is an agent?\n\nAn agent is an AI program, usually powered by a large language model, that can make decisions and take actions on its own. Unlike a plain chatbot that only talks, an agent can actually do things: search a database, send an email, generate a file, or call another agent.\n\n**A simple comparison:** a chatbot is like a person who can only give you advice. An agent is like a personal assistant who can actually go and complete the task on your behalf.\n\n**Example:** you ask, \"Prepare this month's sales report.\" A single agent might fetch the data, analyze it, and build the report all by itself.\n\n## What is a multi-agent system?\n\nA multi-agent system is a group of agents that cooperate together to finish a larger task. Each agent has a specific role, its own permissions, and its own set of tools.\n\nUsing the sales report example again, a multi-agent system would split up the job:\n\n- Agent 1 pulls sales numbers from the database.\n- Agent 2 turns those numbers into charts and a slide deck.\n- Agent 3 scans the deck for unsafe links before it's shared with anyone.\n- A coordinator tells each agent when to act and passes results between them.\n\n## Why do multi-agent systems exist?\n\nCompanies moved toward multi-agent designs for a few practical reasons:\n\n- **Specialization** — a focused agent tends to perform better than one giant model juggling every task at once, similar to how a specialist doctor tends to outperform a generalist for a specific problem.\n- **Scalability** — you can add or upgrade one individual agent without needing to rebuild the entire system.\n- **Separation of concerns** — each agent only gets the access it genuinely needs, which is inherently safer.\n- **Better reasoning** — breaking a hard problem down into smaller steps often produces more accurate results overall.\n\n---\n\n## Single agent vs multi-agent\n\nThe move from one agent to many changes both the power and the risk profile of the entire system."
+    },
+    {
+      "type": "content",
+      "body": "The table below shows the key differences at a glance."
+    },
+    {
+      "type": "diagram",
+      "src": "graph TD\n    A[User Request] --> B[Coordinator Agent]\n    B --> C[Data Agent]\n    B --> D[Presentation Agent]\n    B --> E[Security Agent]\n    C --> B\n    D --> B\n    E --> B\n    B --> F[Final Result to User]"
+    },
+    {
+      "type": "content",
+      "body": "## The security problem this creates\n\nHere's the core idea to remember for the entire module: splitting work across agents creates brand-new places for attackers to strike.\n\nIn a single-agent system, the model calls its own internal functions. Everything happens inside one single program. There's essentially one door to guard.\n\nIn a multi-agent system, those internal calls become messages sent between separate programs, often traveling over a network. Every single message hop is a new door. Attackers now have many more potential ways in:\n\n- They can pretend to be a trusted agent.\n- They can slip fake instructions into a message.\n- They can register a rogue agent that steals data as it passes by.\n- They can trick one agent into abusing the permissions belonging to another.\n\nWe call the invisible lines between agents trust boundaries. Most attacks covered in this module happen exactly at those boundaries."
+    },
+    {
+      "type": "note",
+      "body": "**Key idea:** every time two agents talk to each other, a trust boundary is crossed. If that boundary isn't properly protected, an attacker can inject, intercept, or impersonate along it. Keep this idea in mind for every lesson that follows in this module."
+    },
+    {
+      "type": "content",
+      "body": "## Comparison: single vs multi-agent\n\n| Aspect | Single Agent | Multi-Agent System |\n|---|---|---|\n| Structure | One model does everything | Many specialized agents |\n| Communication | Internal function calls | Messages between programs |\n| Attack surface | Small, one entry point | Large, many entry points |\n| Failure impact | Whole task fails at once | One agent can be isolated |\n| Trust boundaries | Very few | Many, between every agent |\n\n## Real-world example\n\nNexora Dynamics, a fictional analytics company, runs a customer-support platform. A user's question first hits a router agent, which decides whether to send it to the billing agent, the technical-support agent, or the account agent. Each of these agents can read different databases.\n\nIf an attacker can trick the router into sending a billing question to a rogue agent instead, they could steal customers' payment details. That's exactly the kind of attack this module teaches you to find and exploit.\n\n## Summary\n\n- An agent is an AI that makes decisions and takes actions on its own.\n- A multi-agent system is many agents working together, each with a defined role.\n- Companies use them for specialization, scalability, and safer separation of duties.\n- Splitting work up creates trust boundaries, which become the main target for attackers.\n\n## Key Takeaways\n\n- Multi-agent systems trade a larger attack surface for better performance and flexibility.\n- The dangerous new attack surface is specifically the communication happening between agents.\n- Almost every attack covered in this module abuses a broken trust boundary somewhere in that communication."
+    }
+  ]
+}

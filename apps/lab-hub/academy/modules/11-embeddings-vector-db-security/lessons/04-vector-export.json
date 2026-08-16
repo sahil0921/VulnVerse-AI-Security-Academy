@@ -1,0 +1,34 @@
+{
+  "slug": "04-vector-export",
+  "title": "Vector Export & Triage",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Exporting Vectors and Triaging Targets\n\nOnce you have access to a vector database, the first two practical steps are:\n\n1. Export all the vectors so you can work on them offline.\n2. Triage, meaning finding the small number of chunks actually worth attacking.\n\nThis lesson walks through both steps in detail.\n\n## Step 1: enumerate and export\n\nImagine a red team engagement where you have SSH access to a machine and discover a Weaviate database on localhost:8080 with no authentication at all. Your goal is to pull every vector out.\n\nMost vector DBs expose an API, either REST or GraphQL, that lets you:\n\n- List collections, meaning tables of vectors.\n- Count how many objects exist in each.\n- Page through and download each vector along with its metadata.\n\nYou save the raw vectors to disk, usually as a NumPy .npy file, because that format preserves the exact float32 values needed for accurate inversion later on. CSV rounds numbers and bloats file size, while .npy and Parquet keep full precision intact.\n\n## Why stealth matters during export\n\nDownloading 10,000 vectors in one single burst is loud. It can trigger rate-limit alerts and fill up access logs quickly. A stealthier approach looks like this:\n\n- Export in small pages with deliberate delays between each one.\n- Spread the export over several hours to blend into normal traffic patterns.\n- Prefer read-only endpoints that generate less suspicious log entries overall."
+    },
+    {
+      "type": "content",
+      "body": "## Step 2: triage, finding the needles\n\nA real knowledge base has thousands of chunks. Most of them are boring: HR policies, meeting notes, product documentation. Only a tiny fraction hold credentials, API keys, or other secrets. Running a full inversion attack on every single chunk could take days.\n\nTriage solves this problem by working entirely within embedding space, no inversion needed yet at this stage. The core idea:\n\n> If a chunk contains a password reset message, its vector sits close to the vectors of other password-reset texts, even if we don't know the exact words used.\n\nSo we create sensitivity probes: short texts describing secrets, such as \"the default password is,\" \"AWS secret access key,\" or \"database connection string.\" We embed these probes and measure cosine similarity against every single chunk. Chunks that score high become our prime targets."
+    },
+    {
+      "type": "content",
+      "body": "## A three-stage triage pipeline\n\nProfessional triage cascades several signals together, each stage narrowing the pool further:\n\n| Stage | Name | What it does |\n| --- | --- | --- |\n| 1 | Density | Credential chunks tend to sit alone in embedding space (few neighbors). Combines this isolation with relevance to credential probes. |\n| 2 | Contrastive pairwise | Uses positive probes (secrets) and negative probes (boring policies) together to compute a net sensitivity score. |\n| 3 | Reconstruction | Attempts a shallow inversion, then scores the decoded text for password/API-key patterns and high entropy. |\n\nThe three stages are combined using weighted Reciprocal Rank Fusion (RRF), where later, more discriminating stages get more weight in the final ranking. The output is a short, ranked list of the highest-value chunks, produced in seconds instead of days."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\nfrom sentence_transformers import SentenceTransformer\n\n# Load exported vectors\nchunks = np.load(\"export/embeddings.npy\")   # shape (N, 384)\nmodel = SentenceTransformer(\"all-MiniLM-L6-v2\")\n\n# Sensitivity probes: short texts that resemble secrets\nprobes = [\n    \"the default password after resetting is\",\n    \"aws secret access key\",\n    \"database connection string with username and password\",\n    \"api key bearer token authorization\",\n]\nprobe_vecs = model.encode(probes, normalize_embeddings=True)\n\n# Normalize chunks so dot product == cosine similarity\nchunks_n = chunks / np.linalg.norm(chunks, axis=1, keepdims=True)\n\n# Score every chunk against every probe; keep the best probe hit\nscores = chunks_n @ probe_vecs.T          # (N, num_probes)\nbest = scores.max(axis=1)                 # highest probe score per chunk\n\ntop = np.argsort(best)[::-1][:5]          # top 5 candidate chunks\nfor i in top:\n    print(f\"chunk[{i}] sensitivity={best[i]:.3f}\")"
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"All chunks (thousands)\"] --> B[\"Stage 1: Density\"]\n    B --> C[\"Stage 2: Contrastive pairwise\"]\n    C --> D[\"Stage 3: Reconstruction\"]\n    D --> E[\"Weighted RRF fusion\"]\n    E --> F[\"Handful of high-value targets\"]"
+    },
+    {
+      "type": "note",
+      "body": "**The triage payoff:** you reduce the attack surface from an entire embedding store down to just a few chunks in seconds, all without inverting a single vector. Only then do you spend expensive inversion effort specifically on the targets most likely to actually hold secrets."
+    }
+  ]
+}

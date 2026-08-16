@@ -1,0 +1,34 @@
+{
+  "slug": "02-improper-output",
+  "title": "Improper Output Handling",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Improper Output Handling\n\nBefore we exploit anything, we need a clear mental map of where output actually goes. Every attack covered in this module is really the same underlying story: model output reaches a place that expects trusted, well-formed data, and it wasn't checked first.\n\nWe call that destination a sink. A sink is any part of the system that does something with a piece of text. A browser is a sink for HTML. A database is a sink for SQL. A shell is a sink for commands.\n\n## The output processing pipeline\n\nHere's the journey of a single piece of model output, step by step:\n\n1. **Generation** — the model produces text.\n2. **Post-processing** — the app may trim, parse, or reformat that text.\n3. **Routing** — the app decides exactly where that text should go next.\n4. **Sink** — the text is finally used: rendered, executed, stored, or sent somewhere.\n\nSecurity really lives at step 4. If the app applies the right protection just before the sink, it's safe. If it doesn't, it's vulnerable."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    G[\"Model generates text\"] --> R[\"App routes the text\"]\n    R --> S1[\"Browser / HTML\"]\n    R --> S2[\"Database / SQL\"]\n    R --> S3[\"Shell / OS command\"]\n    R --> S4[\"File system\"]\n    R --> S5[\"Email / HTTP request\"]\n    S1 --> X1[\"XSS if not encoded\"]\n    S2 --> X2[\"SQLi if not parameterized\"]\n    S3 --> X3[\"Command injection if not sandboxed\"]\n    S4 --> X4[\"Path traversal if not validated\"]\n    S5 --> X5[\"Header / SSRF abuse\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Trust boundaries\n\nA trust boundary is the invisible line between \"data I control\" and \"data I don't control.\" Every time data crosses that line into a trusted zone, it needs to be checked.\n\nHere's the critical insight for LLMs: many developers place the LLM inside the trusted zone by default. They assume, \"It's our model, our prompt, so the output must be safe.\" This is the core mistake. The model actually sits on the untrusted side of that boundary, because its output can be steered by attackers in ways the developer never anticipated.\n\n## Three defensive tools\n\nAcross this entire module, defenders rely on three core tools. Learn what each one means now, and every fix covered later will make sense immediately.\n\n| Tool | What it does | Simple comparison |\n|---|---|---|\n| Validation | Reject output that doesn't match an expected shape | A bouncer checking IDs against a guest list |\n| Sanitization | Remove or neutralize dangerous parts of the output | A metal detector confiscating weapons at the door |\n| Encoding / Escaping | Convert dangerous characters so the sink treats them as plain text, not code | Putting text in quotation marks so it's \"just words\" |\n\nEncoding is context-aware. The right encoding depends entirely on the sink involved. HTML encoding stops XSS but does absolutely nothing for SQL. SQL escaping stops SQLi but does nothing for a shell. This is the single most important nuance in output security, and it's worth remembering throughout the rest of this module."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: model output dropped straight into an HTML response\nfrom flask import Flask\napp = Flask(__name__)\n\n@app.route('/summary')\ndef summary():\n    answer = llm.generate(user_question)   # untrusted output\n    # The output is inserted into HTML with NO encoding.\n    return f\"<div class='answer'>{answer}</div>\"\n# If 'answer' contains <script>...</script>, the browser runs it. -> XSS\n\n\n# SECURE: encode for the HTML context before rendering\nimport html\n\n@app.route('/summary')\ndef summary_secure():\n    answer = llm.generate(user_question)\n    safe = html.escape(answer)             # context-aware HTML encoding\n    return f\"<div class='answer'>{safe}</div>\"\n# Now <script> becomes &lt;script&gt; and is shown as plain text."
+    },
+    {
+      "type": "note",
+      "body": "**Why the vulnerable version is dangerous, and why the fix works:** the vulnerable code lets the browser interpret model output as live HTML or JavaScript. The secure version applies HTML encoding so that angle brackets become harmless entities instead, and the browser simply displays them rather than executing them. This same principle, just with a different encoder, applies to every single sink covered in this module."
+    },
+    {
+      "type": "content",
+      "body": "## Downstream applications\n\nModern LLMs rarely just chat. Their output is frequently fed downstream into fully automated systems: report generators, SQL translators, code assistants, ticketing tools, and agents that call external APIs. The further that output travels without proper validation, the larger the resulting blast radius becomes.\n\nA common mistake is believing prompt engineering counts as a real security control. Writing \"never output HTML\" into the system prompt is not a genuine defense. Attackers bypass instructions like this constantly. Real defense happens at the sink, enforced in code, never just in the prompt.\n\nWith the pipeline and the three core tools clear, we're ready to look at our first concrete attack: Cross-Site Scripting."
+    }
+  ]
+}

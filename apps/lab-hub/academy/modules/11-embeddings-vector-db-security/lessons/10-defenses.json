@@ -1,0 +1,58 @@
+{
+  "slug": "10-defenses",
+  "title": "Defenses & Mitigations",
+  "type": "content",
+  "readingtime": "11 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Defending Embeddings and Vector Databases\n\nNow it's time to switch sides. You've seen every attack in this module. So how do you actually protect a vector-based AI system?\n\nThe answer is **defense in depth** — using several layers of protection stacked together, instead of relying on just one. No single control is ever enough on its own.\n\n- *Analogy:* Think of a house. A lock on the front door helps. But you'd still want a fence, an alarm, and a safe for your valuables too. If someone gets past one layer, the next one is still there."
+    },
+    {
+      "type": "content",
+      "body": "## Attack Surface Recap\n\nEvery attack covered in this module targeted one of these weak points:\n\n| Weak point | Attack it enables |\n| --- | --- |\n| Open / unauthenticated database | Vector export |\n| Known embedding model | Inversion |\n| Write access to the store | Canary injection, poisoning |\n| Full-precision stored vectors | High-quality inversion |\n| Chatty RAG chatbot | Inference probing |\n| Unencrypted metadata | Direct data leakage |\n| Weak multi-tenant isolation | Cross-tenant leakage |\n\nGood defense means closing as many of these gaps as you realistically can."
+    },
+    {
+      "type": "content",
+      "body": "## Layer 1: Access Control and Authentication\n\nThe single most common failure is a vector database sitting on an open port with **no authentication at all**. Fixes:\n\n- Require **strong authentication** on every endpoint. Never assume \"it's only reachable on localhost\" is enough protection — networks change, and mistakes happen.\n- Enforce **least-privilege authorization**: give query services a read-only role, and only let the ingestion pipeline actually write new data.\n- Put the database on an **isolated network segment**, not exposed to the wider company network or the open internet.\n\n- *Analogy:* This is the difference between a shop with a locked door and one with the door propped wide open, hoping nobody wanders in."
+    },
+    {
+      "type": "content",
+      "body": "## Layer 2: Encryption\n\n- **Encrypt data at rest** — both the vectors themselves *and* their metadata. Remember from earlier lessons: metadata is often the easiest thing for an attacker to leak, since it's frequently overlooked.\n- **Encrypt data in transit**, using TLS between every component that talks to each other.\n- Store secrets — API keys, database passwords — in a proper **secrets manager**, never in plain config files or a `.env` file accidentally committed to git."
+    },
+    {
+      "type": "content",
+      "body": "## Layer 3: Multi-Tenant Isolation\n\nIf one system serves many different customers (tenants) at once, a leak between them can be catastrophic — one customer's data ending up visible to another.\n\n- Give each tenant a **separate collection or namespace** inside the database.\n- **Always filter by tenant ID on the server side.** Never trust the client application to correctly scope its own query — a malicious or buggy client could simply omit the filter.\n- Explicitly test for **cross-tenant leakage** during any security assessment, rather than assuming isolation works.\n\n- *Analogy:* Like separate, individually locked storage units in the same building, instead of one giant shared room where everyone's boxes sit next to each other."
+    },
+    {
+      "type": "content",
+      "body": "## Layer 4: Reduce How Feasible Inversion Actually Is\n\nRecall the natural limitations of inversion attacks from earlier lessons. You can turn those same limitations into deliberate defenses:\n\n- Apply **quantization** or **dimensionality reduction** to stored vectors. This discards some fine detail that inversion attacks rely on, lowering reconstruction quality — though it's a genuine trade-off, since it can also slightly reduce search accuracy for legitimate users.\n- **Never store real secrets** — passwords, API keys — inside documents that get embedded in the first place. If a secret was never ingested into the vector store, no inversion attack, however powerful, can ever recover it. This is the single most reliable fix in this entire lesson."
+    },
+    {
+      "type": "content",
+      "body": "## Layer 5: Guardrails (With Realistic Expectations)\n\n- **Input guardrails** try to block obviously malicious or extraction-style prompts before they even reach the model.\n- **Output guardrails** try to redact sensitive values before a response reaches the user.\n\nBut by now, you already know their limit from earlier lessons: **guardrails on the chat output do nothing to protect a stolen embedding itself.** If an attacker has direct access to the vector database, output guardrails never even come into play. Treat guardrails as one useful layer — never as the whole defense on their own."
+    },
+    {
+      "type": "content",
+      "body": "## Layer 6: Detection, Logging, and Monitoring\n\nEven a well-defended system benefits from watching for attacks that do get through. Every attack in this module leaves some kind of trace:\n\n- Log and **alert on bulk vector exports** — things like unusual pagination patterns, or an unusually high volume of read requests.\n- Watch for **sudden spikes in ingestion volume** — a possible sign of canary or poisoning injection.\n- Monitor for **repetitive, systematic-looking queries**, which are typical of inference probing rather than normal human usage.\n- Track which queries consistently retrieve the same sensitive chunks over and over, which can indicate someone specifically targeting that content."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Vector DB and RAG system\"] --> B[\"Layer 1: AuthN and AuthZ\"]\n    A --> C[\"Layer 2: Encryption at rest and in transit\"]\n    A --> D[\"Layer 3: Multi-tenant isolation\"]\n    A --> E[\"Layer 4: Quantization and no raw secrets\"]\n    A --> F[\"Layer 5: Input and output guardrails\"]\n    A --> G[\"Layer 6: Logging and monitoring\"]\n    B --> H[\"Defense in depth\"]\n    C --> H\n    D --> H\n    E --> H\n    F --> H\n    G --> H"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: no auth, no tenant filter, secrets embedded directly\ndef vulnerable_search(query, client):\n    # Anyone who reaches the port can query everything.\n    # Chunks include raw passwords that were ingested.\n    return client.search(query, top_k=5)\n\n\n# SECURE: authenticated, tenant-scoped, secrets never ingested\ndef secure_search(query, client, user):\n    if not user.is_authenticated:\n        raise PermissionError(\"authentication required\")\n\n    # Server-side tenant filter — never trust the client to scope itself\n    results = client.search(\n        query,\n        top_k=5,\n        filter={\"tenant_id\": user.tenant_id},   # isolation enforced here\n    )\n\n    # Defense: sensitive values were redacted BEFORE ingestion,\n    # so they were never embedded and cannot be inverted.\n    return results\n\n# Why the secure version wins:\n#   - No auth  -> attacker cannot even connect.\n#   - Tenant filter -> no cross-tenant leakage.\n#   - No raw secrets ingested -> inversion has nothing left to recover."
+    },
+    {
+      "type": "note",
+      "body": "**The strongest single defense:** don't embed real secrets in the first place. Inversion, membership inference, and probing all fall apart completely if the sensitive value was never placed into the vector store to begin with. Treat embeddings as **sensitive data** — apply the same level of care you'd give a production SQL database — and layer detection on top of that as a safety net."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- No single defense is enough on its own — **defense in depth** means stacking several layers together.\n- Authentication and least-privilege access control close off the most common failure: an open, unauthenticated database.\n- Encrypt both vectors and metadata — metadata is often the easier target and gets overlooked.\n- In multi-tenant systems, always filter by tenant ID **server-side** — never trust the client to scope its own query.\n- Quantization reduces inversion quality, but the single most reliable fix is simply never embedding real secrets in the first place.\n- Output guardrails only protect chat responses — they do nothing if an attacker gets direct access to the vector database itself.\n- Logging and monitoring won't prevent an attack, but they help you catch bulk exports, poisoning attempts, and probing patterns after the fact."
+    }
+  ]
+}

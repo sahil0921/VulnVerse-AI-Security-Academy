@@ -1,0 +1,57 @@
+{
+  "slug": "07-mitre-atlas",
+  "title": "MITRE ATLAS Mapping",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## Why We Need a Shared Language\n\nImagine two security teams describing the same attack. One says *\"they tricked the AI with a nasty prompt.\"* The other says *\"they used input manipulation on the model.\"* Same attack, different words. When everyone invents their own terms, communication breaks down.\n\nSecurity solves this with **shared taxonomies** — agreed-upon catalogs of attack techniques, each with a name and an ID. When you map your findings to these IDs, anyone in the world knows exactly what you mean.\n\n**MITRE ATLAS** is the taxonomy built specifically for attacks on AI and machine-learning systems. Think of it as a shared dictionary of AI attack techniques."
+    },
+    {
+      "type": "content",
+      "body": "## ATT&CK vs. ATLAS\n\nYou'll hear about two MITRE catalogs. Here's the difference in plain terms.\n\n| Catalog | Covers | Example technique |\n|---|---|---|\n| **MITRE ATT&CK** | Traditional IT attacks | Stealing cloud account credentials |\n| **MITRE ATLAS** | AI / ML-specific attacks | Poisoning a model's training data |\n\n**ATT&CK** is the older, huge catalog for normal computer attacks. **ATLAS** is the newer, AI-focused catalog. They complement each other. A full AI attack often uses *both* — ATLAS techniques to abuse the AI, then ATT&CK techniques to move through the surrounding infrastructure.\n\n**An analogy.** ATT&CK is a dictionary of general crime. ATLAS is a specialized dictionary for a new kind of crime that only became possible with AI. You keep both on your shelf."
+    },
+    {
+      "type": "content",
+      "body": "## The Structure of ATLAS\n\nATLAS organizes attacks into **tactics** and **techniques**.\n\n- A **tactic** is the attacker's *goal* at a stage — the *why*. (\"I want to access the model.\")\n- A **technique** is a *specific method* to achieve it — the *how*. (\"Query the inference API to extract behavior.\")\n\nEach technique has an ID like `AML.TXXXX`. The `AML` stands for Adversarial Machine Learning. Some example tactics:\n\n- **Reconnaissance** — learning about the AI target.\n- **ML Model Access** — gaining a way to interact with the model.\n- **Poisoning** — corrupting data or the model.\n- **Exfiltration** — stealing data or the model itself.\n- **Impact** — causing harm to the system's operation."
+    },
+    {
+      "type": "content",
+      "body": "## Why Mapping Helps\n\nMapping your findings to ATLAS IDs gives you real benefits:\n\n1. **Clear communication.** \"We demonstrated AML.T0020\" means the same to every reader.\n2. **Tradecraft selection.** Each technique links to known methods and tools, guiding *how* to test it.\n3. **Coverage checking.** You can see which tactics you've covered and which you've missed.\n4. **Professional reports.** Clients and blue teams expect findings mapped to a recognized framework.\n\nMapping turns a loose list of \"things we found\" into a structured, comparable, professional assessment."
+    },
+    {
+      "type": "content",
+      "body": "## Mapping Sentri's Findings\n\nLet's map the components and attack paths we discovered in Aetherlink's Sentri platform to ATLAS techniques. (Technique IDs shown are representative examples of the ATLAS taxonomy.)\n\n| Sentri component / finding | ATLAS technique (concept) | When it applies |\n|---|---|---|\n| Agent HTTP endpoints respond to queries | Inference API Access | Immediately — endpoints answer |\n| Unauthenticated vector DB read | Infer / Extract training data | Immediately — no auth needed |\n| Staging knowledge base is writable | Poison training data | Only in permitted staging area |\n| Tool server abuse via agent token | ML-enabled product abuse | If a valid agent token authorizes it |\n| Crafted alert to fool Triage Agent | Craft adversarial input | If we can deliver crafted alerts |\n| Model registry access | ML supply chain / model access | If the registry is reachable |"
+    },
+    {
+      "type": "note",
+      "body": "**Notice the \"if\" column.** Several mappings say *\"if\"* — their viability depends on assumptions we haven't validated yet. This is normal and healthy. A technique doesn't enter your active plan until its preconditions are confirmed with high confidence. The ATLAS mapping evolves alongside your assumption register."
+    },
+    {
+      "type": "content",
+      "body": "## Mapping Evolves With Your Assumptions\n\nYour ATLAS mapping is not a one-time table. It grows and shifts exactly like your assumption register.\n\n- When you *validate* an assumption, a \"potentially applicable\" technique becomes \"confirmed applicable.\"\n- When you *invalidate* an assumption, a technique may drop off the list.\n- When you discover a *new* component, new techniques enter the map.\n\nFor example, once we confirmed the vector database was unauthenticated, the \"extract training data\" technique moved from *maybe* to *immediately applicable*. The mapping tracks reality as it firms up."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Finding in\\nassumption register\"] --> B{\"Assumption\\nvalidated?\"}\n    B -->|Yes| C[\"Technique enters\\nactive plan\"]\n    B -->|No| D[\"Technique stays\\n'if applicable'\"]\n    B -->|Invalidated| E[\"Technique dropped\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Combining ATLAS and ATT&CK in One Chain\n\nReal attacks blend both catalogs. Here's how a Sentri attack chain might read using both:\n\n1. **Recon** the AI endpoints — *ATLAS: Inference API Access*.\n2. **Extract** knowledge from the vector DB — *ATLAS: Infer training data*.\n3. **Abuse** the tool server to pull cloud credentials — *ATLAS: ML-enabled product abuse*.\n4. **Use** those cloud credentials — *ATT&CK: Cloud Accounts*.\n5. **Run commands** on cloud infrastructure — *ATT&CK: Command execution*.\n\nThe attack starts in ATLAS territory (abusing the AI) and finishes in ATT&CK territory (abusing the cloud). A complete report references both, showing the full journey from AI weakness to infrastructure impact."
+    },
+    {
+      "type": "content",
+      "body": "## Mapping for Defenders\n\nDefenders use ATLAS mapping too, but in reverse.\n\n- For each technique that applies to your system, ask: *\"Do we detect this? Do we prevent it?\"*\n- Gaps in your coverage become priorities.\n- Mapping helps you build a **detection matrix** — a grid of techniques versus your defenses.\n\nIf an attacker's likely technique has no matching detection, that's a hole to fill. ATLAS turns \"are we secure?\" into a concrete, checkable list."
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes\n\n- **Forcing a mapping.** If a finding doesn't cleanly match a technique, note it as novel rather than mislabeling it.\n- **Mapping unvalidated findings as confirmed.** Keep the \"if applicable\" tag until preconditions hold.\n- **Using only ATLAS or only ATT&CK.** AI attacks usually need both catalogs.\n- **Treating the mapping as static.** It must evolve with your assumption register.\n- **Skipping mapping entirely.** Unmapped findings are harder to communicate and compare."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **MITRE ATLAS** is a shared taxonomy of AI/ML attack techniques, each with an `AML.T####` ID — a shared language stops teams from talking past each other.\n- **ATT&CK** covers traditional IT attacks; **ATLAS** covers AI-specific ones — real chains use both.\n- ATLAS organizes attacks into **tactics** (goals) and **techniques** (methods).\n- Mapping improves **communication**, guides **tradecraft**, checks **coverage**, and strengthens **reports**. Keep the \"if applicable\" tag until you've validated the precondition.\n- The mapping **evolves** with your assumption register — techniques enter only when preconditions hold.\n- Defenders use mapping to build **detection matrices** and find coverage gaps — attackers map to plan, defenders map to find gaps.\n\nNext, we package everything into a professional deliverable: the **intelligence brief**."
+    }
+  ]
+}

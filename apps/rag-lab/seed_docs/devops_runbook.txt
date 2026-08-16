@@ -1,0 +1,18 @@
+DevOps Runbook — NimbleTech Engineering
+=========================================
+Database Connection Strings (production):
+- Primary: postgresql://app_user:Nimble_DB_2026!@prod-db-01.nimbletech.local:5432/nimbletech_prod
+- Replica: postgresql://readonly:NimbleRead2026@prod-db-02.nimbletech.local:5432/nimbletech_prod
+API Keys (rotated quarterly — see vault):
+- Stripe Live: sk_live_nimble2026_xK9mP2vL5nQ8wR
+- SendGrid: SG.nimble2026.xK9mP2vL5nQ8wR_jF4kZ
+- AWS Prod Access Key: AKIA3NIMBLE2026PROD01
+Deployment Pipeline:
+1. Merge to main triggers Jenkins job nimble-deploy-prod
+2. Jenkins pulls from github.com/nimbletech/platform
+3. Docker images pushed to registry.nimbletech.local
+4. Kubernetes rolling update via ArgoCD
+Default new-environment credentials:
+- Grafana: admin / NimbleGrafana2026
+- Kibana: no auth (internal network only)
+- Jenkins: admin / admin (DO NOT USE IN PROD — known issue)

@@ -1,0 +1,79 @@
+{
+  "slug": "02-target-reconstruction",
+  "title": "Target Reconstruction",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "## You Never Get the Blueprint\n\nIn a textbook, the full system diagram is printed on page one. In real life, **nobody hands you the architecture.**\n\nWhen you assess a real AI system, you start with fragments:\n\n- A short scoping document.\n- A few job postings that mention tools and technologies.\n- Some DNS records or IP ranges.\n- A vague paragraph from a kickoff call.\n- Whatever you discover by poking at the system.\n\n**Target reconstruction** is the skill of building an accurate picture of the system from these scattered clues. You assemble the map piece by piece, and you keep improving it as you learn more.\n\n**An analogy.** A detective arriving at a scene doesn't get a written confession. They collect footprints, fingerprints, and witness statements, then slowly reconstruct what happened. Target reconstruction is detective work for systems."
+    },
+    {
+      "type": "content",
+      "body": "## Why This Skill Comes First\n\nYou cannot threat-model a system you don't understand. Every later step depends on this one:\n\n- You can't rank *crown jewels* if you don't know what assets exist.\n- You can't map *trust boundaries* if you don't know the components.\n- You can't plan *attack paths* if you don't know how pieces connect.\n\nReconstruction is the foundation. Get it wrong and everything built on top wobbles."
+    },
+    {
+      "type": "content",
+      "body": "## Two Kinds of Intelligence\n\nThe clues you gather come in two flavors.\n\n**Passive intelligence** — information you collect *without touching the target*. It's quiet and low-risk.\n\n- Public job postings (\"we use MLflow, Qdrant, Kubernetes\").\n- Employee profiles listing skills.\n- Public code repositories and their forks.\n- DNS records, certificate transparency logs.\n- Company blog posts and conference talks.\n\n**Active intelligence** — information you get by *interacting with the target*. It's richer but noisier and may be detected.\n\n- Port scans that reveal running services.\n- API calls that return version numbers or error messages.\n- Reading configuration files or listing available tools.\n\nStart passive, then go active. Learn everything you can quietly before you make noise."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Scoping Document\"] --> E[\"Working Model\\nof the Target\"]\n    B[\"Passive OSINT\"] --> E\n    C[\"Active Recon\"] --> E\n    D[\"Kickoff Notes\"] --> E\n    E --> F{\"Confident\\nenough?\"}\n    F -->|No| C\n    F -->|Yes| G[\"Threat Modeling\\nBegins\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Reconstructing Aetherlink's Sentri Platform\n\nLet's make this concrete. You've been asked to assess **Sentri**, Aetherlink's internal AI assistant. Here is everything you start with.\n\n**From the scoping document:**\n\n- Sentri is an internal platform, not exposed to the internet.\n- It runs on a Kubernetes cluster in a hybrid cloud.\n- You get read-only access to the cluster and a VPN into the internal network.\n- Some actions are off-limits (more on that in later lessons).\n\n**From passive OSINT:**\n\n- A job posting for a *\"Senior AI Platform Engineer\"* mentions **vector databases, a model registry, and container orchestration**.\n- A DevOps engineer's public profile lists **a secrets manager** and **tool-server integrations** as skills.\n- A public fork of a tool-server library references an internal repo and hints at three connected tools: one that queries cloud infrastructure, one that creates support tickets, and one that reads monitoring data.\n\n**From the kickoff call:**\n\n- *\"User requests flow into a central coordinator, which routes them to specialized helpers. The helpers look up context from a shared knowledge base and take actions through a central tool server.\"*\n\nThat's all. No diagram, no port list, no component inventory. Now we build."
+    },
+    {
+      "type": "content",
+      "body": "## Step 1: Turn Clues Into a First Draft\n\nFrom those fragments, we can sketch a rough model. Notice that everything here is a **guess**, not a fact yet.\n\n| Clue | What we think it means |\n|---|---|\n| \"central coordinator\" | One orchestrator component routes all requests |\n| \"specialized helpers\" | Several distinct AI agent services exist |\n| \"shared knowledge base\" | A retrieval pipeline backed by a vector database |\n| \"central tool server\" | A tool server that agents call to take actions |\n| job posting: model registry | A place where AI models are stored and versioned |\n| DevOps profile: secrets manager | Credentials are managed centrally, not hardcoded |\n\nThis first draft is useful but fragile. Each row is a hypothesis waiting to be tested."
+    },
+    {
+      "type": "content",
+      "body": "## Step 2: Go Active and Confirm\n\nNow we interact with the system to turn guesses into knowledge. A network sweep of the internal service subnet reveals the running services and their versions."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "$ nmap -sV -p- --open -T4 10.20.30.0/24\n\nNmap scan report for 10.20.30.10\nPORT     STATE SERVICE  VERSION\n9000/tcp open  http     Sentri Orchestrator API v2.1\n\nNmap scan report for 10.20.30.11\nPORT     STATE SERVICE  VERSION\n9001/tcp open  http     Sentri Triage Agent\n\nNmap scan report for 10.20.30.12\nPORT     STATE SERVICE  VERSION\n9002/tcp open  http     Sentri Action Agent\n\nNmap scan report for 10.20.30.13\nPORT     STATE SERVICE  VERSION\n9004/tcp open  http     Sentri Knowledge Agent\n\nNmap scan report for 10.20.30.20\nPORT     STATE SERVICE  VERSION\n6333/tcp open  http     Vector DB REST API\n\nNmap scan report for 10.20.30.21\nPORT     STATE SERVICE  VERSION\n5000/tcp open  http     Model Registry (Tracking Server)\n\nNmap scan report for 10.20.30.22\nPORT     STATE SERVICE  VERSION\n8200/tcp open  http     Secrets Manager (status: unsealed)"
+    },
+    {
+      "type": "content",
+      "body": "**Look what just happened.** Our vague guesses became confirmed facts:\n\n- The orchestrator is real and lives at a specific address and port.\n- We hypothesized \"several agents\" — we now see exactly which ones (Triage, Action, Knowledge).\n- The vector database, model registry, and secrets manager are all confirmed and running.\n\nWe also learned something new we didn't guess: the **Knowledge Agent is a separate standalone service**, not buried inside another component. That means it has its own network address and its own attack surface. A standalone service can be queried directly, which changes how we might attack it."
+    },
+    {
+      "type": "note",
+      "body": "**A guess can be wrong in a useful way.** We assumed a certain number of agents and found a different number. That's not a failure — it's *exactly what reconstruction is for*. Each surprise sharpens the map. The goal is to see reality as it actually is, not as we first imagined it."
+    },
+    {
+      "type": "content",
+      "body": "## Step 3: Probe Individual Components\n\nOnce we know a component exists, we probe it for detail. For example, checking whether the vector database requires a login:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "$ curl -s http://10.20.30.20:6333/collections | jq '.result.collections[].name'\n\n\"operational_knowledge\"\n\"support_articles\"\n\"incident_history\"\n\"runbook_corpus\""
+    },
+    {
+      "type": "content",
+      "body": "The vector database answered our request **with no credentials at all**. That is a major discovery. It means any component inside the network — or any attacker who gets inside — can read its contents freely. We didn't know this before; we learned it by probing. Reconstruction turned an unknown into a confirmed, high-value finding."
+    },
+    {
+      "type": "content",
+      "body": "## The Reconstruction Loop\n\nTarget reconstruction is not a straight line. It is a loop you repeat until your picture is good enough to act on.\n\n1. **Collect** a piece of intelligence (passive or active).\n2. **Update** your model — add a component, confirm a guess, or discard a wrong idea.\n3. **Ask** what new question this raises.\n4. **Repeat** until confident.\n\nEach loop makes the map more accurate. You stop when the picture is clear enough to plan an attack or a defense — not when it's \"complete,\" because it never truly is."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Collect\\nintelligence\"] --> B[\"Update the\\nmodel\"]\n    B --> C[\"Raise new\\nquestions\"]\n    C --> A\n    B --> D[\"Model good\\nenough to act\"]"
+    },
+    {
+      "type": "content",
+      "body": "## Common Mistakes in Reconstruction\n\n- **Treating guesses as facts.** The single most common error. A hypothesis is not knowledge until you test it.\n- **Stopping too early.** A shallow map hides the most interesting attack paths.\n- **Going active too soon.** Making noise before you've learned the quiet stuff can burn your access.\n- **Ignoring surprises.** When reality contradicts your guess, that contradiction is a gift. Follow it.\n- **Not writing it down.** A model in your head is a model you'll forget. Record everything."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Real assessments start with **fragments**, never a finished blueprint — nobody hands you the architecture, you rebuild it like a detective.\n- Use **passive intelligence** first (quiet), then **active intelligence** (noisier but richer).\n- Every clue produces a **hypothesis**; every probe turns hypotheses into confirmed facts. A confirmed \"unauthenticated database\" beats ten untested guesses.\n- Reconstruction is a **loop**: collect, update, question, repeat — and surprises are valuable, since they correct your map.\n- Stop when the map is *good enough to act*, then keep refining as you go.\n\nThe next lesson shows how to track all these guesses cleanly: the **assumption register**."
+    }
+  ]
+}

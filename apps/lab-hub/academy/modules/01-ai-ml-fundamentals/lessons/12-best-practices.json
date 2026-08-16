@@ -1,0 +1,29 @@
+{
+  "slug": "12-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "7 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Security Best Practices\n\nAt this point, you understand how AI systems work and where they tend to break. This lesson covers the core defenses used to secure them. As a red teamer, these are the controls you will try to bypass. As a defender, these are the controls you will build. Either way, you need to understand them well.\n\nThink of this lesson as the baseline security checklist for any AI system."
+    },
+    {
+      "type": "content",
+      "body": "## 1. Treat all input as untrusted\n\nUser input, web pages, uploaded files, and emails should all be treated as potentially malicious. Validate and sanitize this data before it reaches the AI model. This is the first layer of defense.\n\n## 2. Treat all output as untrusted\n\nNever trust what the AI generates by default. Before using its output:\n\n- Properly escape it before displaying it in a browser, to prevent XSS.\n- Never insert it directly into a database query, to prevent SQL injection.\n- Never execute it as a system command, to prevent code injection.\n\n## 3. Give the AI the minimum access it needs\n\nThis is known as the **principle of least privilege**. If the AI only needs to read data, don't grant it write access. If it doesn't need internet access, don't provide it. Limiting the AI's capabilities reduces the potential damage if it is ever manipulated."
+    },
+    {
+      "type": "content",
+      "body": "## 4. Keep secrets out of prompts\n\nNever store passwords, API keys, or other credentials inside a system prompt. This information can potentially be leaked through the model's output. Secrets should be stored and managed properly, outside of the model entirely.\n\n## 5. Add guardrails\n\nUse separate validation checks both before and after the model processes a request:\n\n- **Input guard:** blocks obvious attack patterns before they reach the model.\n- **Output guard:** blocks harmful or sensitive responses before they reach the user.\n\n## 6. Secure the data pipeline\n\n- Control and restrict who is able to add or modify training data, to prevent poisoning.\n- Protect the model file itself, to prevent theft or tampering.\n- Secure the vector database and any stored embeddings.\n\n## 7. Log and monitor activity\n\nRecord both the inputs sent to the AI and the outputs it produces, and watch for unusual patterns. You cannot defend against attacks you cannot see. This is also why the hands-on labs in this course include monitoring and SIEM-style dashboards."
+    },
+    {
+      "type": "diagram",
+      "src": "graph LR\n    U[User Input] --> IG[Input Guard]\n    IG --> M[AI Model<br/>least privilege]\n    M --> OG[Output Guard]\n    OG --> R[Safe Response]\n    M -.logs.-> L[Monitoring]"
+    },
+    {
+      "type": "note",
+      "body": "No single defense is sufficient on its own. Real-world security relies on stacking multiple layers of protection together, a concept known as **defense in depth**. If one layer fails, another layer is there to catch the attack."
+    }
+  ]
+}

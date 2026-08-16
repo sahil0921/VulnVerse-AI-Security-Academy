@@ -1,0 +1,25 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to Output Handling",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# LLM Output Attacks\n\nWelcome to the module on LLM Output Attacks. In earlier modules, you learned how attackers craft malicious input to a model. This module flips that problem around entirely. Here, we focus on what happens after the model speaks: the output.\n\nWhen an application takes text from a large language model and uses it somewhere, whether that's displaying it on a web page, running it as a command, or saving it in a database, that text becomes a genuine security concern. If the application trusts the output blindly, an attacker can turn the model into a delivery vehicle for classic attacks like XSS, SQL injection, and command injection.\n\n## The one rule to remember\n\nLLM output is untrusted data. Treat it exactly the way you'd treat raw input typed by a complete stranger on the internet.\n\nThat single idea is the foundation of this entire module. If you understand it deeply, everything else in this module becomes much easier.\n\n## Why is output untrusted?\n\nA model doesn't decide what to say the way a human consciously does. It predicts text based on learned patterns, and its behavior can be steered by:\n\n- The user's prompt, which an attacker may fully control.\n- Data the model retrieves, such as a web page, document, or email, which an attacker may also control.\n- The model simply making a mistake, a behavior known as a hallucination.\n\nSo the developer never has complete control over the exact characters the model actually produces. If those characters flow into a sensitive location without being checked first, the danger begins right there.\n\n## A simple comparison\n\nThink of the LLM as a very fast, very confident temp worker. You give them a task, and they hand you back a finished document. That document might be perfect, or it might contain a hidden note someone slipped in earlier. A careful office never staples an unread document straight onto a legal contract. They read it, check it, and clean it up first. Insecure output handling is the office that skips that step entirely."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"User or attacker input\"] --> B[\"LLM\"]\n    B --> C[\"Raw model output\"]\n    C --> D{\"Handled safely?\"}\n    D -->|No| E[\"Output used directly:<br/>HTML, SQL, shell, email\"]\n    E --> F[\"Injection / exploit\"]\n    D -->|Yes| G[\"Validated, encoded, sandboxed\"]\n    G --> H[\"Safe use\"]"
+    },
+    {
+      "type": "note",
+      "body": "**Scope of this module.** We cover attacks that specifically abuse how output is handled. Prompt injection, RAG poisoning, and agent abuse are only mentioned briefly here, where they help deliver an output attack. Those topics have their own dedicated modules elsewhere in this course."
+    },
+    {
+      "type": "content",
+      "body": "## Where output attacks sit in the industry\n\nThe security community tracks this risk formally. In the OWASP Top 10 for LLM Applications, this whole family of issues is listed as LLM05: Improper Output Handling. In Google's Secure AI Framework (SAIF), the same underlying idea appears as the Insecure Model Output risk.\n\nYou don't need to memorize these exact names. Just know that when a security report says \"improper output handling,\" it means exactly what this module teaches: output was trusted when it shouldn't have been.\n\n## What you will be able to do after this module\n\nBy the end of this module, you'll be able to:\n\n- Recognize where LLM output flows into dangerous sinks within an application.\n- Test an application to see whether it properly encodes, validates, or sandboxes its output.\n- Understand and explain XSS, SQL injection, command injection, and data exfiltration carried out through an LLM.\n- Recommend concrete, technically correct fixes for each of these issues.\n\nLet's begin by understanding the output pipeline itself."
+    }
+  ]
+}

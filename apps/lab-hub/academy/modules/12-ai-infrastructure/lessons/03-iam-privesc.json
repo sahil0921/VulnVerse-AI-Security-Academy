@@ -1,0 +1,51 @@
+{
+  "slug": "03-iam-privesc",
+  "title": "IAM Privilege Escalation",
+  "type": "content",
+  "readingtime": "10 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# IAM Privilege Escalation\n\nIn the last lesson, you stole some cloud credentials. But stolen credentials often have *limited* permissions. This lesson teaches you how to turn weak access into powerful access. This is called **privilege escalation**.\n\n## What is IAM?\n\n**IAM** stands for **Identity and Access Management**.\n\nIt is the cloud's system for answering two questions:\n\n1. **Who are you?** (Identity / Authentication)\n2. **What are you allowed to do?** (Permissions / Authorization)\n\n**Analogy:** IAM is like the security system in an office building. Your ID badge says who you are. The badge's permissions decide which doors open. Some badges open one room. Some open the whole building.\n\n## Key IAM Words (Explained Simply)\n\n| Word | Simple Meaning | Analogy |\n|---|---|---|\n| **User** | A human identity | An employee |\n| **Role** | A temporary identity you can borrow | A guest badge |\n| **Policy** | The rules attached to an identity | The list of doors a badge opens |\n| **Permission** | One allowed action | \"Can open door 3\" |\n| **AssumeRole** | Borrowing a role's identity | Picking up a different badge |\n| **PassRole** | Giving a role to a new service | Handing a badge to a robot you built |"
+    },
+    {
+      "type": "content",
+      "body": "## What Is Privilege Escalation?\n\n**Privilege escalation** means moving from *low* access to *high* access.\n\nYou start as a low-level identity. You look for a mistake that lets you become a more powerful identity. You repeat this, hopping from one role to the next, until you reach the top.\n\n**Analogy:** You enter the building with a visitor badge. You find a desk with a manager's badge left out. You use it. On that manager's desk is the master key. You climb the ladder one badge at a time.\n\n## The Most Common Escalation Paths\n\nHere are the classic mistakes attackers look for in cloud IAM:\n\n- **AssumeRole to a stronger role** — your role is allowed to \"become\" a more powerful role.\n- **PassRole + create service** — you can attach a powerful role to a new service (like a notebook or function) that you then control.\n- **Editing your own policy** — you have permission to give yourself more permissions.\n- **Reading policies** — you can read policy documents to find these paths without guessing."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Lambda Role<br/>weak] -->|AssumeRole| B[DataScientist Role<br/>medium]\n    B -->|AssumeRole| C[MLOps Role<br/>strong]\n    C -->|AssumeRole + PassRole| D[SageMaker Execution Role<br/>full access]\n    style A fill:#22c55e,color:#fff\n    style B fill:#f59e0b,color:#fff\n    style C fill:#f97316,color:#fff\n    style D fill:#ef4444,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## Walking a Real Chain\n\nLet's follow a realistic escalation from a fictional healthcare AI project.\n\n### Step 1: Confirm Who You Are\n\nFirst, always check your current identity. In AWS:\n\n```bash\naws sts get-caller-identity\n```\n\nThis tells you the account and role you currently hold. It needs no special permissions.\n\n### Step 2: Read Your Own Permissions\n\nInstead of guessing, read the policy attached to your role:\n\n```bash\naws iam get-role-policy --role-name DataScientistRole \\\n  --policy-name DataScientistPolicy\n```\n\n### Step 3: Look for the Escalation Clues\n\nInside the policy, two things scream \"escalation\":\n\n```json\n{\n  \"Sid\": \"AssumeMLOpsRole\",\n  \"Effect\": \"Allow\",\n  \"Action\": \"sts:AssumeRole\",\n  \"Resource\": \"arn:aws:iam::123456789012:role/MLOpsRole\"\n}\n```\n\nThis says: *you are allowed to become the MLOpsRole.* That is a direct ladder up."
+    },
+    {
+      "type": "content",
+      "body": "### Step 4: Climb the Ladder\n\nYou assume the stronger role:\n\n```bash\naws sts assume-role \\\n  --role-arn arn:aws:iam::123456789012:role/MLOpsRole \\\n  --role-session-name \"session1\"\n```\n\nThis returns new, more powerful credentials. You export them and repeat the process — read the new role's policy, find the next hop, climb again.\n\n### The Dangerous End: a Broad Managed Policy\n\nThe chain often ends when you reach a role with a **wildcard** permission or an overly broad managed policy like `AmazonSageMakerFullAccess`. Wildcards look like this:\n\n```json\n{\n  \"Effect\": \"Allow\",\n  \"Action\": \"s3:*\",\n  \"Resource\": \"*\"\n}\n```\n\n**`*` means \"everything.\"** This role can now touch every S3 bucket in the account — including buckets from *completely different projects*. That is how one small SSRF bug ends in total account compromise."
+    },
+    {
+      "type": "content",
+      "body": "## The PassRole Trick (Explained)\n\n**PassRole** deserves its own explanation because it is subtle but powerful.\n\nSome cloud services (like a training notebook) run *as a role you assign to them*. If you have `iam:PassRole` and permission to *create* such a service, you can:\n\n1. Create a new notebook.\n2. Attach a powerful role to it (PassRole).\n3. Run code inside the notebook.\n4. Now your code runs with that powerful role's permissions.\n\n**Analogy:** You build a robot and hand it the manager's badge. The robot obeys you, but opens the manager's doors. You escalated without ever touching the badge yourself."
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "body": "// VULNERABLE POLICY: too broad, enables escalation\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": \"sts:AssumeRole\",\n      \"Resource\": \"*\"          // Can become ANY role - dangerous\n    },\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": \"iam:PassRole\",\n      \"Resource\": \"*\"          // Can hand ANY role to a new service\n    }\n  ]\n}"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "body": "// SECURE POLICY: scoped and conditional (least privilege)\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": \"sts:AssumeRole\",\n      \"Resource\": \"arn:aws:iam::123456789012:role/SpecificTaskRole\"\n    },\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": \"iam:PassRole\",\n      \"Resource\": \"arn:aws:iam::123456789012:role/SageMakerRole-project-x\",\n      \"Condition\": {\n        \"StringEquals\": {\n          \"iam:PassedToService\": \"sagemaker.amazonaws.com\"\n        }\n      }\n    }\n  ]\n}\n// Why better:\n// - AssumeRole is limited to ONE role, not everything\n// - PassRole is limited to ONE role AND only to one service\n// - No wildcards means no surprise escalation paths"
+    },
+    {
+      "type": "note",
+      "body": "**Attacker tip that is also a defender lesson:** Reading policies (`get-role-policy`, `list-roles`) is quiet and precise. It lets attackers plan without noisy brute-force. Defenders should therefore **restrict who can read IAM policies** and monitor for unusual `AssumeRole` chains in logs."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **IAM** controls who you are and what you can do in the cloud.\n- **Privilege escalation** means hopping from weak identities to strong ones.\n- Watch for **AssumeRole**, **PassRole**, and **wildcard (`*`)** permissions.\n- Broad managed policies like `*FullAccess` break project boundaries.\n- **Defense = least privilege:** scope every permission to specific roles, services, and resources with conditions.\n\nNext, we search the account for secrets left lying around in **Credential Hunting.**"
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+{
+  "slug": "12-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 20,
+  "questions": [
+    {
+      "q": "What is the primary goal of an SSRF attack against a cloud server?",
+      "options": [
+        "To crash the web application",
+        "To brute-force the login page",
+        "To trick the server into making requests the attacker chooses, often to reach internal services like the metadata endpoint",
+        "To encrypt the server's files for ransom"
+      ],
+      "answer": 2,
+      "explanation": "SSRF (Server-Side Request Forgery) tricks the server itself into fetching a URL the attacker chose, often reaching internal-only services the attacker could never reach directly."
+    },
+    {
+      "q": "Which internal IP address hosts the cloud instance metadata service (IMDS) across AWS, Azure, and GCP?",
+      "options": [
+        "10.0.0.1",
+        "169.254.169.254",
+        "127.0.0.1",
+        "192.168.1.1"
+      ],
+      "answer": 1,
+      "explanation": "All three major cloud providers use the same reserved link-local address, 169.254.169.254, only reachable from inside the machine itself."
+    },
+    {
+      "q": "An app blocks http:// URLs in its SSRF-vulnerable feature but still allows file://. What can an attacker read to potentially find leaked cloud credentials?",
+      "options": [
+        "/etc/hostname",
+        "/proc/self/environ",
+        "/var/log/syslog",
+        "/tmp/cache.db"
+      ],
+      "answer": 1,
+      "explanation": "The process environment file holds every environment variable a process started with, which is often exactly where cloud credentials get injected in serverless and container deployments."
+    },
+    {
+      "q": "Why does IMDSv2 resist basic SSRF attacks better than IMDSv1?",
+      "options": [
+        "It uses a completely different, unguessable IP address",
+        "It requires a special header and a two-step token request that most simple SSRF bugs cannot add",
+        "It is only accessible from a VPN",
+        "It disables all metadata access permanently"
+      ],
+      "answer": 1,
+      "explanation": "IMDSv2 requires first fetching a token using a custom header, and most basic SSRF vulnerabilities cannot forge custom headers on the request they trigger."
+    },
+    {
+      "q": "In IAM, what does the 'AssumeRole' action allow an identity to do?",
+      "options": [
+        "Delete another role permanently",
+        "Reset a user's password",
+        "Create a brand-new cloud account",
+        "Temporarily borrow another role's identity and permissions"
+      ],
+      "answer": 3,
+      "explanation": "AssumeRole lets an identity temporarily take on a different role's permissions, similar to picking up a different keycard for a while."
+    },
+    {
+      "q": "What does the 'PassRole' technique allow an attacker to do?",
+      "options": [
+        "Directly steal another user's password",
+        "Attach a powerful role to a new service (like a notebook) they control, so their code runs with that role's permissions",
+        "Force another user to log out",
+        "Bypass multi-factor authentication entirely"
+      ],
+      "answer": 1,
+      "explanation": "PassRole lets you hand a powerful role to a service you control, like building a robot and giving it a manager's badge — your code then runs with that role's power."
+    },
+    {
+      "q": "Why is a wildcard (*) in an IAM policy's Action or Resource field considered dangerous?",
+      "options": [
+        "It slows down every API call significantly",
+        "It only affects billing, not security",
+        "It grants access to everything matching that field, often far more than intended",
+        "It requires additional encryption keys"
+      ],
+      "answer": 2,
+      "explanation": "A wildcard means \"everything\" — a policy with s3:* and Resource: * can touch every S3 bucket in the account, including ones from completely unrelated projects."
+    },
+    {
+      "q": "Why are failed training jobs an especially good place to hunt for credentials?",
+      "options": [
+        "They run faster than successful jobs",
+        "They automatically encrypt all secrets",
+        "They delete all logs immediately",
+        "Error handlers often dump environment variables and secrets, and nobody reviews failed runs"
+      ],
+      "answer": 3,
+      "explanation": "When something breaks, error handlers frequently print out the full environment for debugging — and since the job failed, few people ever go back and review those logs."
+    },
+    {
+      "q": "What is the danger of storing an AWS SSM parameter as plain 'String' instead of 'SecureString'?",
+      "options": [
+        "String parameters cost more money",
+        "String parameters are stored and returned as plaintext, with no encryption protecting the value",
+        "String parameters cannot hold more than 10 characters",
+        "String parameters are automatically shared with other AWS accounts"
+      ],
+      "answer": 1,
+      "explanation": "SecureString values are encrypted; plain String values are stored and returned as plaintext, meaning anyone who can read the parameter sees the secret directly."
+    },
+    {
+      "q": "What firewall rule value means a port is open to the entire internet?",
+      "options": [
+        "10.0.0.0/8",
+        "172.16.0.0/12",
+        "0.0.0.0/0",
+        "127.0.0.1/32"
+      ],
+      "answer": 2,
+      "explanation": "0.0.0.0/0 matches every possible IP address, meaning literally anyone on the internet can reach that port."
+    },
+    {
+      "q": "Why is discovering a model server's exact version number (e.g. via a /version endpoint) valuable to an attacker?",
+      "options": [
+        "It lets them change the server's hostname",
+        "It reveals the exact software build, which can then be checked against known CVEs for that version",
+        "It automatically grants admin access",
+        "It disables the server's rate limiting"
+      ],
+      "answer": 1,
+      "explanation": "Once the exact version is known, an attacker can search for publicly known vulnerabilities (CVEs) affecting that specific build."
+    },
+    {
+      "q": "In Kubernetes, why is the ability to 'create pods' effectively equal to cluster admin?",
+      "options": [
+        "Because creating pods deletes the audit logs",
+        "Because pods automatically become the cluster owner",
+        "Because you can launch a pod that mounts the host filesystem or runs as a more powerful service account",
+        "Because it disables all RBAC rules"
+      ],
+      "answer": 2,
+      "explanation": "A pod you create can be configured to mount the host's filesystem or run with a stronger service account, effectively handing you control of the whole cluster."
+    },
+    {
+      "q": "What is the difference between a Kubernetes Role and a ClusterRole?",
+      "options": [
+        "A Role only works for humans, a ClusterRole only for pods",
+        "A Role applies to one namespace only; a ClusterRole applies across the entire cluster",
+        "There is no functional difference between them",
+        "A ClusterRole expires automatically after 24 hours"
+      ],
+      "answer": 1,
+      "explanation": "A Role is scoped to a single namespace, while a ClusterRole's permissions apply cluster-wide, across every namespace."
+    },
+    {
+      "q": "What is 'identity chaining' in a Kubernetes attack?",
+      "options": [
+        "Linking multiple user passwords together",
+        "Rotating tokens every hour automatically",
+        "Encrypting service account tokens",
+        "Combining a read-only identity to steal a more powerful identity's token, gaining capabilities neither had alone"
+      ],
+      "answer": 3,
+      "explanation": "An identity that can only read secrets uses that ability to read a stronger identity's stored token, effectively becoming that stronger identity."
+    },
+    {
+      "q": "Which single YAML setting removes the most common Kubernetes lateral-movement path by not mounting a token into a pod?",
+      "options": [
+        "privileged: true",
+        "automountServiceAccountToken: false",
+        "hostNetwork: true",
+        "replicas: 0"
+      ],
+      "answer": 1,
+      "explanation": "This setting stops Kubernetes from automatically placing a service account token into a pod that doesn't need to talk to the Kubernetes API at all."
+    },
+    {
+      "q": "Why are legacy (pre-v1.24) Kubernetes service account tokens considered a bigger risk than modern bound tokens?",
+      "options": [
+        "Legacy tokens are shorter and easier to guess",
+        "Legacy tokens never expire, so a stolen one remains valid indefinitely",
+        "Legacy tokens can only be used once",
+        "Legacy tokens require a password in addition"
+      ],
+      "answer": 1,
+      "explanation": "Legacy tokens have no expiration at all, so once stolen, they keep working forever unless manually revoked. Bound tokens expire quickly and are audience-restricted."
+    },
+    {
+      "q": "How can a compromised pre-processing sidecar container break a model's results without ever touching the model itself?",
+      "options": [
+        "By modifying requests in a shared volume before the model reads them",
+        "By directly editing the model's weight files",
+        "By changing the model's version number",
+        "By disabling the model's GPU access"
+      ],
+      "answer": 0,
+      "explanation": "Since containers in the same pod share volumes, a compromised sidecar can quietly rewrite the data flowing through a shared queue before the model ever sees it."
+    },
+    {
+      "q": "In the GPU container escape (CVE-2025-23266), what role does the LD_PRELOAD environment variable play?",
+      "options": [
+        "It disables GPU access entirely",
+        "It forces the dynamic linker to load the attacker's malicious library first, running its code as root on the host",
+        "It encrypts the container's filesystem",
+        "It only affects network settings"
+      ],
+      "answer": 1,
+      "explanation": "LD_PRELOAD tells the system to load a specific library before anything else. Chained with the runc and toolkit bugs, this results in the attacker's code running as root on the host."
+    },
+    {
+      "q": "Why do simple Docker wrapper scripts that block flags like --privileged fail to stop the CVE-2025-23266 GPU escape?",
+      "options": [
+        "The exploit hides in the Dockerfile's ENV directive, not in any command-line flag the wrapper checks",
+        "The wrapper scripts are always disabled by default",
+        "The exploit only works on Windows containers",
+        "GPU exploits cannot be blocked by any wrapper"
+      ],
+      "answer": 0,
+      "explanation": "The malicious LD_PRELOAD is baked into the image itself via an ENV directive, so a wrapper that only inspects command-line flags never sees it."
+    },
+    {
+      "q": "What is the single most powerful principle for defending AI infrastructure across cloud, Kubernetes, and containers?",
+      "options": [
+        "Using the longest possible passwords",
+        "Turning off all logging to reduce noise",
+        "Running everything as root for simplicity",
+        "Least privilege — giving every identity only the permissions it truly needs"
+      ],
+      "answer": 3,
+      "explanation": "Least privilege alone closes off most of the escalation paths covered in this module — wildcard IAM policies, overly broad RBAC, and unnecessary create-pod permissions all stem from violating it."
+    }
+  ]
+}

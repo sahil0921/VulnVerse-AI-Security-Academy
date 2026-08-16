@@ -1,0 +1,25 @@
+{
+  "slug": "07-inference-basics",
+  "title": "Inference Basics",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "6 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Inference Basics\n\nTraining is when a model learns. Inference is when the model actually uses what it learned to respond to a query.\n\nEvery time you type a question into a chatbot and receive a reply, that's inference happening. This stage matters a lot for security, because it's the part of the system that regular users, and attackers, can directly interact with."
+    },
+    {
+      "type": "content",
+      "body": "## What happens during inference\n\n1. You send an input, usually called a **prompt**.\n2. The model converts your text into numbers it can process. Each small piece of text becomes a **token**, which is typically a word or part of a word.\n3. The model processes these tokens through its internal layers.\n4. It generates an output, one token at a time.\n\nA useful way to think about it: training is when the model builds up all its knowledge, and inference is when it applies that knowledge to answer a specific request.\n\n## Understanding tokens\n\nModels don't process whole words directly. They process tokens, which are small chunks of text.\n\n*Example:* the word \"unhappiness\" might be broken into three tokens: `un`, `happi`, `ness`.\n\nThis matters for security because attackers sometimes exploit tokenization. Splitting or spacing out a word, such as writing `p a s s w o r d` instead of `password`, can bypass filters that only check for exact, whole-word matches."
+    },
+    {
+      "type": "content",
+      "body": "## Key inference behaviors to understand\n\n**Models predict, they don't \"know\" anything.**\nAn LLM works by predicting the most likely next token based on patterns learned during training. It has no real understanding of facts or truth. This is why a model can sound completely confident while giving an incorrect answer, a behavior known as a **hallucination**.\n\n**The same question can produce different answers.**\nMany models introduce a small amount of randomness into their responses, controlled by a setting called **temperature**. Higher temperature produces more varied and creative output. Lower temperature produces more consistent, predictable output.\n\n**Context has a limit.**\nA model can only process a limited amount of text at once, known as the **context window**. In a long conversation, earlier parts of the chat can eventually fall outside this window and be effectively forgotten."
+    },
+    {
+      "type": "note",
+      "body": "**Security angle:** inference is the primary entry point for attackers. Prompt injection, jailbreaks, and output-based attacks all happen at this stage, because this is exactly where untrusted user input meets the model directly."
+    }
+  ]
+}

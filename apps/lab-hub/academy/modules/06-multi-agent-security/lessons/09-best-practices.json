@@ -1,0 +1,33 @@
+{
+  "slug": "09-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Best Practices\n\nThis lesson turns everything covered in this module into a practical checklist. Whether you're building, testing, or defending a multi-agent system, these principles will keep you on track.\n\n## The golden rule\n\n> Never trust another agent's output the way you would trust hard-coded logic.\n\nEvery message passed between agents crosses a trust boundary. Treat all of it as untrusted input by default. If you remember only one thing from this entire module, remember this.\n\n## Best practices for builders\n\nIf you design multi-agent systems, build these habits in from day one:\n\n- **Authenticate everything.** Use mTLS between agents and require valid tokens for registration.\n- **Sign your Agent Cards.** An unsigned card is a forgeable card, plain and simple.\n- **Enforce workflows in code.** Mandatory security steps must never depend on an LLM's own decision.\n- **Apply least privilege.** Each agent should get only the data and tools it genuinely needs.\n- **Separate data from instructions.** Never let retrieved content or peer output act as a command.\n- **Own the history.** Store conversation state server-side, and reject client-supplied history for any security decisions.\n- **Validate at every hop.** Re-check permissions at each step instead of simply inheriting them from a caller.\n- **Fail closed.** If a security check can't run for some reason, block the action rather than allowing it through by default."
+    },
+    {
+      "type": "diagram",
+      "src": "graph TD\n    B[Build Securely] --> B1[Auth + mTLS]\n    B --> B2[Signed Cards]\n    B --> B3[Enforced Workflow]\n    B --> B4[Least Privilege]\n    T[Test Thoroughly] --> T1[Enumerate cards]\n    T --> T2[Try rogue registration]\n    T --> T3[Attempt workflow bypass]\n    T --> T4[Test data poisoning]\n    D[Defend Continuously] --> D1[SIEM monitoring]\n    D --> D2[Anomaly detection]\n    D --> D3[Incident response]"
+    },
+    {
+      "type": "content",
+      "body": "## Best practices for testers (red teamers)\n\nWhen assessing a multi-agent system, work through this structured methodology:\n\n1. **Recon** — scan for Agent Cards at `/.well-known/agent.json`. Map out every agent, its skills, and its URL.\n2. **Discover endpoints** — check for exposed API docs, such as `/openapi.json` or `/docs`, to find hidden routes like `/agents/register` or `/a2a/workflow`.\n3. **Identify trust boundaries** — note exactly where data flows between agents and where privilege levels differ.\n4. **Test workflow integrity** — try to skip or reorder steps using authority appeal and history injection.\n5. **Test registration** — attempt to register a rogue agent. Is the endpoint actually open?\n6. **Test spoofing** — do any cards use DNS hostnames you could potentially hijack?\n7. **Test data poisoning** — can you write to a data source that the agents read from?\n8. **Verify with responses** — always confirm success by carefully reading the workflow response, checking fields like `steps_completed` and `security_report`.\n9. **Consider detection** — note which of your actions would trigger SIEM rules, and document any evasion techniques used.\n10. **Clean up** — deregister any rogue agents and remove poisoned records afterward."
+    },
+    {
+      "type": "content",
+      "body": "## Common mistakes to avoid\n\nThese are the errors that show up again and again in real-world systems.\n\n| Mistake | Why it is dangerous | Fix |\n|---|---|---|\n| Letting the LLM decide security steps | Prompt controls safety | Hard-code mandatory steps |\n| Open registration endpoint | Anyone can add a rogue agent | Require authentication |\n| Unsigned Agent Cards | Trivial to spoof | Sign and verify cards |\n| Agents share one admin account | One breach = full access | Least privilege per agent |\n| Trusting client-supplied history | Enables history injection | Server-side history only |\n| Treating peer output as commands | Confused deputy attacks | Data/instruction separation |\n| No monitoring | Attacks go unnoticed | Deploy a SIEM with A2A rules |"
+    },
+    {
+      "type": "note",
+      "body": "**Testing responsibly:** only test systems you're actually authorized to assess. Rogue agent registration, data poisoning, and traffic interception are real attacks that cause real, genuine harm. Get written permission, define scope clearly, and always clean up afterward."
+    },
+    {
+      "type": "content",
+      "body": "## Best practices for defenders\n\nOngoing defense isn't a one-time setup you configure and forget. Keep these running continuously:\n\n- **Monitor the registry.** Alert on any new agent registration, especially from unknown IPs or occurring outside normal business hours.\n- **Watch for card changes.** A changed Agent Card URL or certificate fingerprint is a strong spoofing signal.\n- **Track data flows.** Flag traffic heading to new destination IPs and any unexpected PII showing up in responses.\n- **Log workflow steps.** Alert whenever a mandatory step, such as a security scan, is missing from the log.\n- **Rehearse incident response.** Know exactly how to quarantine a rogue agent and roll back poisoned data quickly.\n- **Review least privilege regularly.** Permissions tend to creep and grow over time, so trim them back periodically.\n\n## A quick mental model\n\nWhen looking at any multi-agent system, ask three simple questions:\n\n- Who is talking? (identity, is it actually verified?)\n- What are they allowed to do? (authorization, is it truly least privilege?)\n- Can I trust what they said? (message integrity, is it validated?)\n\nIf the answer to any of these is \"we don't check,\" you've just found a real weakness.\n\n## Summary\n\n- The golden rule: never trust another agent's output blindly.\n- Builders: authenticate, sign, enforce, and isolate.\n- Testers: follow a structured recon-to-cleanup methodology.\n- Defenders: monitor continuously and rehearse response procedures.\n\n## Key Takeaways\n\n- Security must be built in from the very start, not bolted on afterward.\n- A structured methodology consistently finds more issues than random poking around.\n- The three core questions, who, what, and trust, reveal most weaknesses quickly."
+    }
+  ]
+}

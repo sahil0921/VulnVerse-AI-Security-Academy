@@ -1,0 +1,38 @@
+{
+  "slug": "08-memory-enumeration",
+  "title": "Memory Enumeration",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Memory Enumeration\n\nAgents need memory to actually be useful. Memory lets an agent remember your name, your past requests, and important facts across a conversation, or even across separate sessions.\n\nBut memory is fundamentally a store of data, and any data store can be attacked. There are two major risks here: reading other people's memory, called enumeration, and planting false memories, called poisoning.\n\n## Short-term vs long-term memory\n\n| Type | What it holds | Lives for | Analogy |\n|------|---------------|-----------|---------|\n| Short-term | The current conversation | One session | What you hold in your head right now |\n| Long-term | Facts saved across sessions | Days to forever | Notes in a filing cabinet |\n\nLong-term memory is usually stored in a database, often keyed by a session ID or user ID. That key becomes the actual target."
+    },
+    {
+      "type": "content",
+      "body": "## Attack 1: Memory enumeration\n\nIf session IDs are predictable, such as `session_1`, `session_2`, `session_3`, an attacker can simply guess other users' IDs and read their stored memory. Other users' memories might contain support tickets, credentials they accidentally pasted, internal notes, or personal data.\n\n**A simple comparison:** a locker room where lockers are numbered 1, 2, 3, and none of them actually lock. You can open every single locker and take whatever's inside.\n\nWeak ID patterns that tend to enable enumeration include:\n\n- Sequential numbers, such as `user_1001`, `user_1002`\n- Timestamps, such as `sess_20260716_1`\n- Short or low-entropy tokens\n- IDs directly based on email or username\n\n## Attack 2: Memory poisoning\n\nThe attacker writes false information into memory so the agent later acts on it as if it were true. For example, they might get the agent to \"remember\" that they're an administrator, or that a malicious URL is \"the official company link.\" On a future turn, the agent then trusts that planted memory without question.\n\nThis is genuinely dangerous because the poison lies dormant and activates later, sometimes even affecting other users if memory happens to be shared across accounts."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n    A[\"Predictable session IDs\"] --> B[\"Attacker guesses IDs\"]\n    B --> C[\"Reads victim memory\"]\n    C --> D[\"Finds tokens, PII, secrets\"]\n    E[\"Attacker writes false fact\"] --> F[\"Stored in long-term memory\"]\n    F --> G[\"Agent trusts it later\"]\n    G --> H[\"Acts on poisoned data\"]"
+    },
+    {
+      "type": "content",
+      "body": "## How to test for it\n\n**For enumeration:**\n1. Get your own session or memory ID and study its exact format.\n2. Check whether it's predictable, meaning sequential, timestamped, or otherwise guessable.\n3. Within the agreed scope, attempt to access an adjacent ID and confirm whether proper authorization is actually enforced.\n4. If you can read data you shouldn't be able to, enumeration is confirmed.\n\n**For poisoning:**\n1. Store a benign fact, such as \"remember my favorite color is teal.\"\n2. Start a fresh session and check whether the agent still recalls it, confirming that persistence is actually working.\n3. Test whether stored facts can influence later decisions or tool calls made by the agent.\n\n## Vulnerable vs secure memory design"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "# VULNERABLE: predictable IDs + no ownership check.\ncounter = 0\ndef new_session():\n    global counter\n    counter += 1\n    return f\"session_{counter}\"            # guessable\n\ndef load_memory(session_id):\n    return db.get(session_id)              # anyone who knows the ID can read it\n\n\n# SECURE: unguessable IDs + ownership enforced in code.\nimport secrets\n\ndef new_session(user_id):\n    sid = secrets.token_urlsafe(32)        # 256 bits of randomness, not guessable\n    db.set_owner(sid, user_id)\n    return sid\n\ndef load_memory(session_id, *, current_user_id):\n    if db.owner_of(session_id) != current_user_id:\n        raise PermissionError(\"Not your session\")   # authorization check\n    return db.get(session_id)"
+    },
+    {
+      "type": "note",
+      "body": "**Two rules for memory:** first, session IDs must be long and genuinely random, never sequential or predictable. Second, every memory read and write must actually check that the requester owns that specific memory. Never rely on the assumption that \"nobody will guess the ID.\""
+    },
+    {
+      "type": "content",
+      "body": "## Defending against poisoning\n\n- Treat stored memory as untrusted input when it's reloaded, rather than as an already-trusted fact.\n- Never let memory alone grant real privileges. A stored note saying \"the memory says I am admin\" should carry no actual authority.\n- Keep memory separated per user. Don't share writable memory across different users without genuinely strong access controls in place.\n- Validate and, where possible, sign or tag memory entries with their actual source.\n\n## Key takeaways\n\n- Memory comes in two main forms: short-term (session-based) and long-term (persistent).\n- Predictable session IDs let attackers read other users' memory through enumeration.\n- Poisoned memory lets attackers plant false facts that the agent later trusts and acts on.\n- Use random IDs, enforce ownership on every single access, and never let memory alone grant trust."
+    }
+  ]
+}

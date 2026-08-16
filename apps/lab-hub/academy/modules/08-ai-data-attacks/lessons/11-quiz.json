@@ -1,0 +1,228 @@
+{
+  "slug": "11-quiz",
+  "title": "Knowledge Check",
+  "type": "quiz",
+  "questioncount": 20,
+  "questions": [
+    {
+      "q": "What fundamentally makes AI Data Attacks different from evasion attacks?",
+      "options": [
+        "They only work on image models",
+        "They require physical access to the server",
+        "They corrupt the data or model the system is built on, not the live input",
+        "They only affect the user interface"
+      ],
+      "answer": 2,
+      "explanation": "Data attacks undermine the model's foundation, its training data or stored file, while evasion attacks trick an already-deployed model at decision time."
+    },
+    {
+      "q": "According to the module, what are the three main goals a data attacker typically aims for?",
+      "options": [
+        "Degrade, target, and backdoor",
+        "Encrypt, compress, and delete",
+        "Scan, patch, and monitor",
+        "Train, test, and validate"
+      ],
+      "answer": 0,
+      "explanation": "Data attackers generally aim for one of three outcomes: degrading overall performance, targeting one specific case, or hiding a secret trigger through a backdoor."
+    },
+    {
+      "q": "In a label flipping attack, what does the attacker actually change?",
+      "options": [
+        "The model's source code",
+        "The model's hyperparameters",
+        "The features (input data) of the samples",
+        "The labels (correct answers) attached to samples"
+      ],
+      "answer": 3,
+      "explanation": "Label flipping leaves the features untouched and changes only the labels, for example relabeling a 'positive' review as 'negative'."
+    },
+    {
+      "q": "What is the difference between random and targeted label flipping?",
+      "options": [
+        "Random flipping only works on images; targeted flipping only works on text",
+        "Random flipping degrades overall accuracy; targeted flipping attacks only one specific class",
+        "There is no real difference between them",
+        "Targeted flipping requires physical access to the training server"
+      ],
+      "answer": 1,
+      "explanation": "Random flipping simply makes the model less reliable overall, while targeted flipping surgically attacks a single class, such as relabeling only positive reviews as negative."
+    },
+    {
+      "q": "Why are clean-label attacks harder to detect than label flipping?",
+      "options": [
+        "They only run at midnight",
+        "They use encryption to hide the data",
+        "The labels stay correct and plausible, so label audits find nothing wrong",
+        "They delete the training data afterward"
+      ],
+      "answer": 2,
+      "explanation": "Clean-label attacks modify features while keeping labels honest, so defenses that check labels miss them entirely. You must inspect the feature space instead."
+    },
+    {
+      "q": "In a clean-label attack, whose data points does the attacker actually modify?",
+      "options": [
+        "The target's own data points",
+        "Random points scattered across the entire dataset",
+        "Points belonging to a different class near the target, nudging them toward the decision boundary",
+        "Only the model's validation set"
+      ],
+      "answer": 2,
+      "explanation": "The attacker shifts nearby points from another class toward the boundary while keeping their original labels, forcing the model to bend its boundary and misclassify the real target."
+    },
+    {
+      "q": "What two metrics define a successful Trojan/backdoor attack?",
+      "options": [
+        "Small file size and fast training",
+        "Low latency and high throughput",
+        "High memory usage and low CPU usage",
+        "High Clean Accuracy (stealth) and high Attack Success Rate (effectiveness)"
+      ],
+      "answer": 3,
+      "explanation": "A good backdoor keeps Clean Accuracy high so it passes normal tests, while keeping Attack Success Rate high so the trigger reliably works when present."
+    },
+    {
+      "q": "Why do backdoors often pass all normal model evaluation tests?",
+      "options": [
+        "Evaluators never test image models",
+        "On clean, untriggered inputs the model behaves accurately and normally; only the trigger reveals the hidden behavior",
+        "Backdoors disable the evaluation process entirely",
+        "Backdoors only activate during training, never during testing"
+      ],
+      "answer": 1,
+      "explanation": "Since the backdoor only activates when the specific trigger appears, standard testing on clean data shows nothing wrong, which is exactly what makes backdoors so dangerous."
+    },
+    {
+      "q": "Why is loading a pickle-based model file from an untrusted source dangerous?",
+      "options": [
+        "Pickle files are always corrupted",
+        "It changes your Python version",
+        "It can execute arbitrary attacker code automatically during loading",
+        "Pickle files are too large to open"
+      ],
+      "answer": 2,
+      "explanation": "Pickle, and torch.load with weights_only=False, can run code embedded via __reduce__ the moment the file is loaded, turning a simple load into remote code execution."
+    },
+    {
+      "q": "What is the recommended safe alternative to loading a model with plain pickle or weights_only=False?",
+      "options": [
+        "Use safetensors and set weights_only=True",
+        "Load the model twice to verify it",
+        "Convert the model to a PDF first",
+        "Disable your antivirus before loading"
+      ],
+      "answer": 0,
+      "explanation": "Safetensors stores only numeric data and cannot execute code, and weights_only=True in torch.load refuses to run arbitrary objects, both closing off the RCE risk."
+    },
+    {
+      "q": "Why do attackers hide data in the least significant bits (LSBs) of model weights?",
+      "options": [
+        "LSBs are encrypted by default",
+        "Only LSBs can hold text",
+        "LSBs store the model's accuracy",
+        "Changing LSBs barely alters the number, so the model still works and the change is hard to spot"
+      ],
+      "answer": 3,
+      "explanation": "Flipping an LSB changes a float by a microscopic amount, so accuracy is preserved and the hidden payload stays statistically inconspicuous across millions of weights."
+    },
+    {
+      "q": "How do pickle deserialization and tensor steganography combine into a full attack?",
+      "options": [
+        "Steganography hides a payload in the weights, and the pickle vulnerability extracts and runs it on load",
+        "They are unrelated techniques that cannot be combined",
+        "Steganography encrypts the pickle file for extra security",
+        "Pickle deserialization deletes the hidden payload automatically"
+      ],
+      "answer": 0,
+      "explanation": "The steganography hides the payload inside the weight tensor's LSBs, while a malicious __reduce__ method extracts and executes that payload the moment the file is loaded."
+    },
+    {
+      "q": "How does 'package hallucination' (slopsquatting) become a security attack?",
+      "options": [
+        "The AI deletes real packages",
+        "The AI encrypts the developer's code",
+        "An attacker registers the fake package names an AI keeps suggesting, then fills them with malware",
+        "Packages become too expensive to install"
+      ],
+      "answer": 2,
+      "explanation": "AIs hallucinate non-existent package names consistently. Attackers register those exact names with malicious code, so developers who trust the AI's suggestion install malware."
+    },
+    {
+      "q": "What makes hallucinated package names a reliable target for attackers?",
+      "options": [
+        "AIs consistently suggest the same fake names repeatedly, giving attackers a predictable target",
+        "Package names are randomly generated each time",
+        "AIs only hallucinate once per day",
+        "Hallucinated names are always identical to real packages"
+      ],
+      "answer": 0,
+      "explanation": "Because the same fake package name tends to get suggested repeatedly across sessions, attackers can reliably predict and register exactly the names developers are likely to install."
+    },
+    {
+      "q": "What is the primary technique behind abuse detection evasion?",
+      "options": [
+        "Deleting the detector's training data",
+        "Keeping the harmful meaning intact while changing the surface form enough to fool the detector",
+        "Overloading the detector with excessive requests",
+        "Bribing the detector's developers"
+      ],
+      "answer": 1,
+      "explanation": "Evasion techniques like homoglyphs, spacing, and paraphrasing preserve the harmful meaning while changing the surface text just enough that the detector no longer recognizes it."
+    },
+    {
+      "q": "Why does text normalization help defend against homoglyph-based evasion?",
+      "options": [
+        "It deletes all Unicode characters from the input",
+        "It collapses lookalike Unicode characters back to a standard form before detection runs",
+        "It translates the text into a different language",
+        "It blocks all non-English input entirely"
+      ],
+      "answer": 1,
+      "explanation": "Normalization, such as NFKC plus explicit homoglyph mapping, converts lookalike characters back to their standard ASCII form before the detector runs, closing the gap attackers exploit."
+    },
+    {
+      "q": "What is the core principle behind a two-stage guardrail pipeline?",
+      "options": [
+        "Retrain the model every hour",
+        "Filter both what goes into the model (input) and what comes out (output)",
+        "Only check the model's speed",
+        "Store all data in plain text"
+      ],
+      "answer": 1,
+      "explanation": "Input guardrails block malicious requests before they reach the model, and output guardrails filter harmful or leaky responses before they reach the user."
+    },
+    {
+      "q": "Why are guardrails alone not considered a complete security solution?",
+      "options": [
+        "Guardrails only work on weekends",
+        "A determined attacker may bypass any single check, so layered defenses are needed",
+        "Guardrails are too expensive to maintain",
+        "Guardrails only protect against SQL injection"
+      ],
+      "answer": 1,
+      "explanation": "Guardrails are one layer in a defense-in-depth strategy. No single check is foolproof, so they need to be combined with validation, monitoring, and least privilege."
+    },
+    {
+      "q": "What does 'provenance' mean in the context of AI data security?",
+      "options": [
+        "The model's accuracy score on a test set",
+        "The amount of storage a dataset consumes",
+        "Knowing and tracking the true source of every piece of data or model",
+        "The speed at which a model can be retrained"
+      ],
+      "answer": 2,
+      "explanation": "Provenance means knowing exactly where every dataset, sample, or model file actually came from. Without it, tampering is far harder to trace and detect."
+    },
+    {
+      "q": "According to the module's six pillars of AI data security, what does 'least privilege' specifically protect against?",
+      "options": [
+        "Slow model inference times",
+        "A compromised account or system being able to cause more damage than necessary, such as freely editing training data",
+        "Running out of disk space",
+        "Users forgetting their passwords"
+      ],
+      "answer": 1,
+      "explanation": "Least privilege limits what any single account or system component can do, so that even if it's compromised, the resulting damage, such as tampering with training data, stays contained."
+    }
+  ]
+}

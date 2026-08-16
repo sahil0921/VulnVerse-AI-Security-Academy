@@ -1,0 +1,29 @@
+{
+  "slug": "04-types-of-learning",
+  "title": "Types of Learning",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "7 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Types of Machine Learning\n\nNot all models learn the same way. There are three main approaches, and understanding them helps you figure out **how a system was likely trained** and **where its weaknesses might be**."
+    },
+    {
+      "type": "content",
+      "body": "## 1. Supervised Learning (learning with labeled answers)\n\nThe model is given examples that already include the correct answer. It learns the relationship between the input and that answer.\n\n*Real example:* spam filters. The model is shown thousands of emails, each already labeled \"spam\" or \"not spam.\" Over time, it learns to classify new, unseen emails correctly.\n\n**Security angle:** if an attacker manages to poison the labeled training data, for example by mislabeling spam emails as safe, the model learns the wrong pattern and makes incorrect decisions later."
+    },
+    {
+      "type": "content",
+      "body": "## 2. Unsupervised Learning (learning without labels)\n\nThe model is given data with no correct answers attached. It has to find patterns, groupings, or structure on its own.\n\n*Real example:* grouping customers into segments based on shopping behavior, without telling the model what the groups should be in advance.\n\n**Security angle:** an attacker can sometimes hide malicious activity inside a large, legitimate-looking group, so it blends in and doesn't get flagged as unusual.\n\n## 3. Reinforcement Learning (learning by reward)\n\nThe model takes actions and receives rewards or penalties based on the outcome. Over many attempts, it learns which actions lead to better results.\n\n*Real example:* an AI system learning to play a game by earning points for good moves and losing points for bad ones."
+    },
+    {
+      "type": "diagram",
+      "src": "graph LR\n    A[Machine Learning] --> B[Supervised<br/>learns from labeled data]\n    A --> C[Unsupervised<br/>finds patterns without labels]\n    A --> D[Reinforcement<br/>learns from rewards]\n    B --> B1[Spam filters]\n    C --> C1[Customer segmentation]\n    D --> D1[Game-playing AI]"
+    },
+    {
+      "type": "note",
+      "body": "Most modern LLMs use a combination of all three. They start with large-scale unsupervised learning on raw text, then get refined through supervised fine-tuning, and finally adjusted using reinforcement learning from human feedback. This process is covered in more detail in a later lesson."
+    }
+  ]
+}

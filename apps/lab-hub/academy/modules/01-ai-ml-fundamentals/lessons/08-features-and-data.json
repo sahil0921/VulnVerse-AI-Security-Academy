@@ -1,0 +1,25 @@
+{
+  "slug": "08-features-and-data",
+  "title": "Features & Data",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "7 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Features & Data\n\nData is the fuel that powers AI systems. Features are the specific pieces of information within that data that a model actually pays attention to. Understanding both helps you figure out what a model relies on, and what an attacker could potentially manipulate.\n\n## What is a feature?\n\nA feature is a single measurable property of your data.\n\n*Example:* to predict house prices, useful features might include:\n\n- Number of bedrooms\n- Size in square meters\n- Neighborhood\n- Age of the house\n\nThe model learns how each of these features influences the final price prediction.\n\nA simple way to think about it: when judging whether fruit is ripe, you naturally focus on details like color, smell, and softness rather than every physical property of the fruit. Those relevant details are effectively the \"features\" your brain is using."
+    },
+    {
+      "type": "content",
+      "body": "## Types of data\n\n- **Structured data** — organized into rows and columns, like a spreadsheet or database table. This is straightforward for machines to process.\n- **Unstructured data** — less organized data such as free text, images, and audio. This is the type of data LLMs are primarily trained on.\n\n## Turning data into numbers: embeddings\n\nComputers only work with numbers, so text and images have to be converted into lists of numbers called **embeddings**.\n\nAn embedding represents meaning numerically. Items with similar meaning end up with similar numeric values.\n\n*Example:* the words \"king\" and \"queen\" end up with embedding values that are close to each other, because their meanings are related.\n\nEmbeddings are covered in more depth in a later module. It's worth knowing now that embeddings can sometimes be reversed, exposing the original text they were generated from."
+    },
+    {
+      "type": "content",
+      "body": "## Why data quality matters so much\n\nThere's a well-known principle in computing: \"garbage in, garbage out.\"\n\nIf the training data is:\n\n- **Biased** — the model's outputs will reflect that same bias.\n- **Inaccurate** — the model learns and repeats incorrect information.\n- **Poisoned** — the model's behavior can be secretly manipulated by an attacker.\n- **Sensitive** — the model risks leaking private or confidential information.\n\nBuilding a reliable model requires clean, well-balanced, and properly secured data."
+    },
+    {
+      "type": "note",
+      "body": "**Security angle:** data is where many attacks originate. Poisoning training data, stealing datasets, and reversing embeddings to recover private text are all documented, real-world threats. Tracing how data flows through a system is often the fastest way to find its vulnerabilities."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "slug": "02-a2a-protocol",
+  "title": "The A2A Protocol",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# The Agent-to-Agent (A2A) Protocol\n\nWhen many agents need to talk to each other, they need a shared language and a shared set of rules. That shared standard is called the A2A protocol, short for Agent-to-Agent.\n\n**A simple comparison:** think of the postal system. No matter which country you live in, an envelope follows a standard format: address on the front, stamp in the corner, letter inside. A2A works as the \"standard envelope format\" that lets any agent send a task to any other agent, even if they were built by entirely different companies.\n\n## Why A2A exists\n\nBefore standards like this existed, every company built agents that could only talk to their own other agents. It was chaos, similar to phones that could only call other phones of the same brand.\n\nA2A fixes this by clearly defining:\n\n- How agents describe themselves, including their skills and address.\n- How agents get discovered by others.\n- How a task message is formatted when it's sent.\n- How results are returned once work is complete.\n\nBecause it's a shared standard, one weakness in the protocol itself can affect every single system that uses it. That's powerful for defenders trying to fix issues at scale, and equally powerful for attackers looking to exploit them at scale.\n\n## The building blocks of A2A\n\nA2A has a few core parts you need to understand before you can effectively attack it."
+    },
+    {
+      "type": "diagram",
+      "src": "sequenceDiagram\n    participant O as Orchestrator\n    participant D as Discovery\n    participant A as Worker Agent\n    O->>A: GET /.well-known/agent.json\n    A-->>O: Agent Card (skills, url)\n    O->>A: POST /a2a (task message)\n    A-->>O: Result (state, parts)"
+    },
+    {
+      "type": "content",
+      "body": "### 1. The Agent Card\n\nEvery A2A agent publishes a small file that describes itself, called the Agent Card. It's served at a standard, predictable web address:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "body": "/.well-known/agent.json"
+    },
+    {
+      "type": "content",
+      "body": "**A simple comparison:** the Agent Card works like a business card. It states the agent's name, what it can actually do, and where to reach it.\n\nWe'll study Agent Cards in much greater depth in a later lesson, but for now, know that it lists the agent's name, description, URL, and skills.\n\n### 2. The task message\n\nWhen one agent wants another agent to do work, it sends a task message. This is a small block of JSON containing the request text along with an ID used to track it.\n\n### 3. The response\n\nThe receiving agent does its work and sends back a response that includes a state, such as `completed`, along with the result parts, meaning the actual answer text itself.\n\n## What a real A2A exchange looks like\n\nLet's walk through a simple, safe example using an imaginary Invoice Agent belonging to Nexora Dynamics."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# Step 1: Discover the agent by reading its Agent Card\ncurl -s http://invoice-agent.nexora.local:9001/.well-known/agent.json\n\n# Example response:\n# {\n#   \"name\": \"Invoice Agent\",\n#   \"description\": \"Creates and looks up customer invoices\",\n#   \"url\": \"http://invoice-agent.nexora.local:9001\",\n#   \"protocolVersion\": \"0.2\",\n#   \"skills\": [\n#     { \"id\": \"create_invoice\", \"name\": \"Create Invoice\" },\n#     { \"id\": \"lookup_invoice\", \"name\": \"Lookup Invoice\" }\n#   ]\n# }"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# Step 2: Send a task message to the agent\ncurl -s -X POST http://invoice-agent.nexora.local:9001/a2a \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"id\": \"task-001\",\n    \"message\": {\n      \"role\": \"user\",\n      \"parts\": [{ \"type\": \"text\", \"text\": \"Look up invoice INV-2026-045\" }]\n    }\n  }'\n\n# Example response (note: state is at the TOP level):\n# {\n#   \"id\": \"task-001\",\n#   \"state\": \"completed\",\n#   \"result\": {\n#     \"role\": \"agent\",\n#     \"parts\": [{ \"type\": \"text\", \"text\": \"Invoice INV-2026-045: $4,200, paid.\" }]\n#   }\n# }"
+    },
+    {
+      "type": "content",
+      "body": "## Why A2A is risky by design\n\nA2A was built to make agents interoperable, meaning able to work together easily across different systems. Unfortunately, ease of use often comes at the cost of security. The default A2A design carries three significant weaknesses:\n\n- **No identity checks** — Agent Cards are usually not signed, so essentially anyone can publish a fake one.\n- **Open registration** — many orchestrators let any agent register without requiring any password at all.\n- **Blind trust** — agents often trust messages from other agents without properly verifying them first.\n\nThese three gaps are the root cause behind almost every attack covered in this module."
+    },
+    {
+      "type": "note",
+      "body": "**Remember:** A2A prioritizes interoperability over security by default. There's no built-in cryptographic identity, no default authentication, and no message signing out of the box. Everything trusts everything else unless the developer manually adds protection on top."
+    },
+    {
+      "type": "content",
+      "body": "## Comparison: A2A vs a locked-down API\n\n| Feature | Default A2A | Secure API |\n|---|---|---|\n| Identity | None (open) | API keys / mTLS |\n| Agent Card trust | Unsigned | Signed & verified |\n| Registration | Often open | Authenticated only |\n| Message trust | Implicit | Validated each hop |\n\n## Summary\n\n- A2A is the shared standard that lets agents discover and message each other.\n- Its key parts are the Agent Card, the task message, and the response.\n- Discovery happens at the standard path `/.well-known/agent.json`.\n- A2A favors interoperability, leaving identity, registration, and message trust wide open by default.\n\n## Key Takeaways\n\n- A2A functions like a standard postal envelope for agents.\n- Its openness is exactly what attackers end up abusing.\n- Master its three core parts (Card, task, response), since every later attack in this module builds directly on them."
+    }
+  ]
+}

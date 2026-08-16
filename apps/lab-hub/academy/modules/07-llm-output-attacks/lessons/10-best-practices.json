@@ -1,0 +1,33 @@
+{
+  "slug": "10-best-practices",
+  "title": "Best Practices",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Best Practices & Advanced Risks\n\nYou now understand the main attacks covered in this module. This lesson consolidates a practical checklist and introduces two further risk areas that round out real-world output security: additional injection sinks, and hallucination-driven vulnerabilities.\n\n## Beyond the big three\n\nXSS, SQLi, and command injection get most of the spotlight, but unsafe output can reach many other sinks too. The underlying principle is identical every time: untrusted output hits a sink without the right protection in place. A quick tour of other common ones:\n\n| Sink | Attack | One-line defense |\n|---|---|---|\n| Spreadsheet / CSV | Formula injection (=, +, -, @) | Prefix risky cells with ' |\n| LDAP query | LDAP injection | Escape LDAP special chars |\n| XML / XPath | XML/XPath injection | Use safe parsers; escape input |\n| Template engine | Server-Side Template Injection (SSTI) | Never render output as a template |\n| Log file | Log injection / forged entries | Strip newlines; encode before logging |\n| HTTP header | Header injection / response splitting | Strip CR/LF |\n| Email header | Email injection | Validate and strip newlines |\n| File path | Path traversal | Allowlist; reject .. |\n| Outbound URL | SSRF | Allowlist destinations |"
+    },
+    {
+      "type": "content",
+      "body": "## Hallucination as a security bug\n\nA hallucination is when the model states something false with full confidence. Beyond just spreading misinformation, this creates a concrete supply-chain risk: hallucinated software packages.\n\nWhen you ask a model for code, it may import or attempt to install a package that doesn't actually exist. Normally that just produces an error. But attackers actively watch for commonly hallucinated package names, then publish a real, malicious package under that exact name. Anyone who runs the model's generated code ends up installing the malware. This attack technique is sometimes called slopsquatting.\n\nDefense: never install dependencies straight from generated code without checking them first. Verify that each package actually exists on the official registry, is widely used, and is genuinely the one you intended to use. Pin versions and use a dependency scanner as an added layer."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    Q[\"Dev asks model for code\"] --> C[\"Model imports fake-pkg\"]\n    C --> Chk{\"Package verified?\"}\n    Chk -->|No| Inst[\"pip install fake-pkg\"]\n    Inst --> Mal[\"Attacker-published malware runs\"]\n    Chk -->|Yes| Safe[\"Verified, pinned dependency\"]"
+    },
+    {
+      "type": "content",
+      "body": "## The output-security checklist\n\nUse this as a review gate for any LLM feature you build:\n\n1. Enumerate every single sink the model's output can reach.\n2. For each sink, apply context-appropriate encoding and validation.\n3. Never pass output to eval, exec, or a shell with shell=True.\n4. Have the model emit structured intent, not raw SQL or shell commands.\n5. Enforce authorization in code, using the real session, never the prompt.\n6. Treat all model-reachable functions and data as effectively public.\n7. Sandbox any code or command execution.\n8. Add a Content Security Policy and a tight img-src to counter both XSS and Markdown exfiltration.\n9. Verify generated dependencies before installing anything.\n10. Log and monitor anomalous output and blocked actions."
+    },
+    {
+      "type": "content",
+      "body": "## Common mistakes to avoid\n\n- Assuming \"it's our model, so its output is safe\" by default.\n- Protecting the obvious view but forgetting a secondary path, the aggregation blind spot covered earlier.\n- Using the system prompt as if it were a real security control.\n- HTML-encoding for one sink and reusing that same encoding for another, when encoding must actually match the specific sink.\n- Rendering Markdown images from arbitrary, unchecked URLs.\n- Trusting generated code and its dependencies without any review at all.\n\nMaster these habits and you'll be able to confidently assess and defend LLM output handling in real, production applications. The next lesson is a short quiz to lock in what you've learned, followed by the hands-on labs."
+    },
+    {
+      "type": "note",
+      "body": "**Remember the throughline:** every fix in this module reduces to one single habit: treat model output as untrusted, and protect it at the exact place it's actually used."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction",
+  "type": "content",
+  "difficulty": "Beginner",
+  "reading_time": "6 min read",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Welcome to AI Security\n\nYou are about to learn how to **attack and defend AI systems**. But before you can break something, you need to understand how it works.\n\nThis module has one purpose: give you the AI and Machine Learning basics needed for AI penetration testing and red teaming. Nothing extra, just what matters.\n\n## Why an attacker needs to understand AI\n\nThink about trying to break into a house without knowing how doors and locks work. You would just be guessing. Attacking AI systems works the same way. If you don't understand how an AI model processes data, learns patterns, and makes decisions, you won't know where to look for weaknesses.\n\nA skilled AI security tester asks questions like:\n\n- Where does this AI system get its training data from?\n- Who or what is allowed to send input to it?\n- What happens if it receives unexpected or malformed input?\n- Where does the system trust data that it shouldn't?\n\nYou need the fundamentals to answer these questions properly."
+    },
+    {
+      "type": "content",
+      "body": "## What you will learn in this module\n\nThis module stays simple and practical. By the end, you will understand:\n\n- What AI and Machine Learning actually are\n- How machines learn from data\n- Core terms every AI security professional should know\n- How a model is built, trained, and deployed\n- Where attackers can target a system (the **attack surface**)\n- Common trust boundary mistakes in AI systems\n\n## How to use this module\n\nGo through each lesson in order. Every lesson builds on the one before it, so don't skip ahead. The goal is simple:\n\nBy the end, you should feel like you **understand the material** — not like you just got through it."
+    },
+    {
+      "type": "note",
+      "body": "You do **not** need a math or programming background to follow these lessons. Every term is explained in plain, straightforward English. If you can follow step-by-step instructions, you can follow this module."
+    }
+  ]
+}

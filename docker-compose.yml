@@ -1,0 +1,794 @@
+version: '3.8'
+networks:
+  ailab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+x-llm-env: &llm-env
+  OLLAMA_HOST: ${OLLAMA_HOST}
+  LLM_PROVIDER: ${LLM_PROVIDER}
+  LLM_MODEL: ${LLM_MODEL}
+  API_PROVIDER: ${API_PROVIDER}
+  API_KEY: ${API_KEY}
+
+services:
+  # ============ DATABASES ============
+  postgres-db:
+    image: postgres:15
+    container_name: nimble-postgres
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: Nimble_DB_2026!
+      POSTGRES_DB: nimbletech_internal
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db-init/postgres:/docker-entrypoint-initdb.d
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.10
+  mssql-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: nimble-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "NimbleStrong!2026"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.11
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: nimble-chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.12
+  # ============ MAIN WEB APP ============
+  nimbletech-web:
+    build: ./apps/nimbletech-web
+    container_name: nimble-web
+    ports:
+      - "5000:5000"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.20
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  # ============ PROMPT INJECTION LABS ============
+  support-chatbot:
+    build: ./apps/support-chatbot
+    container_name: nimble-chatbot
+    ports:
+      - "5001:5001"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.21
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  email-assistant:
+    build: ./apps/email-assistant
+    container_name: nimble-email
+    ports:
+      - "5002:5002"
+      - "2525:2525"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.22
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  url-summarizer:
+    build: ./apps/url-summarizer
+    container_name: nimble-urlsum
+    ports:
+      - "5003:5003"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.23
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  order-bot:
+    build: ./apps/order-bot
+    container_name: nimble-orderbot
+    ports:
+      - "5004:5004"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.24
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  jailbreak-lab:
+    build: ./apps/jailbreak-lab
+    container_name: nimble-jailbreak
+    ports:
+      - "5005:5005"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.25
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  # ============ AGENT LABS ============
+  agent-helpdesk:
+    build: ./apps/agent-helpdesk
+    container_name: nimble-helpdesk
+    ports:
+      - "5006:5006"
+    environment:
+      <<: *llm-env
+      DB_HOST: postgres-db
+    depends_on:
+      - postgres-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.30
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  agent-docprocessor:
+    build: ./apps/agent-docprocessor
+    container_name: nimble-docproc
+    ports:
+      - "5007:5007"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.31
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  agent-browser:
+    build: ./apps/agent-browser
+    container_name: nimble-browser
+    ports:
+      - "5008:5008"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.32
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  agent-codereview:
+    build: ./apps/agent-codereview
+    container_name: nimble-codereview
+    ports:
+      - "5009:5009"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.33
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  agent-memory:
+    build: ./apps/agent-memory
+    container_name: nimble-memory
+    ports:
+      - "5010:5010"
+    environment:
+      <<: *llm-env
+      DB_HOST: postgres-db
+    depends_on:
+      - postgres-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.34
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  supply-chain-lab:
+    build: ./apps/supply-chain-lab
+    container_name: nimble-supplychain
+    ports:
+      - "5025:5025"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.35
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  idor-lab:
+    build: ./apps/idor
+    container_name: nimble-idor
+    ports:
+      - "5054:5054"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.209
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  # ============ MULTI-AGENT (A2A) — CONTENT PIPELINE ============
+  orchestrator:
+    build: ./apps/multiagent/orchestrator
+    container_name: nimble-orchestrator
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *llm-env
+      DEFAULT_MODE: "production"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.40
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+
+  fetcher-agent:
+    build: ./apps/multiagent/fetcher-agent
+    container_name: nimble-fetcher
+    ports:
+      - "8011:8001"
+    environment:
+      <<: *llm-env
+      SIMULATE: "1"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.41
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+
+  summarizer-agent:
+    build: ./apps/multiagent/summarizer-agent
+    container_name: nimble-summarizer
+    ports:
+      - "8012:8002"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.42
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+
+  security-agent:
+    build: ./apps/multiagent/security-agent
+    container_name: nimble-secagent
+    ports:
+      - "8013:8003"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.43
+
+  publisher-agent:
+    build: ./apps/multiagent/publisher-agent
+    container_name: nimble-publisher
+    ports:
+      - "8014:8004"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.44
+  # ============ RECON TARGET ============
+  recon-target:
+    build: ./apps/recon-target
+    container_name: nimble-recon
+    ports:
+      - "5011:5011"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.50
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  # ============ RAG PIPELINE LAB ============
+  rag-lab:
+    build: ./apps/rag-lab
+    container_name: nimble-rag
+    ports:
+      - "5012:5012"
+    environment:
+      <<: *llm-env
+      DB_HOST: postgres-db
+      CHROMA_HOST: chromadb
+      ES_HOST: http://elasticsearch:9200
+    depends_on:
+      - postgres-db
+      - chromadb
+      - elasticsearch
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.51
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  # ============ LLM OUTPUT ATTACKS ============
+  output-xss-reflected:
+    build: ./apps/output-xss-reflected
+    container_name: nimble-xss-refl
+    ports:
+      - "5044:5044"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.184
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  output-xss-stored:
+    build: ./apps/output-xss-stored
+    container_name: nimble-xss-stored
+    ports:
+      - "5045:5045"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.185
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  output-sqli:
+    build: ./apps/output-sqli
+    container_name: nimble-sqli
+    ports:
+      - "5046:5046"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.186
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  output-codeinj:
+    build: ./apps/output-codeinj
+    container_name: nimble-codeinj
+    ports:
+      - "5047:5047"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.187
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  output-funccall:
+    build: ./apps/output-funccall
+    container_name: nimble-funccall
+    ports:
+      - "5048:5048"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.88
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  output-exfil:
+    build: ./apps/output-exfil
+    container_name: nimble-exfil
+    ports:
+      - "5049:5049"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.89
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  llm-hallucination:
+    build: ./apps/llm-hallucination
+    container_name: nimble-halluc
+    ports:
+      - "5050:5050"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.90
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  llm-abuse:
+    build: ./apps/llm-abuse
+    container_name: nimble-abuse
+    ports:
+      - "5051:5051"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.91
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  llm-safeguards:
+    build: ./apps/llm-safeguards
+    container_name: nimble-safeguards
+    ports:
+      - "5052:5052"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.92
+        
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  # ============ AI DATA ATTACKS LAB ============
+  data-attacks-lab:
+    build: ./apps/data-attacks-lab
+    container_name: nimble-dataattacks
+    ports:
+      - "5053:5053"
+    volumes:
+      - dataattacks_data:/app/data
+    environment:
+      DEFENSE_MODE: "vulnerable"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.180
+  # ============ MCP ATTACKS ============
+  mcp-recon:
+    build: ./apps/mcp-recon
+    container_name: nimble-mcp-recon
+    ports:
+      - "5020:5020"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.188
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  mcp-poisoning:
+    build: ./apps/mcp-poisoning
+    container_name: nimble-mcp-poison
+    ports:
+      - "5021:5021"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.181
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  mcp-apps-ui:
+    build: ./apps/mcp-apps-ui
+    container_name: nimble-mcp-appsui
+    ports:
+      - "5022:5022"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.182
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  mcp-permissions:
+    build: ./apps/mcp-permissions
+    container_name: nimble-mcp-perm
+    ports:
+      - "5023:5023"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.183
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  mcp-chaining:
+    build: ./apps/mcp-chaining
+    container_name: nimble-mcp-chain
+    ports:
+      - "5024:5024"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.84
+
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  # ============ AI EVASION ATTACKS LABS ============
+  evasion-spam-wb:
+    build: ./apps/evasion-spam-wb
+    container_name: nimble-evasion-wb
+    ports:
+      - "5040:5040"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.189
+  evasion-spam-bb:
+    build: ./apps/evasion-spam-bb
+    container_name: nimble-evasion-bb
+    ports:
+      - "5041:5041"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.192
+  evasion-sentiment:
+    build: ./apps/evasion-sentiment
+    container_name: nimble-evasion-sent
+    ports:
+      - "5042:5042"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.82
+  evasion-hub:
+    build: ./apps/evasion-hub
+    container_name: nimble-evasion-hub
+    ports:
+      - "5043:5043"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.83
+  # ============ EMBEDDING ATTACKS — VECTOR DB ============
+  weaviate-db:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.24.10
+    container_name: nimble-weaviate
+    ports:
+      - "8090:8080"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      DEFAULT_VECTORIZER_MODULE: "none"
+      ENABLE_MODULES: ""
+      CLUSTER_HOSTNAME: "node1"
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.190
+  weaviate-seeder:
+    build: ./db-init/weaviate-seed
+    container_name: nimble-weaviate-seed
+    depends_on:
+      - weaviate-db
+    environment:
+      WEAVIATE_URL: http://weaviate-db:8080
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.193
+    restart: on-failure
+  # ============ EMBEDDING ATTACK LABS ============
+  embedding-recon:
+    build: ./apps/embedding-recon
+    container_name: nimble-emb-recon
+    ports:
+      - "5013:5013"
+    environment:
+      WEAVIATE_URL: http://weaviate-db:8080
+      <<: *llm-env
+    depends_on:
+      - weaviate-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.194
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  embedding-export:
+    build: ./apps/embedding-export
+    container_name: nimble-emb-export
+    ports:
+      - "5014:5014"
+    environment:
+      WEAVIATE_URL: http://weaviate-db:8080
+    depends_on:
+      - weaviate-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.196
+  embedding-invert-zeroshot:
+    build: ./apps/embedding-invert-zeroshot
+    container_name: nimble-emb-zeroshot
+    ports:
+      - "5015:5015"
+    environment:
+      WEAVIATE_URL: http://weaviate-db:8080
+    depends_on:
+      - weaviate-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.198
+  embedding-invert-beam:
+    build: ./apps/embedding-invert-beam
+    container_name: nimble-emb-beam
+    ports:
+      - "5016:5016"
+    environment:
+      WEAVIATE_URL: http://weaviate-db:8080
+    depends_on:
+      - weaviate-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.200
+  embedding-invert-algen:
+    build: ./apps/embedding-invert-algen
+    container_name: nimble-emb-algen
+    ports:
+      - "5017:5017"
+    environment:
+      WEAVIATE_URL: http://weaviate-db:8080
+    depends_on:
+      - weaviate-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.202
+  embedding-invert-vec2text:
+    build: ./apps/embedding-invert-vec2text
+    container_name: nimble-emb-vec2text
+    ports:
+      - "5018:5018"
+    environment:
+      WEAVIATE_URL: http://weaviate-db:8080
+    depends_on:
+      - weaviate-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.204
+  embedding-membership:
+    build: ./apps/embedding-membership
+    container_name: nimble-emb-membership
+    ports:
+      - "5019:5019"
+    environment:
+      WEAVIATE_URL: http://weaviate-db:8080
+    depends_on:
+      - weaviate-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.206
+  # ============ AI INFRASTRUCTURE ============
+  cloud-ssrf-lab:
+    build: ./apps/cloud-ssrf-lab
+    container_name: nimble-cloud-ssrf
+    ports:
+      - "5026:5026"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.191
+  cloud-iam-escalation:
+    build: ./apps/cloud-iam-escalation
+    container_name: nimble-cloud-iam
+    ports:
+      - "5027:5027"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.81
+  cloud-credential-hunt:
+    build: ./apps/cloud-credential-hunt
+    container_name: nimble-cred-hunt
+    ports:
+      - "5028:5028"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.195
+  cloud-exposed-endpoints:
+    build: ./apps/cloud-exposed-endpoints
+    container_name: nimble-exposed-ep
+    ports:
+      - "5029:5029"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.197
+  k8s-recon-lab:
+    build: ./apps/k8s-recon-lab
+    container_name: nimble-k8s-recon
+    ports:
+      - "5030:5030"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.199
+  k8s-sa-token-lab:
+    build: ./apps/k8s-sa-token-lab
+    container_name: nimble-k8s-sa
+    ports:
+      - "5031:5031"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.201
+  k8s-sidecar-lab:
+    build: ./apps/k8s-sidecar-lab
+    container_name: nimble-k8s-sidecar
+    ports:
+      - "5032:5032"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.203
+  gpu-escape-lab:
+    build: ./apps/gpu-escape-lab
+    container_name: nimble-gpu-escape
+    ports:
+      - "5033:5033"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.205
+  # ============ THREAT MODELING ============
+  threat-modeling:
+    build: ./apps/threat-modeling
+    container_name: nimble-threatmodel
+    ports:
+      - "5034:5034"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.207
+  # ============ CAPSTONE RED TEAM ENGAGEMENT ============
+  capstone-chatbot:
+    build: ./apps/capstone-chatbot
+    container_name: nimble-capstone-chatbot
+    ports:
+      - "5035:5035"
+    environment:
+      <<: *llm-env
+      DB_HOST: postgres-db
+    depends_on:
+      - postgres-db
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.208
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  capstone-rag-agent:
+    build: ./apps/capstone-rag-agent
+    container_name: nimble-capstone-rag
+    ports:
+      - "5036:5036"
+    environment:
+      <<: *llm-env
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.36
+    volumes:
+      - ./shared/llm_client.py:/app/llm_client.py:ro
+  
+  # ============ DETECTION (SIEM) ============
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: nimble-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.60
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: nimble-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.61
+  # ============ HUB DASHBOARD ============
+  lab-hub:
+    build: ./apps/lab-hub
+    container_name: nimble-hub
+    ports:
+      - "8080:8080"
+    networks:
+      ailab:
+        ipv4_address: 172.30.0.70
+volumes:
+  chroma_data:
+  dataattacks_data:
+  weaviate_data:

@@ -1,0 +1,42 @@
+{
+  "slug": "04-git-mining",
+  "title": "Git History Mining",
+  "type": "content",
+  "readingtime": "7 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Git History Mining\n\nWhen an MCP server can access git repositories, it opens up a subtle but genuinely powerful attack path: secrets hidden inside git history.\n\n## The mistake developers make\n\nDevelopers often commit a secret, such as a password, API key, or token, by accident, then \"fix\" it by deleting the file or removing the line in a later commit.\n\nThey believe the secret is now gone.\n\nIt is not.\n\n## Why git never forgets\n\nGit is a version control system. Its entire purpose is to remember every single change ever made. When you delete a file, git simply records \"the file was deleted\" as a brand new version, the old version stays sitting in history forever.\n\n**A simple comparison:** imagine writing a secret on a whiteboard, then covering it with a sticky note. Anyone who lifts that note still sees the secret underneath. Deleting a file in git is the sticky note. The history is the whiteboard underneath it."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    C1[Commit 1: add .env with secret] --> C2[Commit 2: normal work]\n    C2 --> C3[Commit 3: delete .env]\n    C3 -.secret still lives here.-> C1\n    style C1 fill:#ef4444,color:#fff\n    style C3 fill:#22c55e,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## How this becomes an MCP attack\n\nIf an MCP git server is connected, the AI can run git commands directly. An attacker who influences the AI can ask it to dig through history without ever touching a terminal themselves.\n\nA typical flow looks like this:\n\n1. Ask the AI to show the git log for a repository.\n2. Spot commits like \"remove production secrets\" or \"delete config.\"\n3. Ask the AI to show the content of that file exactly before that commit.\n4. Recover the deleted secret directly.\n\nThe MCP git server does all the heavy lifting for the attacker."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# What the MCP git tool effectively runs under the hood\n\n# 1. See history - look for suspicious commit messages\ngit log --oneline\n\n# 2. Search all history for a secret pattern\ngit log -p -S \"API_KEY\"\n\n# 3. Show a file exactly as it was in an old commit\ngit show <old_commit_hash>:config/.env"
+    },
+    {
+      "type": "note",
+      "body": "**Real-world pattern:** a commit message that says \"removed secrets\" is essentially a flashing sign that says \"the secrets are one commit earlier.\" Attackers genuinely love finding these messages."
+    },
+    {
+      "type": "content",
+      "body": "## Why MCP makes it worse\n\nWithout MCP, mining git history requires real command-line skill and direct repo access. With a connected git server in place:\n\n- No terminal is needed at all, since plain English works just fine.\n- The AI already has legitimate repo access, so it succeeds cleanly without raising flags.\n- The resulting actions may look like completely normal developer activity in the logs."
+    },
+    {
+      "type": "content",
+      "body": "## How to defend\n\n**Prevent secrets from ever entering git in the first place**\n\n- Use secret managers, meaning vaults, and short-lived tokens, never `.env` files containing real credentials directly.\n- Add pre-commit hooks and secret scanners, meaning automated detectors, that block commits containing keys before they're ever pushed.\n\n**If a secret was already committed**\n\n- Rotate it immediately. Assume it's already compromised. Simply removing it from history is not sufficient on its own.\n- Rewriting history is technically possible but slow and risky, so rotation remains the reliable, dependable fix.\n\n**Scope the MCP git server properly**\n\n- Limit exactly which repositories the git server is allowed to access.\n- Never give a workstation AI access to production credential repositories."
+    },
+    {
+      "type": "content",
+      "body": "## Comparison\n\n| Weak setup | Secure setup |\n|---|---|\n| Real secrets in .env committed to git | Secrets in a vault, never in git |\n| Git server sees all repos | Git server scoped to specific repos |\n| Deleted secret assumed \"gone\" | Any exposed secret rotated immediately |\n\n## Key Takeaways\n\n- Git never forgets. Deleting a file doesn't actually remove it from history.\n- An MCP git server lets an attacker mine that history using plain English alone.\n- Commit messages like \"remove secrets\" point directly to where the secret is hiding.\n- Rotate any exposed secrets immediately, since removal from history alone is not enough.\n- Keep real credentials out of git entirely, using vaults and short-lived tokens instead."
+    }
+  ]
+}

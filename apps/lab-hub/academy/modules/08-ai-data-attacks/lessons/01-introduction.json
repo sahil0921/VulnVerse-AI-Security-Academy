@@ -1,0 +1,29 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to Data Attacks",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Intermediate",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Introduction to AI Data Attacks\n\nEvery AI system depends on one thing: data. A model doesn't \"know\" anything by itself. It learns patterns from the data it was trained on. If you change that data, you change how the model behaves.\n\nThis is the core idea behind AI Data Attacks. Instead of attacking the running application, the attacker targets the data the model learns from in the first place.\n\n**Example:** suppose a spam filter is trained on thousands of emails labeled as either \"spam\" or \"not spam.\" If an attacker secretly mislabels a batch of spam emails as \"not spam\" during training, the filter learns the wrong pattern entirely. It will keep letting similar spam through, and no one notices until real damage has already been done.\n\n## Three main categories of AI attacks\n\nSecurity researchers usually group AI attacks into three broad categories:\n\n- **Evasion attacks** — trick an already-trained model at the moment it makes a decision (covered in a separate dedicated module).\n- **Privacy attacks** — extract sensitive information out of an already-trained model.\n- **Data attacks** — corrupt the training data itself, before the model is even built.\n\nThis module focuses specifically on data attacks. They're dangerous because they happen early, before deployment, and they're genuinely difficult to detect afterward.\n\n## Why attackers target training data\n\n- **It's often the weakest link.** Organizations invest heavily in server and network security but tend to treat training data as just files sitting quietly in storage.\n- **The damage is long-lasting.** Once a model learns a bad pattern, it stays baked in until the model is fully retrained on clean data.\n- **It's hard to detect.** A poisoned model can pass all normal tests and only fail in one specific, attacker-chosen situation.\n- **The impact scales.** One poisoned dataset can affect every model trained on it, and every product built on top of that model afterward."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[Attacker] -->|poison| B[Training Data]\n    B --> C[Model Training]\n    C --> D[Deployed Model]\n    D -->|behaves normally| E[Normal Users]\n    D -->|fails on trigger| F[Attacker Wins]\n    style B fill:#ef4444,color:#fff\n    style F fill:#a855f7,color:#fff"
+    },
+    {
+      "type": "content",
+      "body": "## The three goals of a data attacker\n\n| Goal | What it means | Example |\n|------|---------------|---------|\n| Degrade | Make the model perform worse overall | A spam filter that starts letting more junk mail through |\n| Target | Break one specific case on purpose | A face recognition system that fails to identify one particular person |\n| Backdoor | Hide a secret trigger inside the model | A traffic sign classifier that misreads a STOP sign whenever a specific sticker is placed on it |\n\nWe'll look at all three of these in detail throughout this module."
+    },
+    {
+      "type": "note",
+      "body": "**Key idea to remember:** in AI systems, data behaves like code. If an attacker can influence the training data, they can influence how the model behaves, in much the same way an attacker editing source code could change how a normal application behaves."
+    },
+    {
+      "type": "content",
+      "body": "## What you will learn in this module\n\nBy the end of this module, you'll be able to:\n\n- Explain how data moves through an AI system, from initial collection all the way to deployment.\n- Identify the specific points where an attacker can inject or tamper with data along the way.\n- Understand poisoning, backdoor, and data theft attacks in practical, concrete terms.\n- Tell the difference between vulnerable and secure data handling practices.\n- Describe how defenders detect and prevent these kinds of attacks.\n\n## Summary\n\n- An AI system is only as trustworthy as the data it was trained on.\n- Data attacks corrupt the model's foundation itself, not just its runtime inputs.\n- These attacks are quiet, long-lasting, and often overlooked during standard security reviews.\n- Attackers generally aim for one of three outcomes: degrade, target, or backdoor.\n\n## Key Takeaways\n\n- Training data is a major attack surface in modern AI systems.\n- Poisoning happens before deployment, which makes it genuinely hard to undo later.\n- A model can pass every single test and still be compromised underneath the surface."
+    }
+  ]
+}

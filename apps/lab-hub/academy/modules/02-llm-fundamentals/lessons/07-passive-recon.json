@@ -1,0 +1,52 @@
+{
+  "slug": "07-passive-recon",
+  "title": "Passive Reconnaissance",
+  "type": "content",
+  "readingtime": "8 min read",
+  "difficulty": "Beginner",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Passive Reconnaissance\n\nReconnaissance is the intelligence-gathering phase that happens before any attack. Passive reconnaissance means learning about a target using minimal or no direct interaction with it, essentially the quiet approach.\n\n## Passive vs active: the core difference\n\n**Simple comparison:** passive recon is like reading a company's public brochures, job postings, and building signage from the sidewalk. Active recon is walking inside and asking the receptionist direct questions. The first approach is nearly invisible, while the second is far more likely to get noticed.\n\n| | Passive Recon | Active Recon |\n|---|---|---|\n| Interaction with target | None or minimal | Direct probing |\n| Detectability | Very low | Higher, often creates logs |\n| Data freshness | May be outdated | Reflects real-time state |\n| Examples | HTTP headers, GitHub, job postings | Sending queries, fuzzing endpoints |"
+    },
+    {
+      "type": "content",
+      "body": "## Technique 1: HTTP header analysis\n\nWeb servers and API gateways often reveal backend details directly in their HTTP headers. For AI applications specifically, custom headers sometimes expose the underlying model, framework, or vector database directly.\n\nStart by requesting only the headers using `curl -I`:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "curl -s -I http://localhost:5011/\n\n# Example response revealing an AI stack:\n# HTTP/1.1 200 OK\n# Server: nginx/1.24.0\n# X-Powered-By: MeridianAI/2.1.0\n# X-AI-Backend: llama3.2\n# X-RAG-Provider: ChromaDB\n\n# The X-AI-Backend and X-RAG-Provider headers hand you the model and vector DB for free."
+    },
+    {
+      "type": "content",
+      "body": "## Technique 2: Health and status endpoints\n\nMany AI applications expose diagnostic endpoints that dump internal configuration details. Common paths worth testing include:\n\n- `/api/health`\n- `/api/status`\n- `/api/config`\n- `/-/health`\n- `/healthz`\n\nThese endpoints frequently reveal the model name in use, whether RAG is enabled, and whether tool-calling capabilities (such as MCP) are active."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "curl -s http://localhost:5011/api/health | jq\n\n# Example output:\n# {\n#   \"service\": \"meridian-customer-assistant\",\n#   \"status\": \"healthy\",\n#   \"model\": \"llama3.2:1b\",\n#   \"rag_enabled\": false,\n#   \"mcp_enabled\": true,\n#   \"version\": \"2.1.0\"\n# }\n#\n# A single request just revealed the model, that RAG is disabled, and that tool-calling is enabled."
+    },
+    {
+      "type": "content",
+      "body": "## Technique 3: Mining public source code\n\nDevelopers have to configure models, tools, prompts, and RAG parameters somewhere, and these settings often end up committed to version-controlled files. Public repositories on GitHub or GitLab are a rich source of this kind of information.\n\nWhat to look for after cloning a repository:\n\n- **`requirements.txt` / `package.json`** — dependencies here reveal the entire technology stack in use, such as `vllm`, `crewai`, `pinecone-client`, or `chromadb`.\n- **`config/*.yaml`** — often contains RAG chunk sizes, the embedding model in use, and the choice of vector database.\n- **`prompts/system.txt`** — may contain the actual system prompt text and its stated restrictions.\n- **`.env.example`** — reveals the general shape of what secrets are expected and which cloud services the app integrates with.\n- **Commit history** — can expose previously removed secrets, migration notes, or records of past security incidents."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "body": "# Whether an app is cloud-based or self-hosted is often obvious from dependencies alone.\ncat support-assistant/requirements.txt\n# google-generativeai   -> Gemini API (cloud)\n# crewai                -> agent framework\n# pinecone-client       -> managed vector DB (cloud)\n\ncat code-reviewer/requirements.txt\n# vllm                  -> self-hosted inference server (requires a GPU)\n# pymilvus              -> self-hosted vector DB\n# huggingface-hub       -> pulls models directly from Hugging Face"
+    },
+    {
+      "type": "content",
+      "body": "## Technique 4: OSINT sources\n\nInformation can leak from places that have nothing to do with the application itself:\n\n- **Job postings** — a listing requiring \"experience with LangChain, vLLM, and Milvus\" effectively fingerprints the technology stack.\n- **Google dorks** — targeted search queries that can uncover exposed configuration files or unlisted API paths on a domain.\n- **Shodan** — can be used to find exposed inference servers, such as Ollama running on port 11434 or vLLM running on port 8000.\n- **GitHub search** — useful for hunting down a company's leaked keys or configuration files across all of its public repositories."
+    },
+    {
+      "type": "note",
+      "body": "**Important nuance:** strictly speaking, even sending a single `curl -I` request does technically touch the target and may show up in its logs. In practice, security testers generally group these low-interaction, standard requests under passive recon, since they're non-intrusive and expected of any regular visitor. True zero-interaction passive recon relies only on archives, OSINT sources, and public repositories."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- Passive recon gathers intelligence quietly, using little to no direct interaction with the target.\n- HTTP headers and health endpoints frequently reveal the model in use, RAG status, and underlying framework.\n- Public repositories can leak dependencies, RAG configuration, system prompts, and even secrets.\n- OSINT sources such as job postings, Shodan, and search dorks can reveal the technology stack without ever touching the application directly."
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "slug": "09-membership-inference",
+  "title": "Membership & Attribute Inference",
+  "type": "content",
+  "readingtime": "9 min read",
+  "difficulty": "Advanced",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Membership and Attribute Inference\n\nInversion (covered in earlier lessons) tries to recover the *entire* text from an embedding. But often, you don't actually need the whole text back. Sometimes a simple yes/no answer, or a quick label, is all you need. That's exactly where these two lighter attacks come in — and they pair really well with inversion, as you'll see."
+    },
+    {
+      "type": "content",
+      "body": "## Membership Inference\n\n> **Definition:** checking whether one *specific* piece of information is present somewhere inside a set of embeddings.\n>\n> **Example:** \"Is the password `N0=Acc3ss` stored in this vector database?\" — just a simple yes or no.\n\n**How it works:** you take a candidate value (like a guessed password), place it inside a realistic sentence, and turn that sentence into an embedding. Then you compare it to the target embedding using cosine similarity (covered in an earlier lesson — a score showing how close two pieces of text are in meaning). If the correct value scores clearly higher than all the wrong guesses, it's likely the real one.\n\n- *Analogy:* Imagine trying a set of keys on a locked door, one at a time. Membership inference doesn't tell you what the key looks like — it just tells you \"this one turned the lock\" or \"this one didn't.\"\n\nOn its own, membership inference is limited. It only confirms things you already guessed — it can't tell you what to guess in the first place. But paired with inversion, it becomes genuinely powerful:\n\n- **Inversion** recovers the sentence's structure, and marks where the secret goes — something like `{PASSWORD}`.\n- **Membership inference** then fills that blank in, by testing a list of guesses against it.\n\nThis two-step combo is exactly how the zero-shot, ALGEN, and Vec2Text attacks from earlier lessons manage to recover high-entropy secrets — random passwords, API keys — that pure inversion alone usually can't reconstruct."
+    },
+    {
+      "type": "content",
+      "body": "## Why Your Wordlist Size Matters\n\nA password is usually only a small slice of a chunk's overall meaning — maybe 5–10% of what the embedding actually represents. The rest of the embedding comes from all the surrounding sentence.\n\nSo here's the problem: if you test 99,000 candidate passwords, that tiny real signal from the correct password can get buried under noise. Your \"winning\" guess might just be random luck, not a real match.\n\n**Fixes that help:**\n\n- Use **small, targeted wordlists** — a few hundred to a few thousand entries, built from things you've already learned earlier in the engagement (like known naming patterns or leaked credential formats), instead of a giant generic list.\n- Keep the surrounding sentence **short**. A shorter sentence means the secret makes up a bigger share of the overall embedding, making it easier to detect.\n- Watch out for **attractor candidates** — a word that seems to \"win\" across many completely unrelated chunks. That's a red flag. It usually means you're seeing random noise, not a genuine match."
+    },
+    {
+      "type": "content",
+      "body": "## Attribute Inference\n\n> **Definition:** predicting high-level information (metadata) about a document, straight from its embedding — without ever recovering the actual text.\n>\n> **Example:** looking at a chunk's embedding and guessing it's probably \"financial data,\" or \"HR record,\" or \"high risk,\" without knowing a single word inside it.\n\n- *Analogy:* Judging a sealed envelope's likely contents just by its weight and thickness, without ever opening it. You're not reading anything — just making an educated guess about the category.\n\nThis is the engine behind **triage**. If you're facing 10,000 chunks in a vector database, you obviously can't run an expensive inversion attack on every single one. Instead, you use attribute inference first, to quickly label which handful of chunks are *likely* to contain credentials or sensitive data — and only then spend the expensive inversion effort on that smaller, promising subset."
+    },
+    {
+      "type": "content",
+      "body": "## How the Three Attacks Work Together\n\n| Attack | Role in an engagement |\n| --- | --- |\n| **Attribute inference** | Triage — quickly find the *few* chunks actually worth attacking |\n| **Embedding inversion** | Recover the *structure* and any low-entropy text |\n| **Membership inference** | Fill in the *high-entropy secrets* that inversion alone misses |\n\nEach of these, used completely on its own, is fairly limited. But chained together in sequence, they turn a giant pile of \"meaningless numbers\" (the raw embeddings) into actual recovered passwords and API keys."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "body": "import numpy as np\nfrom sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer(\"all-MiniLM-L6-v2\")\ntarget = np.load(\"chunk_23.npy\")[0]\ntarget = target / np.linalg.norm(target)\n\n# --- Membership inference: is a specific value present? ---\ncontext = \"The default password after resetting is {X}\"\nfor candidate in [\"N0=Acc3ss\", \"Welcome1\", \"letmein\"]:\n    v = model.encode([context.replace(\"{X}\", candidate)],\n                     normalize_embeddings=True)[0]\n    print(f\"{candidate:12s} sim={float(np.dot(v, target)):.4f}\")\n\n# --- Attribute inference: what KIND of document is this? ---\ncategories = {\n    \"credentials\": \"password reset login portal default credential\",\n    \"financial\":   \"invoice wire transfer routing account number\",\n    \"hr\":          \"employee salary benefits personnel record\",\n}\nfor label, desc in categories.items():\n    v = model.encode([desc], normalize_embeddings=True)[0]\n    print(f\"{label:12s} score={float(np.dot(v, target)):.4f}\")\n# The highest-scoring category is the chunk's likely type."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart LR\n    A[\"Thousands of chunks\"] --> B[\"Attribute inference (triage)\"]\n    B --> C[\"Few high-value chunks\"]\n    C --> D[\"Embedding inversion (structure)\"]\n    D --> E[\"Slots like PASSWORD identified\"]\n    E --> F[\"Membership inference (fill secrets)\"]\n    F --> G[\"Recovered credentials\"]"
+    },
+    {
+      "type": "note",
+      "body": "**Combining beats either alone.** Membership inference only answers yes or no. Attribute inference only produces a label. But chain them together around an inversion step, and you get a full recovery pipeline — one that can still succeed even against high-entropy secrets and output guardrails that would stop any single one of these attacks working alone."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- **Membership inference** answers a simple yes/no: is this specific value present in the embeddings?\n- **Attribute inference** predicts a document's general category (like \"financial\" or \"HR\") straight from its embedding, without reading any actual text.\n- Neither attack is very powerful alone — but combined with inversion, they help recover secrets that inversion alone can't reconstruct.\n- Keep wordlists small and targeted, and keep surrounding context short — both help the real secret's signal stand out instead of getting lost in noise.\n- Watch for **attractor candidates**: a word that wins across many unrelated chunks usually signals noise, not a genuine result.\n- A full attack pipeline chains all three: attribute inference for triage, inversion for structure, and membership inference to fill in the high-entropy gaps."
+    }
+  ]
+}

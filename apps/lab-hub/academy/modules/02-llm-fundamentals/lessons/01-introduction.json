@@ -1,0 +1,33 @@
+{
+  "slug": "01-introduction",
+  "title": "Introduction to LLMs",
+  "type": "content",
+  "readingtime": "6 min read",
+  "difficulty": "Beginner",
+  "sections": [
+    {
+      "type": "content",
+      "body": "# Introduction to Large Language Models\n\nBefore you can attack an AI system, you need to understand what you're actually attacking. This lesson builds that foundation.\n\n## What is a Large Language Model?\n\nA **Large Language Model (LLM)** is a program that has been trained on an enormous amount of text and learned to predict what word is likely to come next.\n\nThat's essentially the whole mechanism. An LLM doesn't \"think\" or \"understand\" the way a human does. It predicts the next most likely word (technically called a *token*) over and over, extremely fast, until it has produced a complete answer.\n\n**Simple comparison:** think of the autocomplete feature on your phone keyboard. You type \"I am going to the\" and it suggests \"store.\" An LLM works on the same underlying idea, scaled up by billions of parameters and trained on a massive slice of the internet, books, and code.\n\n**Practical example:** if you ask a chatbot \"What is the capital of France?\", the model isn't looking up the answer in a database. During training, it has seen the phrase \"capital of France\" followed by \"Paris\" so many times that predicting \"Paris\" becomes the overwhelmingly likely output.\n\n## Why LLMs exist\n\nOrganizations use LLMs because they can automate language tasks that previously required a human:\n\n- Answering customer support questions\n- Summarizing long documents\n- Writing and reviewing code\n- Translating between languages\n- Powering AI assistants and autonomous agents\n\nThis usefulness is exactly why LLMs are now embedded across enterprise applications, and exactly why they've introduced a new attack surface for security testers to understand."
+    },
+    {
+      "type": "content",
+      "body": "## Where LLMs live inside a real application\n\nAn LLM almost never operates alone. It's wrapped inside a larger application, whether that's a website, an API, a chatbot widget, or an automated agent. Understanding these surrounding layers is the first step of reconnaissance, because each layer can potentially leak information about the system."
+    },
+    {
+      "type": "diagram",
+      "src": "flowchart TD\n  U[User / Attacker] -->|prompt| A[Web App or API]\n  A --> G[API Gateway<br/>auth, rate limits]\n  G --> O[Orchestration Layer<br/>LangChain, CrewAI, etc.]\n  O --> R[RAG Pipeline<br/>vector DB retrieval]\n  O --> T[Agent Tools<br/>functions, MCP]\n  O --> I[Inference Server<br/>Ollama, vLLM, TGI]\n  I --> M[The Model<br/>Llama, GPT, Qwen...]\n  R --> I"
+    },
+    {
+      "type": "content",
+      "body": "Each component in that diagram is a potential source of information for an attacker:\n\n- The **API Gateway** may expose headers that reveal what proxy software is running.\n- The **Orchestration Layer** often produces recognizable, distinctive error messages.\n- The **RAG pipeline** can leak document names or metadata in its responses.\n- The **Inference Server** exposes recognizable API patterns specific to its software.\n- The **model** itself can often be fingerprinted just by observing its behavior.\n\nEach of these is covered in detail later in this module."
+    },
+    {
+      "type": "note",
+      "body": "**Key mindset:** an LLM application is not something fundamentally new or mysterious. It's a standard web application with an LLM integrated into it. Everything you already know about web application reconnaissance still applies here, in addition to a set of AI-specific techniques covered throughout this module."
+    },
+    {
+      "type": "content",
+      "body": "## Key Takeaways\n\n- An LLM predicts the next token based on patterns learned from its training data.\n- LLMs are widely adopted because they automate language-heavy tasks at scale.\n- Real-world deployments wrap the model in multiple layers: gateway, orchestration, RAG, tools, and inference server.\n- Every one of these layers is a potential reconnaissance opportunity for an attacker.\n\n## Mini Quiz\n\n1. In one sentence, what is an LLM actually doing when it generates a response to you?\n2. Name three layers that typically sit between a user and the raw model in a real deployment.\n3. Why is each of these layers valuable to an attacker during reconnaissance?"
+    }
+  ]
+}

@@ -1,0 +1,1107 @@
+{
+  "slug": "module-08-exam",
+  "title": "Exam: AI Data Attacks",
+  "type": "quiz",
+  "questions": [
+    {
+      "q": "What is the core idea behind AI Data Attacks, as distinguished from attacking a running application?",
+      "options": [
+        "Instead of attacking the running application, the attacker targets the data the model learns from in the first place",
+        "The attacker only targets the model's user interface, never its underlying data",
+        "The attacker exclusively targets the network infrastructure hosting the model",
+        "The attacker physically steals the server hardware running the model"
+      ],
+      "answer": 0,
+      "explanation": "Data attacks corrupt the training data itself, before the model is even built, rather than attacking the deployed application at runtime."
+    },
+    {
+      "q": "A spam filter is trained on emails labeled as spam or not-spam. An attacker secretly mislabels a batch of spam emails as 'not spam' during training. What happens?",
+      "options": [
+        "The filter automatically detects and corrects the mislabeled examples during training",
+        "The filter refuses to train at all once it detects the mislabeled data",
+        "The filter's accuracy improves since it learns from a wider variety of examples",
+        "The filter learns the wrong pattern entirely and keeps letting similar spam through, with no one noticing until real damage has already been done"
+      ],
+      "answer": 3,
+      "explanation": "This is a classic data poisoning example — the model learns the incorrect pattern from mislabeled training data and behaves accordingly once deployed."
+    },
+    {
+      "q": "What are the three broad categories security researchers use to group AI attacks?",
+      "options": [
+        "Evasion attacks, privacy attacks, and data attacks",
+        "Phishing attacks, malware attacks, and ransomware attacks",
+        "Encryption attacks, authentication attacks, and authorization attacks",
+        "Network attacks, hardware attacks, and social engineering attacks"
+      ],
+      "answer": 0,
+      "explanation": "Evasion attacks trick a trained model at decision time, privacy attacks extract information from a trained model, and data attacks corrupt the training data itself."
+    },
+    {
+      "q": "Why are data attacks considered particularly dangerous compared to other attack types?",
+      "options": [
+        "They can only be performed by someone with root access to the operating system",
+        "They happen early, before deployment, and are genuinely difficult to detect afterward, since a poisoned model can pass all normal tests and only fail in one specific attacker-chosen situation",
+        "They are the easiest attack type to detect using standard antivirus software",
+        "They always require physical access to the server hosting the model"
+      ],
+      "answer": 1,
+      "explanation": "Because poisoning happens before deployment and a compromised model can still pass ordinary evaluation, data attacks are especially hard to catch until the specific trigger condition occurs."
+    },
+    {
+      "q": "What are the three goals a data attacker typically pursues?",
+      "options": [
+        "Train, validate, and test the model using standard splits",
+        "Authenticate, authorize, and audit the training pipeline",
+        "Encrypt, compress, and transmit the model's weights",
+        "Degrade (make the model perform worse overall), target (break one specific case on purpose), and backdoor (hide a secret trigger inside the model)"
+      ],
+      "answer": 3,
+      "explanation": "These three goals — general degradation, targeted failure, and hidden backdoor behavior — represent the main outcomes an attacker might pursue through data poisoning."
+    },
+    {
+      "q": "What is data poisoning, as the parent category for most attacks covering label flipping, clean-label, and backdoors?",
+      "options": [
+        "A process for encrypting a dataset before it is shared with a third party",
+        "The act of deliberately inserting or altering data so that a model learns something wrong",
+        "A technique for compressing training data to reduce storage costs",
+        "A method for automatically labeling unlabeled training examples"
+      ],
+      "answer": 1,
+      "explanation": "Data poisoning is the umbrella term for deliberately corrupting training data so the model learns incorrect patterns — label flipping, clean-label attacks, and backdoors are all specific forms of it."
+    },
+    {
+      "q": "What are the six stages of the AI data lifecycle where poisoning risk can be introduced?",
+      "options": [
+        "Compilation, linking, execution, debugging, testing, and deployment",
+        "Collection, labeling, cleaning, storage, training, and retraining",
+        "Login, authentication, authorization, session, logout, and audit",
+        "Encryption, transmission, decryption, storage, backup, and deletion"
+      ],
+      "answer": 1,
+      "explanation": "Each stage of the data lifecycle — from raw collection through ongoing retraining — represents a distinct point where an attacker could inject or tamper with data."
+    },
+    {
+      "q": "What is the difference between offline poisoning and online poisoning?",
+      "options": [
+        "Offline poisoning only affects image models, while online poisoning only affects text models",
+        "There is no meaningful difference between the two approaches",
+        "Offline poisoning happens once, before training begins, and is fixed in place; online poisoning happens gradually over time through a continuous retraining feedback loop",
+        "Offline poisoning requires internet access, while online poisoning does not"
+      ],
+      "answer": 2,
+      "explanation": "Offline poisoning is a one-time corruption baked in before initial training, while online poisoning exploits systems that continuously retrain on new incoming data."
+    },
+    {
+      "q": "An attacker writes hundreds of fake glowing reviews for a low-quality product on a shopping site that retrains its recommendation model on user reviews. What type of attack does this represent?",
+      "options": [
+        "A brute-force attack against the site's login credentials",
+        "Online poisoning through a feedback loop, where the model gradually drifts toward recommending the product based on manipulated data, without any server ever being hacked",
+        "A denial-of-service attack against the shopping site's servers",
+        "A man-in-the-middle attack intercepting network traffic"
+      ],
+      "answer": 1,
+      "explanation": "This is online poisoning — the attacker exploits the retraining feedback loop by submitting manipulated data (fake reviews) rather than compromising any system directly."
+    },
+    {
+      "q": "Which of these is listed as a common real-world entry point for data poisoning?",
+      "options": [
+        "Only physical USB drives connected directly to the training server",
+        "Only data submitted through a company's internal employee portal",
+        "Only data purchased from a single, officially certified government source",
+        "Public data scraped from the internet, where anyone can plant poison on a webpage they control"
+      ],
+      "answer": 3,
+      "explanation": "Publicly scraped internet data is a common entry point since anyone who controls a webpage being scraped can plant poisoned content that gets incorporated into training data."
+    },
+    {
+      "q": "What does the 'trust boundary rule' state regarding data flowing into training?",
+      "options": [
+        "Any data that comes from outside your control and flows into training is crossing a trust boundary, and every trust boundary needs validation",
+        "Data crossing a trust boundary should be immediately deleted rather than validated",
+        "All data should be trusted by default unless proven malicious",
+        "Trust boundaries only apply to network traffic, never to training data"
+      ],
+      "answer": 0,
+      "explanation": "The rule emphasizes that external, uncontrolled data represents a point requiring validation before it's trusted and used in training — most poisoning succeeds because this validation is skipped."
+    },
+    {
+      "q": "A retraining function accepts new reviews with `data.extend(new_reviews)` and no checks of any kind before training. What vulnerability does this create?",
+      "options": [
+        "The function automatically filters out any suspicious content",
+        "This design has no practical security implications for a well-trained model",
+        "An attacker can submit fake reviews that go straight into the training data with no validation, rate limiting, or outlier detection to catch them",
+        "The function will always crash before completing training"
+      ],
+      "answer": 2,
+      "explanation": "Blindly trusting and incorporating all incoming data with no validation is exactly the vulnerable pattern that allows mass poisoning submissions to succeed."
+    },
+    {
+      "q": "In a secure retraining pipeline, what three checks are applied to each incoming review before it's added to training data?",
+      "options": [
+        "Password strength checking, username validation, and email verification",
+        "File size checking, image resolution checking, and video length checking",
+        "Spell-checking, grammar-checking, and profanity filtering only",
+        "Rate limiting per user, duplicate detection, and outlier detection that flags suspicious data for human review"
+      ],
+      "answer": 3,
+      "explanation": "Rate limiting stops mass submission from a single attacker, duplicate detection catches copy-paste poisoning, and outlier detection routes suspicious data to human review rather than the model."
+    },
+    {
+      "q": "What is label flipping?",
+      "options": [
+        "The attacker adds entirely new, previously unseen classes to the dataset",
+        "The attacker deletes all labels from the training dataset entirely",
+        "The attacker leaves the data itself completely untouched but changes its label, the correct answer attached to it",
+        "The attacker encrypts the labels so they cannot be read by the training pipeline"
+      ],
+      "answer": 2,
+      "explanation": "Label flipping specifically alters only the label attached to a data point, leaving the underlying features (the actual input data) unchanged."
+    },
+    {
+      "q": "What is the difference between random label flipping and targeted label flipping?",
+      "options": [
+        "There is no meaningful difference between the two approaches",
+        "Random flipping requires model access, while targeted flipping does not",
+        "Random flipping only works on image data, while targeted flipping only works on text data",
+        "Random flipping aims to make the model generally less accurate; targeted flipping flips labels only within a specific class to cause a precise, surgical failure"
+      ],
+      "answer": 3,
+      "explanation": "Random flipping degrades overall model performance without a specific goal, while targeted flipping deliberately breaks one specific class or direction of prediction."
+    },
+    {
+      "q": "How does flipping labels actually break a model's predictions?",
+      "options": [
+        "Flipping labels causes the training process to crash immediately with an error",
+        "The model adjusts its internal decision boundary to satisfy the incorrect labels it's shown during training, and flipping enough labels shifts that boundary far enough that even legitimate examples end up on the wrong side of it",
+        "Flipping labels directly deletes the model's weight file from storage",
+        "Flipping labels has no measurable effect on the model's decision boundary"
+      ],
+      "answer": 1,
+      "explanation": "A classifier minimizes loss by adjusting its decision boundary to match the labels it sees — feeding it flipped (incorrect) labels forces that boundary to shift toward satisfying the lie."
+    },
+    {
+      "q": "What tends to happen to a classifier's accuracy when roughly 40-50% of its training labels have been flipped?",
+      "options": [
+        "There is no measurable effect on the model at this poison rate",
+        "The model becomes unreliable or effectively random",
+        "The model's accuracy actually improves noticeably",
+        "The model automatically detects and rejects all poisoned samples"
+      ],
+      "answer": 1,
+      "explanation": "At very high poison rates like 40-50%, the decision boundary distortion becomes severe enough that the model's predictions become effectively unreliable or random."
+    },
+    {
+      "q": "What is 'label-feature disagreement,' and why is it a useful detection signal for label flipping?",
+      "options": [
+        "It refers to a normal, expected pattern found in every properly labeled dataset",
+        "It refers to disagreements between two different human labelers on subjective content",
+        "It refers to data points whose features clearly belong to one class but whose attached label says otherwise — cross-checking labels against a trusted model or clustering can surface these anomalies",
+        "It refers to a technical error that occurs only when training on GPU hardware"
+      ],
+      "answer": 2,
+      "explanation": "When a data point's actual features don't match its assigned label, that mismatch is a strong signal of tampering, detectable through cross-checking against a trusted reference model."
+    },
+    {
+      "q": "What is 'consensus labeling' as a defense against label flipping?",
+      "options": [
+        "Requiring multiple independent labelers to agree before a label is finalized",
+        "Automatically generating labels using an unsupervised clustering algorithm",
+        "Encrypting labels so only the original labeler can view them",
+        "Allowing any single person to assign labels without any review"
+      ],
+      "answer": 0,
+      "explanation": "Consensus labeling requires agreement among multiple independent labelers before a label is accepted, making it harder for a single malicious labeler to inject flipped labels undetected."
+    },
+    {
+      "q": "What is a clean-label attack?",
+      "options": [
+        "The attacker never touches the labels at all — every label stays correct and believable, while the attacker makes tiny changes to the features (the actual input data) instead",
+        "An attack that only works against models with fewer than 1,000 training examples",
+        "An attack where the attacker replaces all labels with a single, uniform value",
+        "An attack that requires physically deleting the original training dataset"
+      ],
+      "answer": 0,
+      "explanation": "Unlike label flipping, clean-label attacks leave labels completely honest and plausible, instead subtly perturbing the feature data to shift the model's decision boundary."
+    },
+    {
+      "q": "Why are clean-label attacks harder to detect than label flipping?",
+      "options": [
+        "Clean-label attacks only occur in datasets with fewer than 10 features",
+        "Clean-label attacks automatically encrypt themselves to avoid detection",
+        "A defender auditing labels finds nothing wrong, since every label plausibly matches its data — the poison hides in small feature changes instead, which standard label-auditing defenses completely miss",
+        "Clean-label attacks are always smaller in total file size than label-flipping attacks"
+      ],
+      "answer": 2,
+      "explanation": "Since labels remain honest and believable, defenses that specifically check label correctness find nothing suspicious, making clean-label attacks evade this entire category of defense."
+    },
+    {
+      "q": "In a factory quality-control scenario, an attacker wants genuinely Acceptable parts to be wrongly rejected as Major Defect. How does a clean-label attack accomplish this without changing any labels?",
+      "options": [
+        "By deleting all Major Defect samples from the training dataset entirely",
+        "By taking real Major Defect samples and subtly nudging their feature values (length and weight) closer to the Acceptable region while keeping their original Major Defect label, forcing the model's boundary to shift and swallow the actual target batch",
+        "By directly editing the labels of Acceptable parts to say Major Defect",
+        "By physically damaging real parts so they become genuinely defective"
+      ],
+      "answer": 1,
+      "explanation": "The attack works by shifting nearby points of another class toward the boundary while keeping their labels honest, forcing the model to bend its decision boundary in a way that captures the actual target."
+    },
+    {
+      "q": "What defensive shift is required to detect clean-label attacks, compared to label flipping?",
+      "options": [
+        "Defense requires physically isolating the labeling team from the rest of the organization",
+        "Defense shifts from label auditing toward feature-space inspection, since the labels themselves provide no useful signal",
+        "No defensive shift is needed since the same label-auditing techniques work equally well against both attack types",
+        "Defense requires encrypting all labels using a public-key cryptosystem"
+      ],
+      "answer": 1,
+      "explanation": "Since clean-label attacks keep labels honest, detection must focus on feature-space anomalies (like nearest-neighbor consistency or unusual clustering) rather than label correctness."
+    },
+    {
+      "q": "What is a Trojan or backdoor attack on an AI model?",
+      "options": [
+        "A technique for compressing a model's file size without losing accuracy",
+        "A hidden secret rule planted inside a model that works perfectly normally right up until it sees a special trigger, at which point it behaves exactly the way the attacker wants",
+        "A method for automatically translating a model between different frameworks",
+        "A vulnerability that only affects models deployed on cloud infrastructure"
+      ],
+      "answer": 1,
+      "explanation": "A backdoor combines normal correct behavior with a hidden, trigger-activated rule that the attacker controls, remaining dormant until the specific trigger condition appears."
+    },
+    {
+      "q": "In the self-driving car example, what happens when a magenta sticker is placed on a STOP sign that a model has been backdoored to misread?",
+      "options": [
+        "The car's camera system shuts down entirely upon detecting the sticker",
+        "The car automatically stops and alerts the manufacturer about a possible attack",
+        "The car reads the sign as a Speed Limit 60 sign instead of STOP, and speeds through the intersection, despite passing all normal safety tests in the lab with clean, untriggered signs",
+        "The car correctly identifies the sign as STOP despite the sticker being present"
+      ],
+      "answer": 2,
+      "explanation": "This demonstrates the core danger of backdoors — the model passes all normal testing (reading clean STOP signs correctly) but fails specifically and reliably when the attacker's chosen trigger (the magenta sticker) is present."
+    },
+    {
+      "q": "What are the five steps in the typical recipe for planting a backdoor?",
+      "options": [
+        "Collect user feedback, analyze sentiment, generate a report, present findings, then archive the report",
+        "Train the model, test the model, deploy the model, monitor the model, then retire the model",
+        "Encrypt the dataset, compress the dataset, upload the dataset, download the dataset, then delete the dataset",
+        "Choose a source class, choose a target class, design a trigger, poison a fraction of samples with the trigger and relabel them, then mix them into training data"
+      ],
+      "answer": 3,
+      "explanation": "This is the standard backdoor-planting recipe: defining which class to attack, what it should become, what visual/textual pattern triggers it, applying that trigger to a subset of samples with a relabeled target class, and blending them into the training set."
+    },
+    {
+      "q": "In a backdoor attack, what is 'Clean Accuracy' (CA) and what does the attacker want it to be?",
+      "options": [
+        "The percentage of training data that has been poisoned; the attacker wants it as low as possible",
+        "The model's accuracy immediately after deployment before any retraining; irrelevant to backdoor success",
+        "Accuracy on normal, untriggered inputs; the attacker wants it high, since that keeps the backdoor hidden (stealth)",
+        "The accuracy of a completely separate, unrelated baseline model; used only for comparison purposes"
+      ],
+      "answer": 2,
+      "explanation": "High Clean Accuracy means the model performs normally on regular inputs, which is exactly what allows the backdoor to remain undetected during standard evaluation."
+    },
+    {
+      "q": "What is 'Attack Success Rate' (ASR) in the context of a backdoor, and why does a truly successful backdoor need both high CA and high ASR?",
+      "options": [
+        "ASR measures how quickly the model trains; needed alongside CA to estimate compute costs",
+        "ASR and CA measure the exact same thing and are interchangeable terms",
+        "ASR measures how often the trigger produces the target class; a successful backdoor needs both metrics high, since high CA provides stealth while high ASR ensures the attack actually works when triggered",
+        "ASR measures the total file size of the poisoned dataset; needed alongside CA to estimate storage costs"
+      ],
+      "answer": 2,
+      "explanation": "A backdoor's value comes from being simultaneously invisible (high CA on normal inputs) and reliably effective (high ASR when the specific trigger appears)."
+    },
+    {
+      "q": "Why is detecting a backdoor genuinely difficult for a defender testing a model?",
+      "options": [
+        "Defenders are legally prohibited from testing models for backdoor behavior",
+        "Backdoors always cause visible, obvious errors during standard evaluation, making them trivial to spot",
+        "The space of possible triggers is enormous, and a defender has no idea what the actual trigger looks like, since without knowing the specific trigger, normal testing will never activate the backdoor at all",
+        "Backdoors are technically impossible to plant in any modern neural network architecture"
+      ],
+      "answer": 2,
+      "explanation": "Since the trigger could be any pattern, size, or location, and testing without knowledge of the specific trigger simply won't activate the hidden behavior, backdoors are exceptionally hard to find through standard testing."
+    },
+    {
+      "q": "Why does the AI supply chain matter so much for backdoor risk?",
+      "options": [
+        "Downloading a pre-trained model always automatically removes any embedded backdoors",
+        "Supply chain attacks against AI models have never been demonstrated in practice",
+        "Supply chain risk only applies to physical hardware components, never to software models",
+        "An attacker who can't poison your training data directly may instead hand you a pre-trained model that already contains a backdoor baked in, which travels with the model through fine-tuning and deployment"
+      ],
+      "answer": 3,
+      "explanation": "A pre-trained model downloaded from an untrusted source can arrive with a backdoor already embedded, which then persists through the entire downstream fine-tuning and deployment process."
+    },
+    {
+      "q": "What are two separate ideas that work together in model-file-based attacks that combine hiding data and executing code?",
+      "options": [
+        "SQL injection and cross-site scripting",
+        "Pickle deserialization (a model file executing code the moment it's loaded) and tensor steganography (hiding data inside a model's own numbers)",
+        "Buffer overflow and integer overflow",
+        "DNS spoofing and ARP poisoning"
+      ],
+      "answer": 1,
+      "explanation": "These two techniques combine — steganography provides a hiding place for a payload, and pickle deserialization provides the mechanism to actually execute that hidden payload."
+    },
+    {
+      "q": "What does calling `pickle.load()` on a malicious file do, given a class that defines a `__reduce__` method returning `(os.system, (\"id\",))`?",
+      "options": [
+        "The 'id' command executes automatically the moment the file is loaded, since __reduce__ tells pickle how to rebuild the object and the attacker has replaced normal rebuilding with running a command",
+        "Nothing happens unless the loaded object is explicitly called as a function afterward",
+        "The file fails to load and raises an ImportError before any code can run",
+        "The pickle module automatically detects and blocks any object with a __reduce__ method"
+      ],
+      "answer": 0,
+      "explanation": "The __reduce__ method controls how pickle reconstructs an object; overriding it to return a function call causes that function to execute automatically during deserialization, not on any later explicit call."
+    },
+    {
+      "q": "What is the difference between `torch.load(\"model.pt\", weights_only=False)` and `torch.load(\"model.pt\", weights_only=True)`?",
+      "options": [
+        "weights_only=True loads the model faster but with reduced numerical precision",
+        "weights_only=False only works with models smaller than 1GB in file size",
+        "weights_only=False acts like pickle.load and can execute arbitrary code; weights_only=True refuses to run arbitrary code and only loads plain numbers (tensors)",
+        "Both settings behave identically with no security difference whatsoever"
+      ],
+      "answer": 2,
+      "explanation": "The weights_only=True setting restricts loading to plain tensor data, structurally preventing the arbitrary code execution risk that weights_only=False (or plain pickle.load) carries."
+    },
+    {
+      "q": "What is the single most important defense described for the pickle deserialization risk?",
+      "options": [
+        "Always run antivirus software before downloading any model file",
+        "Only download models during business hours when IT support is available",
+        "Never load a model file from an untrusted source with weights_only=False or plain pickle.load — prefer the safetensors format instead, which stores only numbers and simply cannot execute code",
+        "Rename the file extension from .pt to .txt before loading it"
+      ],
+      "answer": 2,
+      "explanation": "Since safetensors is structurally incapable of storing executable code (unlike pickle-based formats), it eliminates the deserialization RCE risk entirely, making it the strongest single defense."
+    },
+    {
+      "q": "What are the three parts of a 32-bit floating-point number, and which part do attackers target for tensor steganography?",
+      "options": [
+        "Header, body, and footer — attackers target the header, since it's the largest section",
+        "Sign, exponent, and mantissa — attackers target the least significant bits (LSBs) of the mantissa, since changing them alters the number by only a microscopic amount",
+        "Red, green, and blue channels — attackers target the blue channel, since it's least noticeable to the human eye",
+        "Integer part, decimal point, and fractional part — attackers target the decimal point specifically"
+      ],
+      "answer": 1,
+      "explanation": "A float32 consists of a sign bit, an 8-bit exponent, and a 23-bit mantissa; the least significant bits of the mantissa can be altered with negligible impact on the number's overall value, making them ideal for hiding data."
+    },
+    {
+      "q": "Why do attackers avoid flipping high-order mantissa bits when hiding data inside model weights?",
+      "options": [
+        "Flipping a high-order mantissa bit changes the value significantly (e.g. by 0.0625), big enough to actually break the model and reveal that tampering occurred, unlike flipping low-order bits which changes values negligibly",
+        "High-order bits are technically impossible to modify using standard programming languages",
+        "High-order bits are always encrypted separately from the rest of the floating-point number",
+        "Flipping high-order bits causes the file format to become completely unreadable"
+      ],
+      "answer": 0,
+      "explanation": "High-order mantissa bit changes are large enough to noticeably affect model accuracy, which would reveal the tampering — low-order bit changes stay hidden within normal numerical noise."
+    },
+    {
+      "q": "How do pickle deserialization and tensor steganography combine into a full attack?",
+      "options": [
+        "The attacker hides a payload (like a reverse shell) inside the LSBs of a weight tensor, then wraps the model in a malicious object whose __reduce__ method extracts and runs those hidden bytes upon load",
+        "The attacker uses steganography to hide the entire model inside a single pickle file with no other components involved",
+        "The attacker embeds the payload directly into the model's file extension name",
+        "The attacker uses pickle deserialization exclusively, since tensor steganography is not actually compatible with pickle-based formats"
+      ],
+      "answer": 0,
+      "explanation": "The two techniques combine: steganography hides the payload invisibly within the model weights, while the pickle vulnerability provides the mechanism to extract and execute that hidden payload automatically upon loading."
+    },
+    {
+      "q": "Which of these is a tool specifically mentioned for detecting malicious pickle opcodes before loading a model?",
+      "options": [
+        "sqlmap or Burp Suite",
+        "picklescan or modelscan",
+        "nmap or masscan",
+        "Wireshark or tcpdump"
+      ],
+      "answer": 1,
+      "explanation": "picklescan and modelscan are specifically named as tools that detect malicious pickle opcodes in model files before they're loaded, helping catch this class of supply chain attack."
+    },
+    {
+      "q": "What is hallucination, in the context of an AI model's behavior?",
+      "options": [
+        "A deliberate lie the model tells based on explicit instructions from its developer",
+        "When an AI model confidently states something that's false or entirely made up, generating plausible-sounding text that has no real basis in reality",
+        "A feature that lets the model generate creative fiction on explicit user request",
+        "A hardware malfunction that causes the model's GPU to overheat"
+      ],
+      "answer": 1,
+      "explanation": "Hallucination is unintentional confident fabrication — the model isn't lying deliberately, it's generating statistically plausible text that happens to be false."
+    },
+    {
+      "q": "What is 'slopsquatting,' also referred to as package hallucination?",
+      "options": [
+        "A technique for legally acquiring a competitor's trademarked package name",
+        "A defensive tool that automatically blocks AI-suggested package installations",
+        "A method for compressing multiple Python packages into a single distributable file",
+        "An attacker notices an AI repeatedly suggesting a fake, nonexistent package name, then registers a real, malicious package under that exact name so developers following the AI's advice install malware unknowingly"
+      ],
+      "answer": 3,
+      "explanation": "Slopsquatting exploits the predictable pattern of AI-hallucinated package names by registering malicious packages under those exact fake names, turning hallucination into a supply-chain attack vector."
+    },
+    {
+      "q": "Why do AIs tend to hallucinate the same fake package name repeatedly across different sessions, and why does this matter for attackers?",
+      "options": [
+        "Because AI models share a single global memory across all user sessions",
+        "Because package names are cached and reused from a shared public database",
+        "Because AIs hallucinate consistently, giving attackers a genuinely reliable, repeatable target to exploit, since the same fake name keeps getting suggested to different developers",
+        "Because this consistency has no practical relevance to any real attack scenario"
+      ],
+      "answer": 2,
+      "explanation": "The predictability of AI hallucination is exactly what makes it exploitable — attackers can identify commonly-suggested fake names and register them with confidence that future developers will encounter the same suggestion."
+    },
+    {
+      "q": "Before installing a package suggested by an AI coding assistant, a developer checks `https://pypi.org/pypi/<package_name>/json` and receives a 404 HTTPError. What does this indicate?",
+      "options": [
+        "The package exists but requires a paid subscription to access",
+        "The package does not exist on PyPI, which is a possible sign of AI hallucination — it should not be installed without further investigation",
+        "The package has been temporarily removed for scheduled maintenance",
+        "The package name contains invalid characters that PyPI cannot process"
+      ],
+      "answer": 1,
+      "explanation": "A 404 response from the PyPI JSON API confirms the package name doesn't exist in the official registry, a strong signal it may be a hallucinated suggestion that shouldn't be installed."
+    },
+    {
+      "q": "What is the golden rule for handling AI-suggested package installations?",
+      "options": [
+        "Package verification is unnecessary as long as the AI model has a recent training cutoff date",
+        "Only verify packages if the AI explicitly warns that the suggestion might be inaccurate",
+        "Always trust and immediately install any package name suggested by an AI coding assistant",
+        "Never install a package just because an AI suggested it — verify that it actually exists, check its download count and age, and confirm it's the real, actively maintained project"
+      ],
+      "answer": 3,
+      "explanation": "Given the reliability of hallucinated package suggestions, the safe practice is always independently verifying existence, popularity, and legitimacy before installing anything an AI recommends."
+    },
+    {
+      "q": "What is abuse detection evasion?",
+      "options": [
+        "The art of slipping harmful content past AI guards, such as hate-speech or spam detectors, without triggering them, while keeping the harmful meaning intact but changing the surface just enough to fool the detector",
+        "A defensive tool that automatically blocks all AI-generated content",
+        "A method for reporting abusive content to a human moderation team",
+        "A technique for training an AI model to detect abuse more accurately"
+      ],
+      "answer": 0,
+      "explanation": "Evasion techniques preserve the harmful intent/meaning of content while altering its surface form enough that pattern-based detectors fail to recognize it as a match."
+    },
+    {
+      "q": "Why are many abuse detectors foolable, given that they are themselves ML models?",
+      "options": [
+        "Abuse detectors are always trained using unlabeled data with no supervision at all",
+        "Abuse detectors only work on images, never on text-based content",
+        "They learned their patterns from past examples, and if an attacker presents content that looks noticeably different from anything in the training data, even with the exact same meaning, the model may fail to recognize it",
+        "Abuse detectors are technically incapable of processing any text input"
+      ],
+      "answer": 2,
+      "explanation": "Since these detectors learned specific patterns from training examples, sufficiently novel-looking surface forms (even with identical underlying meaning) can fall outside what the model learned to recognize."
+    },
+    {
+      "q": "What is a homoglyph swap, as an abuse detection evasion technique?",
+      "options": [
+        "Removing all vowels from a sentence while preserving consonants",
+        "Replacing normal letters with visually identical Unicode characters from other alphabets (e.g. Cyrillic 'a' instead of Latin 'a'), which looks the same to a human but appears as entirely unfamiliar tokens to the model",
+        "Replacing every word in a sentence with its exact opposite meaning",
+        "Converting all text to a completely different human language automatically"
+      ],
+      "answer": 1,
+      "explanation": "Homoglyphs exploit visual similarity across different character sets — a human reader sees identical text, but the underlying bytes/tokens are different from what the detector was trained to recognize."
+    },
+    {
+      "q": "In the vulnerable detector code `def naive_detect(text, banned): return any(word in text.lower() for word in banned)`, why does a message containing 'h\\u0430te' (using a Cyrillic 'а') bypass this check even if 'hate' is in the banned list?",
+      "options": [
+        "The Cyrillic character is a completely different Unicode code point than the Latin 'a', so the string 'h\\u0430te' never actually matches the literal string 'hate' in the banned list, despite looking identical visually",
+        "The naive_detect function has a syntax error that prevents it from ever executing",
+        "Python's lower() function automatically converts all Cyrillic characters into their Latin equivalents",
+        "Unicode strings are always case-insensitive regardless of the specific character set used"
+      ],
+      "answer": 0,
+      "explanation": "Since the Cyrillic 'а' is a different byte sequence than the Latin 'a', direct string matching fails even though the text looks visually identical to a human reader."
+    },
+    {
+      "q": "What does calling `unicodedata.normalize(\"NFKC\", text)` accomplish as a defense against homoglyph-based evasion?",
+      "options": [
+        "It automatically translates the text into English regardless of the original language",
+        "It collapses many lookalike/compatibility characters into a canonical form, helping undo the visual-substitution trick before running detection",
+        "It encrypts the text using a symmetric cipher before detection runs",
+        "It permanently deletes any character that isn't part of the standard ASCII character set"
+      ],
+      "answer": 1,
+      "explanation": "NFKC normalization maps many visually or semantically similar Unicode characters to a canonical representation, helping restore homoglyph-substituted text to its original, detectable form."
+    },
+    {
+      "q": "What is 'context stuffing' as an abuse evasion technique?",
+      "options": [
+        "Sending an extremely large number of separate, short messages in rapid succession",
+        "Burying a toxic line inside a long, polite paragraph, hoping the surrounding benign context dilutes or distracts the detector from flagging the harmful portion",
+        "Encrypting the entire message using a publicly known cipher",
+        "Repeating the exact same banned word hundreds of times in a single message"
+      ],
+      "answer": 1,
+      "explanation": "Context stuffing hides a small harmful segment within a much larger body of innocuous text, potentially causing a detector to miss the flagged content amid the surrounding noise."
+    },
+    {
+      "q": "What is the core defense principle emphasized for fighting abuse detection evasion?",
+      "options": [
+        "Normalize before you detect — collapse the gap between how text looks and how it's actually stored internally, since most evasion exploits that exact gap",
+        "Always block any message longer than 500 characters regardless of content",
+        "Disable all text-based content moderation entirely to avoid false positives",
+        "Rely exclusively on a single keyword blocklist with no other detection method"
+      ],
+      "answer": 0,
+      "explanation": "Since evasion techniques exploit the difference between visual appearance and internal representation, normalizing text (Unicode, spacing, obfuscation) before running detection closes that exploitable gap."
+    },
+    {
+      "q": "What is 'semantic (meaning-based) detection' as a defense against abuse evasion, and why is it harder to bypass than keyword matching?",
+      "options": [
+        "It only works on messages written in a single specific language",
+        "It requires manually reviewing every single message submitted to the platform",
+        "It uses embeddings to check underlying meaning rather than literal words, making it much harder to evade through simple rewording or paraphrasing since the semantic content is what's actually being checked",
+        "It automatically translates all content into a canonical format before storage"
+      ],
+      "answer": 2,
+      "explanation": "Since semantic detection evaluates meaning via embeddings rather than exact word matches, paraphrasing (which keyword matching easily evades) doesn't defeat it as reliably."
+    },
+    {
+      "q": "What are guardrails, in the context of AI system defense?",
+      "options": [
+        "A method for training a model faster using distributed GPUs",
+        "A synonym for the model's own internal weight values",
+        "Protective layers that sit around an AI system to check both what goes in and what comes out",
+        "A technique for compressing a model's file size before deployment"
+      ],
+      "answer": 2,
+      "explanation": "Guardrails wrap around a model to validate both input (before it reaches the model) and output (before it reaches the user), containing damage even from a compromised model."
+    },
+    {
+      "q": "What are the two stages of a strong AI guardrail pipeline, and what does each stage guard against?",
+      "options": [
+        "Input guardrail (guards against malicious or unsafe requests, like prompt injection) and output guardrail (guards against harmful or leaky responses, like leaked secrets)",
+        "Network guardrail and storage guardrail, both checking hardware security only",
+        "Frontend guardrail and backend guardrail, both checking UI rendering only",
+        "Training guardrail and deployment guardrail, both checking model file integrity only"
+      ],
+      "answer": 0,
+      "explanation": "The two-stage pipeline filters both directions — malicious input before it reaches the model, and harmful/leaky output before it reaches the user."
+    },
+    {
+      "q": "Which of these is explicitly listed as something an output guardrail commonly checks for?",
+      "options": [
+        "The geographic region of the server that handled the request",
+        "The exact wall-clock time the request was processed",
+        "Leaked API keys, passwords, or personal data (PII) in the model's response",
+        "The total number of tokens used in the user's original prompt"
+      ],
+      "answer": 2,
+      "explanation": "Output guardrails scan the model's generated response for sensitive leaked data like credentials or PII before it's shown to the user."
+    },
+    {
+      "q": "Why is it a mistake to treat guardrails as a complete, standalone solution rather than one layer among several?",
+      "options": [
+        "A single, sufficiently well-designed guardrail can theoretically stop every possible attack",
+        "Guardrails are purely decorative and provide no actual security value whatsoever",
+        "Guardrails only function correctly during the first hour after deployment",
+        "A determined attacker may find a way to bypass any single check, so the real goal is layering input filtering, output filtering, validation, monitoring, and least privilege together"
+      ],
+      "answer": 3,
+      "explanation": "Since any single defensive layer can potentially be bypassed by a sufficiently determined attacker, combining multiple independent layers ensures that defeating one alone isn't sufficient for a full compromise."
+    },
+    {
+      "q": "How do guardrails specifically apply to protecting the data pipeline, beyond live user traffic?",
+      "options": [
+        "Through ingestion validation, provenance enforcement, integrity checks, model scanning for malicious pickle payloads, and anomaly monitoring for sudden distribution shifts",
+        "Guardrails only apply to live chat conversations and have no role in data pipeline protection",
+        "Guardrails are only relevant during the initial model training phase, never afterward",
+        "Guardrails exclusively protect network traffic between the model and end users"
+      ],
+      "answer": 0,
+      "explanation": "Beyond filtering live requests, guardrail principles extend to validating incoming training data, tracking its source, verifying integrity, scanning model files, and watching for distribution anomalies."
+    },
+    {
+      "q": "What is the core mindset recommended for AI data security best practices?",
+      "options": [
+        "Treat data with the same suspicion you'd treat code — every dataset, every label, and every model file is a potential attack vector until proven otherwise",
+        "Only apply security scrutiny to data collected from anonymous users",
+        "Data security is only relevant for organizations handling financial information",
+        "Trust all data by default since most organizations have good intentions"
+      ],
+      "answer": 0,
+      "explanation": "The core mindset treats all data as potentially hostile by default, mirroring how developers treat all input in traditional application security."
+    },
+    {
+      "q": "What is the primary defense mapped to backdoors/Trojan attacks in the best practices summary?",
+      "options": [
+        "Only human review of every single prediction",
+        "Only encryption at rest and in transit",
+        "Only rate limiting and de-duplication",
+        "Trusted sources, model scanning, and provenance"
+      ],
+      "answer": 3,
+      "explanation": "Since backdoors typically arrive via untrusted training data or pre-trained model files, the primary defenses focus on trust verification, scanning, and knowing the origin of every component."
+    },
+    {
+      "q": "What is the primary defense mapped to package hallucination (slopsquatting) in the best practices summary?",
+      "options": [
+        "Only Unicode normalization",
+        "Verify and allowlist packages",
+        "Only sandboxed model loading",
+        "Only consensus labeling"
+      ],
+      "answer": 1,
+      "explanation": "Since package hallucination exploits developers trusting unverified AI suggestions, the direct fix is verifying package existence/legitimacy and restricting installs to an approved allowlist."
+    },
+    {
+      "q": "In a secure AI data lifecycle, what security measures should be applied during the Collection stage specifically?",
+      "options": [
+        "Load only from safe formats like safetensors and scan model files before loading",
+        "Rate-limit and de-duplicate user submissions, validate the format/range/type of every incoming record, and track the source (provenance) of every data point",
+        "Encrypt data at rest and enforce strict access controls",
+        "Restrict who can assign or edit labels using least privilege"
+      ],
+      "answer": 1,
+      "explanation": "Collection-stage security focuses on validating and rate-limiting incoming raw data before it moves further into the pipeline, and recording where each piece came from."
+    },
+    {
+      "q": "In a secure AI data lifecycle, what security measures should be applied during the Deployment stage specifically?",
+      "options": [
+        "Cross-check labels regularly against a trusted reference model",
+        "Rate-limit and de-duplicate user submissions during collection",
+        "Restrict who can assign or edit labels during the labeling process",
+        "Load only from safe formats such as safetensors, scan and verify model files before ever loading them, and sandbox any untrusted models before trusting them fully"
+      ],
+      "answer": 3,
+      "explanation": "Deployment-stage security specifically addresses model-file risks — using safe formats, scanning for malicious content, and sandboxing untrusted models before full production trust."
+    },
+    {
+      "q": "What are the six pillars of a comprehensive AI data security framework?",
+      "options": [
+        "Collection, Labeling, Cleaning, Storage, Training, and Retraining",
+        "Provenance, Validation, Integrity, Least Privilege, Monitoring, and Human Oversight",
+        "Encryption, Compression, Authentication, Authorization, Auditing, and Backup",
+        "Training, Testing, Validation, Deployment, Monitoring, and Retirement"
+      ],
+      "answer": 1,
+      "explanation": "These six pillars — knowing data origin, checking incoming data, detecting tampering, limiting access, watching for anomalies, and keeping humans involved in risky decisions — form the comprehensive AI data security framework."
+    },
+    {
+      "q": "A data intake function computes `hashlib.sha256(str(record[\"data\"]).encode()).hexdigest()` and stores it alongside each record. What is the purpose of this step?",
+      "options": [
+        "It automatically translates the record's content into a standardized format",
+        "It creates a content hash for integrity verification, allowing later detection if the stored data has been tampered with after the fact",
+        "It compresses the record to reduce the total storage space required",
+        "It encrypts the record so that only the original submitter can ever read it again"
+      ],
+      "answer": 1,
+      "explanation": "Storing a cryptographic hash alongside the data enables later integrity verification — any subsequent tampering with the stored data would produce a hash mismatch, revealing the modification."
+    },
+    {
+      "q": "Under the OWASP Top 10 for LLM Applications, which category number corresponds to Training Data Poisoning?",
+      "options": [
+        "LLM03",
+        "LLM07",
+        "LLM10",
+        "LLM01"
+      ],
+      "answer": 0,
+      "explanation": "LLM03 in the OWASP Top 10 for LLM Applications is Training Data Poisoning, which maps directly onto the attacks covered throughout this domain."
+    },
+    {
+      "q": "A defender inspects a model's training data and finds that every single label appears correct and plausible upon manual review, with no obvious mismatches. Should they conclude the dataset is safe from data poisoning?",
+      "options": [
+        "No, but only because label auditing is technically impossible to perform correctly",
+        "Yes, but only if the dataset also passed a basic accuracy test on a held-out validation set",
+        "No — clean-label attacks specifically keep labels honest while poisoning the underlying features, so label correctness alone doesn't rule out this class of attack",
+        "Yes — if every label is correct, the dataset must be completely free of any poisoning by definition"
+      ],
+      "answer": 2,
+      "explanation": "Since clean-label attacks are specifically designed to pass label-correctness checks, verifying labels alone is insufficient — feature-space inspection is needed to catch this attack class."
+    },
+    {
+      "q": "A company downloads a pre-trained model from an unofficial third-party mirror and loads it using torch.load(path, weights_only=False) directly on a production server with no sandboxing. Which combination of risks applies most directly?",
+      "options": [
+        "Both pickle-based remote code execution and potential embedded backdoors, since an untrusted model file could contain executable payloads and/or trigger-based poisoned behavior, with no isolation to limit the impact of either",
+        "Only clean-label attack risk, since pre-trained models cannot be affected by pickle deserialization",
+        "Only label flipping risk, since pre-trained models never contain executable code of any kind",
+        "No practical risk exists as long as the model achieves high accuracy on a standard benchmark test"
+      ],
+      "answer": 0,
+      "explanation": "Loading an untrusted model file with weights_only=False directly in production combines two serious risks: potential pickle-based code execution and potential backdoor behavior, with no sandbox to contain either if triggered."
+    },
+    {
+      "q": "An AI-powered content moderation pipeline uses only a raw keyword blocklist with no normalization step. A user submits toxic content using Cyrillic homoglyphs mixed with character spacing. What is the most likely outcome?",
+      "options": [
+        "The pipeline crashes and refuses to process any further submissions",
+        "The content passes through undetected, since the raw keyword check never sees the exact banned strings due to both the homoglyph substitution and the spacing obfuscation",
+        "The content is automatically blocked, since keyword blocklists are inherently immune to any form of text obfuscation",
+        "The homoglyphs are automatically converted to ASCII by the underlying operating system before reaching the blocklist"
+      ],
+      "answer": 1,
+      "explanation": "Without normalization, both homoglyph substitution and character spacing independently defeat exact keyword matching, and combining them compounds the evasion — this is exactly the scenario normalization-based defenses are designed to prevent."
+    },
+    {
+      "q": "A retraining pipeline validates incoming data, rate-limits submissions, and routes statistical outliers to human review — but has no provenance tracking recording where each data point originally came from. If a poisoning incident is later discovered, what specific investigative capability is missing?",
+      "options": [
+        "The ability to trace which source or submitter contributed the poisoned data, making it difficult to identify the origin of the attack or clean up affected records after the fact",
+        "The ability to retrain the model on any data whatsoever, since provenance tracking is a prerequisite for training",
+        "The ability to detect the poisoning at all, since provenance tracking is the only mechanism capable of flagging anomalies",
+        "The ability to encrypt the dataset, since provenance tracking and encryption are technically the same mechanism"
+      ],
+      "answer": 0,
+      "explanation": "Provenance tracking specifically enables tracing data back to its source — without it, even a well-validated pipeline lacks the ability to identify and clean up after a poisoning incident once discovered."
+    },
+    {
+      "q": "A model backdoor is planted with a trigger consisting of a specific 3-pixel pattern in the corner of an image, poisoned into only 8% of the source class samples. Why might this backdoor still succeed despite affecting such a small fraction of the training data?",
+      "options": [
+        "Only a small percentage of poisoned samples is typically needed for a backdoor to stick, since the model reliably learns the trigger-to-target association even from a limited number of examples",
+        "Backdoors require poisoning at least 50% of the training data to succeed under any circumstances",
+        "The trigger's small pixel size makes it mathematically impossible for the model to learn the association",
+        "An 8% poison rate is actually far too low to have any measurable effect on the model whatsoever"
+      ],
+      "answer": 0,
+      "explanation": "As described in the module, backdoors are notably data-efficient — a relatively small poisoning percentage (like the ~10% figure mentioned for the STOP sign example) is often sufficient to reliably plant the hidden trigger behavior."
+    },
+    {
+      "q": "A code-review AI assistant suggests importing a package that a developer has never heard of. Before installing it, the developer checks the package's download count, publication date, and whether it's listed as a well-known alternative to a popular library. What risk is this verification process specifically designed to catch?",
+      "options": [
+        "SQL injection, since package verification always involves checking a database",
+        "Clean-label poisoning, since package names are technically considered training labels",
+        "Tensor steganography, since package files are stored using the same format as model weights",
+        "Package hallucination / slopsquatting, where a hallucinated package name might have been registered by an attacker as a malicious lookalike"
+      ],
+      "answer": 3,
+      "explanation": "This verification process — checking legitimacy, popularity, and age — is exactly the recommended defense against slopsquatting, where attackers register malicious packages under commonly-hallucinated names."
+    },
+    {
+      "q": "An organization implements input guardrails to block prompt injection but has no output guardrail checking for leaked secrets in model responses. What specific gap does this leave open?",
+      "options": [
+        "The gap only matters if the model has also been backdoored, otherwise no risk exists",
+        "This configuration provides complete protection, since input guardrails alone are always sufficient",
+        "A model that has legitimate access to a secret (like an API key) could still leak that secret in its response, since nothing is checking outbound content even if the input itself passed the input guardrail cleanly",
+        "Input-only guardrails always automatically imply equivalent output protection by design"
+      ],
+      "answer": 2,
+      "explanation": "Since the two guardrail stages address different risks (malicious input vs. leaky output), skipping the output stage leaves the system vulnerable to legitimate-seeming requests that still result in accidental data leakage in the response."
+    },
+    {
+      "q": "A dataset intake pipeline flags statistical outliers for human review but has no rate limiting on submissions per user. An attacker submits 10,000 near-duplicate, slightly-varied poisoned samples designed to each individually appear as a plausible (non-outlier) data point. What defensive gap does this scenario illustrate?",
+      "options": [
+        "The lack of rate limiting allows mass submission from a single source to overwhelm the outlier-detection safeguard, since each individual sample may not statistically stand out even though the aggregate submission pattern is highly suspicious",
+        "Rate limiting has no relationship to poisoning defense and only affects server performance",
+        "Outlier detection alone is always sufficient regardless of submission volume or rate limiting",
+        "This scenario is impossible to execute since human review always catches every single submission regardless of volume"
+      ],
+      "answer": 0,
+      "explanation": "Since outlier detection evaluates each sample somewhat individually, a large volume of samples specifically crafted to avoid standing out can bypass it — rate limiting per submitter is the complementary control that catches this pattern at the volume level."
+    },
+    {
+      "q": "What is the shared underlying weakness that both pickle-based remote code execution and Trojan backdoor attacks exploit, when a model is downloaded from an untrusted source?",
+      "options": [
+        "Both attacks are only possible against models larger than 1 billion parameters",
+        "Both attacks require the victim to have root/administrator access on their machine",
+        "Blind trust in an external model file's contents without verification, scanning, or sandboxing before it's loaded and used",
+        "Both attacks require the same exact specific Python version to succeed"
+      ],
+      "answer": 2,
+      "explanation": "Both attacks exploit the same fundamental gap — trusting an externally-sourced model file without independent verification, whether that file contains executable pickle payloads or a trained-in backdoor trigger."
+    },
+    {
+      "q": "An LLM-powered support bot invents a refund policy on the spot when a customer asks about a scenario the bot has no real information about. What category of risk does this represent, and what is the recommended mitigation?",
+      "options": [
+        "SQL injection risk; the mitigation is parameterizing all database queries",
+        "Tensor steganography risk; the mitigation is scanning the model file for hidden payloads",
+        "Hallucination creating real legal and financial risk for the business; grounding the model with real, retrieved documents (RAG) reduces the chance of the model inventing facts",
+        "Clean-label poisoning risk; the mitigation is auditing all training labels manually"
+      ],
+      "answer": 2,
+      "explanation": "This is a hallucination risk with real business consequences — grounding the model in actual retrieved documents (RAG) rather than letting it generate unconstrained answers is the recommended mitigation."
+    },
+    {
+      "q": "A defender notices a single uploaded document repeatedly triggers highly specific, unusual model behavior across unrelated queries, while all other documents behave normally. What kind of investigation would help determine if this indicates a data poisoning or backdoor issue versus a coincidence?",
+      "options": [
+        "Testing whether the specific document (or a pattern within it) reliably and consistently reproduces the same unusual behavior across repeated, controlled tests — consistent reproduction would strongly suggest a planted trigger rather than random chance",
+        "Immediately deleting the document without any further investigation, since deletion always resolves any underlying data attack",
+        "Assuming it's a coincidence, since data poisoning attacks are purely theoretical and have never been demonstrated against real systems",
+        "Increasing the model's temperature setting, since higher randomness always eliminates any planted trigger's effect"
+      ],
+      "answer": 0,
+      "explanation": "Reliable, repeatable reproduction of unusual behavior tied to a specific input is a hallmark of an intentionally planted trigger (like a backdoor), distinguishing it from random model variance or coincidence."
+    },
+    {
+      "q": "An attacker gains write access to an S3 bucket storing training images and directly edits several files. What entry point for data poisoning does this represent?",
+      "options": [
+        "Compromised storage",
+        "Compromised pipeline code",
+        "Public web scraping",
+        "Third-party dataset purchase"
+      ],
+      "answer": 0,
+      "explanation": "Direct unauthorized editing of stored data via write access to a storage system like an S3 bucket is a compromised storage entry point."
+    },
+    {
+      "q": "If cleaning or labeling scripts used in a data pipeline get maliciously altered, what happens to otherwise clean data passing through them?",
+      "options": [
+        "Otherwise clean data becomes poisoned somewhere in transit, even though the original source data was never directly tampered with",
+        "The altered scripts have no effect on data quality since cleaning only affects formatting",
+        "The data pipeline automatically halts and refuses to process any further records",
+        "Cleaning scripts cannot be altered since they run in a read-only environment by design"
+      ],
+      "answer": 0,
+      "explanation": "Compromised pipeline code can silently corrupt data as it flows through, even if the original source data was legitimate and untampered."
+    },
+    {
+      "q": "A spam classifier's training labels are randomly flipped with no particular target. What is the attacker's most likely goal?",
+      "options": [
+        "Target — to break one particular email sender's messages specifically",
+        "Extraction — to steal the model's underlying training data",
+        "Degrade — to make the model perform worse overall without targeting any specific case",
+        "Backdoor — to plant a hidden trigger the attacker can activate later"
+      ],
+      "answer": 2,
+      "explanation": "Random, untargeted label flipping is characteristic of a degrade goal, aiming to reduce overall model reliability rather than causing a specific, precise failure."
+    },
+    {
+      "q": "A company's product-review sentiment model reports that a genuinely popular product is disliked, after an attacker flipped labels for enough positive reviews to negative. What real business consequence resulted directly from this poisoned analysis?",
+      "options": [
+        "The company's servers experience a complete outage",
+        "The company pulls a successful product from the market based on the poisoned analysis",
+        "Customer data is directly leaked to the attacker's own server",
+        "The model's overall accuracy improves due to more diverse training data"
+      ],
+      "answer": 1,
+      "explanation": "This is the real-world example given for targeted label flipping — a business decision (pulling a successful product) made based entirely on data that was deliberately poisoned."
+    },
+    {
+      "q": "What does a decision boundary represent in a trained classifier?",
+      "options": [
+        "The encryption boundary protecting the model's weight file",
+        "The invisible line separating one class from another, based on what the model learned during training",
+        "The maximum number of training examples the model can process",
+        "The physical boundary of the GPU memory used during training"
+      ],
+      "answer": 1,
+      "explanation": "The decision boundary is the conceptual line (or surface) a classifier learns to separate different classes, and it's exactly what label flipping and clean-label attacks aim to shift."
+    },
+    {
+      "q": "What is the difference in typical effort required to execute a label-flipping attack versus a clean-label attack?",
+      "options": [
+        "Both attacks require identical levels of technical skill and effort to execute successfully",
+        "Label flipping is very easy to execute; clean-label attacks are hard to execute since they usually require real knowledge of the model and careful mathematics to craft perturbations correctly",
+        "Clean-label attacks are easier to execute since they don't require touching any labels at all",
+        "Label flipping requires more advanced mathematical knowledge than clean-label attacks"
+      ],
+      "answer": 1,
+      "explanation": "Label flipping is trivially easy (just swap a label), while clean-label attacks require sophisticated knowledge to craft feature perturbations that shift the boundary correctly while keeping labels honest."
+    },
+    {
+      "q": "Which defense technique specifically flags samples whose nearby neighbors mostly belong to a different class than the sample itself?",
+      "options": [
+        "Rate limiting per submitter",
+        "Content Security Policy enforcement",
+        "Cryptographic hash verification",
+        "Nearest-neighbor consistency checks"
+      ],
+      "answer": 3,
+      "explanation": "Nearest-neighbor consistency checks specifically detect feature-space anomalies where a sample's neighborhood disagrees with its assigned class, a useful signal against clean-label attacks."
+    },
+    {
+      "q": "Why is a Trojan-backdoored model often compared to a sleeper agent?",
+      "options": [
+        "Because backdoored models are always slower to respond than clean models",
+        "The model behaves completely normally and passes every check, but switches to hidden behavior only when it encounters the specific secret trigger, just as a sleeper agent activates only upon hearing a code word",
+        "Because both sleeper agents and backdoored models require physical hardware access to activate",
+        "Because sleeper agents and backdoors both require encryption keys to function"
+      ],
+      "answer": 1,
+      "explanation": "The analogy captures the essential nature of a backdoor — normal, undetectable behavior most of the time, with hidden malicious behavior triggered only by a specific, attacker-chosen condition."
+    },
+    {
+      "q": "What is 'fine-pruning' as a backdoor defense?",
+      "options": [
+        "Retraining the model exclusively on backdoor-free synthetic data",
+        "Compressing the model's weights to reduce file size",
+        "Encrypting the entire model file before deployment",
+        "Removing rarely-used neurons that may be holding the backdoor's hidden logic"
+      ],
+      "answer": 3,
+      "explanation": "Fine-pruning targets neurons that are rarely activated by normal inputs but may specifically encode the backdoor's trigger-response logic, removing them to disrupt the hidden behavior."
+    },
+    {
+      "q": "What is 'activation clustering' as a backdoor detection technique?",
+      "options": [
+        "Poisoned samples often cluster oddly within the model's internal activations, so examining these clusters can reveal hidden backdoor behavior",
+        "A method for automatically labeling unlabeled activation data",
+        "A defense that encrypts all internal activations during forward passes",
+        "A technique for compressing model activations to save memory during inference"
+      ],
+      "answer": 0,
+      "explanation": "Backdoored samples tend to produce distinctively different internal activation patterns compared to clean samples, and clustering analysis can surface this anomaly."
+    },
+    {
+      "q": "What is the recommended way to verify a downloaded model's integrity before trusting it?",
+      "options": [
+        "Open the file in a text editor to visually inspect its contents",
+        "Simply check whether the file size seems reasonable for the claimed model type",
+        "Rely entirely on the download source's reputation with no technical verification",
+        "Check hashes and signatures on the downloaded model before use"
+      ],
+      "answer": 3,
+      "explanation": "Cryptographic hash and signature verification confirms a downloaded model matches what the legitimate publisher actually released, detecting tampering along the supply chain."
+    },
+    {
+      "q": "In tensor steganography, why is the size of the payload that can be hidden described as potentially reaching 'kilobytes,' even though each individual bit change is tiny?",
+      "options": [
+        "Each weight can only ever store a single bit, making large payloads technically impossible",
+        "The payload size is limited strictly by the model's file extension type",
+        "Steganography payloads are always compressed to exactly one kilobyte regardless of content",
+        "Across millions of individual weights, even a few bits hidden per weight adds up to a substantial total payload capacity, enough to smuggle in a full script"
+      ],
+      "answer": 3,
+      "explanation": "Since modern neural networks contain millions or billions of individual weight values, hiding just a few bits per weight scales up to a meaningful total payload capacity across the entire tensor."
+    },
+    {
+      "q": "Why do outdated training data and ambiguous prompts both act as common triggers for hallucination?",
+      "options": [
+        "These factors only affect models with fewer than one billion parameters",
+        "Outdated data and ambiguous prompts both cause the model's API to return an error code",
+        "The model automatically refuses to respond whenever these conditions occur",
+        "The model fills knowledge gaps with statistically plausible invention when it lacks real information or clear intent, rather than admitting uncertainty"
+      ],
+      "answer": 3,
+      "explanation": "Both scenarios create genuine knowledge or intent gaps that the model, tuned to be helpful and rarely refuse, fills in with confident-sounding but potentially fabricated content."
+    },
+    {
+      "q": "Why does typosquatting overlap make slopsquatting particularly effective?",
+      "options": [
+        "Fake package names are always completely unrelated to any real, existing package",
+        "Typosquatted names are always automatically rejected by package registries before publication",
+        "Fake hallucinated names often closely resemble real, popular packages, making them look believable at a glance to a developer skimming the suggestion",
+        "Typosquatting only affects packages published before a model's training cutoff date"
+      ],
+      "answer": 2,
+      "explanation": "When a hallucinated name closely resembles a genuine, well-known package, it doesn't raise suspicion, making developers more likely to install it without extra scrutiny."
+    },
+    {
+      "q": "What is 'misspelling' as an abuse detection evasion technique, using 'viagra' becoming 'v1agr4' as an example?",
+      "options": [
+        "Automatically translating a word into a different language's spelling convention",
+        "Deliberate typos that alter the exact spelling of a flagged word while remaining readable, defeating exact-string keyword matching",
+        "Removing all numbers from a message before it's submitted",
+        "Correcting spelling errors in a message to make it appear more professional"
+      ],
+      "answer": 1,
+      "explanation": "Deliberate misspellings that substitute visually similar characters (like numbers for letters) break exact-string matches while remaining readable, similar to leetspeak techniques covered elsewhere."
+    },
+    {
+      "q": "Why is it beneficial to combine rule-based filters, ML classifiers, and semantic checks together for abuse detection, rather than relying on just one method?",
+      "options": [
+        "Combining multiple methods always doubles the detection system's processing speed",
+        "Multiple detection methods are required by international data protection law",
+        "The attacker has to beat all of them at once, not just one, making a successful evasion significantly harder to achieve",
+        "Using only one detection method is technically impossible to implement in production systems"
+      ],
+      "answer": 2,
+      "explanation": "Layered detection means an evasion technique effective against one method (e.g. keyword matching) may still be caught by another (e.g. semantic embedding checks), raising the bar for successful evasion."
+    },
+    {
+      "q": "What does the airport security analogy illustrate about the role of guardrails relative to the AI model itself?",
+      "options": [
+        "The plane represents the guardrail system, while airport security represents the model's own internal safety training",
+        "Airport security only checks passengers once, mirroring a single-stage guardrail system with no output checking at all",
+        "The plane (the model) does its job in between, but the checkpoints (guardrails) on either side keep dangerous things from entering or leaving — guardrails don't fix a poisoned model but contain the resulting damage",
+        "The analogy shows that guardrails are unnecessary once a plane (model) has passed initial safety certification"
+      ],
+      "answer": 2,
+      "explanation": "The analogy positions guardrails as the boundary checkpoints (input and output) surrounding the model, containing damage rather than fixing the model's underlying issues directly."
+    },
+    {
+      "q": "In the safe_chat() function pattern combining input_guard() and output_guard(), what happens if input_guard() returns False?",
+      "options": [
+        "The function calls the model anyway but discards the response afterward",
+        "The function retries the input guard check up to three times before giving up",
+        "The function automatically escalates the request to a human reviewer",
+        "The function immediately returns a 'Blocked' message with the reason, without ever calling the model to generate a response"
+      ],
+      "answer": 3,
+      "explanation": "When the input guard rejects a request, the function short-circuits and returns a block message immediately, never reaching the model generation step at all."
+    },
+    {
+      "q": "What role do 'safety classifier models' play in a modern guardrail system?",
+      "options": [
+        "They are used exclusively to compress the main model's file size",
+        "They replace the main model entirely for all conversational tasks",
+        "They function only as a logging mechanism with no actual filtering capability",
+        "Small models trained specifically to score content for safety, either before or after the main model runs"
+      ],
+      "answer": 3,
+      "explanation": "Safety classifier models are dedicated, typically smaller models whose sole job is scoring content for safety at the input or output stage, working alongside the main model."
+    },
+    {
+      "q": "What is the primary defense against online (feedback-loop) poisoning?",
+      "options": [
+        "Rate limiting and human review of feedback",
+        "Only safetensors and weights_only=True",
+        "Only signed Agent Cards and mTLS",
+        "Only Content Security Policy enforcement"
+      ],
+      "answer": 0,
+      "explanation": "Since online poisoning exploits continuous retraining on user-submitted feedback, rate limiting submissions and routing feedback through human review directly addresses this risk."
+    },
+    {
+      "q": "Which established framework's principles of Secure Data, Secure Supply Chain, and Secure Monitoring & Response line up with the six pillars of AI data security?",
+      "options": [
+        "OWASP Top 10 for Web Applications",
+        "Google SAIF",
+        "NIST Cybersecurity Framework version 1.0",
+        "ISO 27001"
+      ],
+      "answer": 1,
+      "explanation": "Google's Secure AI Framework (SAIF) principles are specifically noted as aligning closely with the module's six pillars of AI data security."
+    },
+    {
+      "q": "A defender wants to catch clean-label poisoning that a label-auditing process would completely miss. Which specific technique should they add to their detection pipeline?",
+      "options": [
+        "Adding more layers to the neural network architecture",
+        "A stricter password policy for accounts with labeling permissions",
+        "Increasing the model's training batch size",
+        "Feature-space anomaly detection, looking for points sitting unusually far from their expected class cluster"
+      ],
+      "answer": 3,
+      "explanation": "Since clean-label attacks specifically evade label-based checks, feature-space anomaly detection is the complementary technique needed to catch the actual perturbed data points."
+    },
+    {
+      "q": "An organization scans all uploaded model files with modelscan before loading them but still loads models directly on production hosts with no sandboxing. What residual risk remains?",
+      "options": [
+        "A backdoor or vulnerability not yet recognized by the scanner's detection patterns could still execute with full access to production resources, since scanning alone doesn't contain what it might miss",
+        "Sandboxing and scanning are functionally identical, so this configuration provides no less protection than adding sandboxing",
+        "No residual risk remains since modelscan provides complete, guaranteed protection against every possible threat",
+        "The risk only applies to models larger than the scanner's maximum supported file size"
+      ],
+      "answer": 0,
+      "explanation": "Scanning catches known malicious patterns, but a sandbox provides defense in depth against anything the scanner might miss, containing potential damage even from an undetected threat."
+    },
+    {
+      "q": "A retraining pipeline validates format, rate-limits per user, and de-duplicates submissions — but has no 'golden dataset' to compare newer data against over time. What specific detection capability is missing?",
+      "options": [
+        "The ability to detect exact duplicate submissions from bots",
+        "The ability to notice gradual distribution shifts or drift compared to a known-clean baseline, which is exactly the pattern online poisoning produces over many small increments",
+        "The ability to rate-limit submissions from any individual user",
+        "The ability to validate the format of any incoming data whatsoever"
+      ],
+      "answer": 1,
+      "explanation": "A golden dataset serves as a stable reference point for detecting gradual drift — without it, slow, incremental poisoning (like online poisoning) can accumulate undetected since there's no baseline to compare against."
+    },
+    {
+      "q": "Why is the principle 'if you can't trace it, you shouldn't trust it' important regarding data and model provenance?",
+      "options": [
+        "Provenance tracking is required by law in every country for AI training data",
+        "This principle only applies to data collected from anonymous, unauthenticated users",
+        "Without knowing the origin of a piece of data or a model, there's no way to verify it hasn't been tampered with somewhere along its journey before reaching you",
+        "Untraceable data is always technically corrupted and cannot be loaded by any system"
+      ],
+      "answer": 2,
+      "explanation": "Provenance is foundational because without knowing a data point or model's origin, there's no basis to assess whether it might have been compromised somewhere in its journey."
+    }
+  ]
+}
