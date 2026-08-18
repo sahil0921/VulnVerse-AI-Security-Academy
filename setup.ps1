@@ -57,7 +57,10 @@ Write-Host "Docker Compose OK"
 Write-Host ""
 Write-Host "[3/8] Checking docker-compose.yml..."
 
+$prevEAP = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 docker compose config *> $null
+$ErrorActionPreference = $prevEAP
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
     Write-Host "docker-compose.yml contains errors."
@@ -309,8 +312,35 @@ Write-Host "[8/8] Building Docker Images..."
 Write-Host "This may take several minutes..."
 Write-Host ""
 
-docker compose build
-if ($LASTEXITCODE -ne 0) { Write-Host "Build failed."; exit 1 }
+$MaxBuildRetries = 3
+$BuildSucceeded = $false
+
+for ($attempt = 1; $attempt -le $MaxBuildRetries; $attempt++) {
+    if ($attempt -gt 1) {
+        Write-Host ""
+        Write-Host "Retrying build (attempt $attempt of $MaxBuildRetries)..."
+        Write-Host "Note: previous failure was likely a transient download issue"
+        Write-Host "(hash mismatch from a corrupted/interrupted parallel download)."
+        Write-Host ""
+    }
+
+    docker compose build
+    if ($LASTEXITCODE -eq 0) {
+        $BuildSucceeded = $true
+        break
+    }
+
+    Write-Host ""
+    Write-Host "Build attempt $attempt failed."
+}
+
+if (-not $BuildSucceeded) {
+    Write-Host ""
+    Write-Host "Build failed after $MaxBuildRetries attempts."
+    Write-Host "Try running manually with no cache for just the failing service(s):"
+    Write-Host "  docker compose build --no-cache <service-name>"
+    exit 1
+}
 
 Write-Host ""
 Write-Host "Starting containers..."
