@@ -24,33 +24,33 @@ https://github.com/user-attachments/assets/d45cdfe9-569e-4779-8d7d-0d758a7ce0f5
 ## Quick Start
 
 ```bash
-#first Install Docker
+# First Install Docker
 sudo apt-get update
 sudo apt-get install docker.io
 sudo apt-get install docker-compose
 
-#Then Download and run setup.sh 
+# Then Download and run setup.sh 
 git clone https://github.com/sahil0921/VulnVerse-AI-Security-Academy.git
 cd VulnVerse-AI-Security-Academy
 ./setup.sh
 
 ## Running individual labs
  
-If you have a low-end system or limited disk space, you don't need to build everything at once — build and run only the labs you actually need, one at a time.
+# If you have a low-end system or limited disk space, you don't need to build everything at once — build and run only the labs you actually need, one at a time.
  
-Same two-command pattern works for everything, including the hub:
+# Same two-command pattern works for everything, including the hub:
 
 docker compose build <name>
 docker compose up -d <name>
 
  
-**Example — run only theory + frontend (lab-hub):**
+# Example — run only theory + frontend (lab-hub):**
 
 docker compose build lab-hub
 docker compose up -d lab-hub
 
  
-**Example — run a specific lab (e.g. RAG lab):**
+# Example — run a specific lab (e.g. RAG lab):**
 
 docker compose build rag-lab
 docker compose up -d rag-lab
