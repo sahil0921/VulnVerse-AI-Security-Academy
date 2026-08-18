@@ -51,6 +51,25 @@ docker compose up -d rag-lab
 
 ```
 
+Available labs
+
+Category	Lab folders
+Main Web App	nimbletech-web
+Prompt Injection Labs	support-chatbot, email-assistant, url-summarizer, order-bot, jailbreak-lab
+Agent Labs	agent-helpdesk, agent-docprocessor, agent-browser, agent-codereview, agent-memory, supply-chain-lab, idor
+Multi-Agent (A2A)	multiagent
+Recon Target	recon-target
+RAG Pipeline Lab	rag-lab
+LLM Output Attacks	output-xss-reflected, output-xss-stored, output-sqli, output-codeinj, output-funccall, output-exfil, llm-hallucination, llm-abuse, llm-safeguards
+AI Data Attacks Lab	data-attacks-lab
+MCP Attacks	mcp-recon, mcp-poisoning, mcp-apps-ui, mcp-permissions, mcp-chaining
+AI Evasion Attacks Labs	evasion-spam-wb, evasion-spam-bb, evasion-sentiment
+Embedding Attack Labs	embedding-recon, embedding-export, embedding-invert-zeroshot, embedding-invert-beam, embedding-invert-algen, embedding-invert-vec2text, embedding-membership
+AI Infrastructure	cloud-ssrf-lab
+Threat Modeling	threat-modeling
+Capstone Red Team Engagement	capstone-chatbot, capstone-rag-agent
+Hub Dashboard	lab-hub
+
 `setup.sh` will interactively ask for your Ollama host / LLM provider / API key / model,
 then build and start everything. Once done, open: **http://localhost:8080**
 
