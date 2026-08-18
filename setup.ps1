@@ -309,18 +309,21 @@ if ($LlmProvider -eq "api") {
 
 Write-Host ""
 Write-Host "[8/8] Building Docker Images..."
-Write-Host "This may take several minutes..."
+Write-Host "This may take a while (large ML/CUDA dependencies)..."
 Write-Host ""
 
-$MaxBuildRetries = 3
+# Limit parallel builds so each service gets more bandwidth.
+# Building many services at once on a slow/limited connection increases
+# the chance of a download getting corrupted mid-way (hash mismatch errors).
+$env:COMPOSE_PARALLEL_LIMIT = "2"
+
+$MaxBuildRetries = 2
 $BuildSucceeded = $false
 
 for ($attempt = 1; $attempt -le $MaxBuildRetries; $attempt++) {
     if ($attempt -gt 1) {
         Write-Host ""
-        Write-Host "Retrying build (attempt $attempt of $MaxBuildRetries)..."
-        Write-Host "Note: previous failure was likely a transient download issue"
-        Write-Host "(hash mismatch from a corrupted/interrupted parallel download)."
+        Write-Host "Retrying full build (attempt $attempt of $MaxBuildRetries)..."
         Write-Host ""
     }
 
@@ -336,9 +339,70 @@ for ($attempt = 1; $attempt -le $MaxBuildRetries; $attempt++) {
 
 if (-not $BuildSucceeded) {
     Write-Host ""
-    Write-Host "Build failed after $MaxBuildRetries attempts."
-    Write-Host "Try running manually with no cache for just the failing service(s):"
-    Write-Host "  docker compose build --no-cache <service-name>"
+    Write-Host "Parallel build failed after $MaxBuildRetries attempts."
+    Write-Host "Falling back to building each remaining service one at a time."
+    Write-Host "This is slower but far more reliable on unstable/limited connections,"
+    Write-Host "since each service gets full bandwidth instead of sharing it."
+    Write-Host ""
+
+    $AllServices = (docker compose config --services) -split "`n" | Where-Object { $_ -ne "" }
+    $BuiltImages = (docker images --format "{{.Repository}}")
+
+    $FailedServices = @()
+    foreach ($svc in $AllServices) {
+        $imagePattern = "*$svc*"
+        $hasImage = $BuiltImages | Where-Object { $_ -like $imagePattern }
+        if (-not $hasImage) {
+            $FailedServices += $svc
+        }
+    }
+
+    if ($FailedServices.Count -eq 0) {
+        Write-Host "All service images appear to be built already. Continuing."
+        $BuildSucceeded = $true
+    } else {
+        Write-Host "Services still needing a build: $($FailedServices -join ', ')"
+        Write-Host ""
+
+        $StillFailing = @()
+        foreach ($svc in $FailedServices) {
+            Write-Host "Building '$svc' individually (no cache)..."
+            $SvcBuildOk = $false
+
+            for ($svcAttempt = 1; $svcAttempt -le 3; $svcAttempt++) {
+                docker compose build --no-cache $svc
+                if ($LASTEXITCODE -eq 0) {
+                    $SvcBuildOk = $true
+                    break
+                }
+                Write-Host "  '$svc' failed (attempt $svcAttempt of 3), retrying..."
+            }
+
+            if (-not $SvcBuildOk) {
+                $StillFailing += $svc
+            }
+            Write-Host ""
+        }
+
+        if ($StillFailing.Count -eq 0) {
+            Write-Host "All previously failing services built successfully."
+            $BuildSucceeded = $true
+        } else {
+            Write-Host "These services still failed after individual retries:"
+            Write-Host "  $($StillFailing -join ', ')"
+            Write-Host ""
+            Write-Host "This usually means an unstable connection is corrupting large downloads."
+            Write-Host "Try a more stable connection (e.g. a different network/hotspot) and re-run:"
+            foreach ($svc in $StillFailing) {
+                Write-Host "  docker compose build --no-cache $svc"
+            }
+        }
+    }
+}
+
+if (-not $BuildSucceeded) {
+    Write-Host ""
+    Write-Host "Build failed. See above for the specific service(s) to retry."
     exit 1
 }
 
