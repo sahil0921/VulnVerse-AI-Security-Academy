@@ -76,7 +76,7 @@ docker compose up -d rag-lab
 | Embedding Attack Labs | `embedding-recon`, `embedding-export`, `embedding-invert-zeroshot`, `embedding-invert-beam`, `embedding-invert-algen`, `embedding-invert-vec2text`, `embedding-membership` |
 | AI Infrastructure | `cloud-ssrf-lab` |
 | Threat Modeling | `threat-modeling` |
-| Final Assisment | `capstone-chatbot`, `capstone-rag-agent` |
+| Final Assessment | `capstone-chatbot`, `capstone-rag-agent` |
 | Hub Dashboard | `lab-hub` |
 
 `setup.sh` will interactively ask for your Ollama host / LLM provider / API key / model,
