@@ -17,6 +17,12 @@ https://github.com/user-attachments/assets/d45cdfe9-569e-4779-8d7d-0d758a7ce0f5
 ## Quick Start
 
 ```bash
+#first Install Docker
+sudo apt-get update
+sudo apt-get install docker.io
+sudo apt-get install docker-compose
+
+#Then Download and run setup.sh 
 git clone <your-repo-url>
 cd vulnverse-ai-security-academy
 ./setup.sh
