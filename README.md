@@ -55,7 +55,7 @@ then build and start everything. Once done, open: **http://localhost:8080**
 ### Windows (PowerShell)
 
 Same scripts, `.ps1` versions, same behavior. Requires Docker Desktop with the WSL2
-or Hyper-V backend, and PowerShell 5.1+ (built into Windows) or PowerShell 7+.
+or Hyper-V backend
 
 | Script | What it does |
 |---|---|
