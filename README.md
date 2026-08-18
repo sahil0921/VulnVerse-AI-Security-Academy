@@ -30,8 +30,8 @@ sudo apt-get install docker.io
 sudo apt-get install docker-compose
 
 #Then Download and run setup.sh 
-git clone <your-repo-url>
-cd vulnverse-ai-security-academy
+git clone https://github.com/sahil0921/VulnVerse-AI-Security-Academy.git
+cd VulnVerse-AI-Security-Academy
 ./setup.sh
 ```
 
