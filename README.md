@@ -3,6 +3,13 @@
 A structured, hands-on AI security learning platform — Prompt Injection, RAG Security,
 AI Agent Security, MCP Security, AI Evasion, and 14 modules from beginner to advanced.
 
+The platform combines:
+ 
+- **14 structured theory modules** (Beginner → Advanced) covering everything from AI/ML fundamentals to Multi-Agent Security, MCP Security, Embeddings & Vector DB attacks, and AI Infrastructure.
+- **Interactive quizzes** to reinforce concepts after every module.
+- **Realistic vulnerable labs** — full product-style UIs (an IDE, a package registry, a shopping assistant, a sprint manager, and more) each hiding a real, chainable vulnerability class: Prompt Injection, IDOR/BOLA, SMTP injection, MCP tool abuse, agent memory poisoning, and supply chain attacks.
+- A consistent **Learn → Understand → Analyze → Exploit → Detect → Mitigate → Practice** flow, so every topic goes from concept to hands-on exploitation to defensive understanding.
+
 ## Demo
 
 https://github.com/user-attachments/assets/d45cdfe9-569e-4779-8d7d-0d758a7ce0f5
@@ -92,6 +99,11 @@ API_KEY=<your key>                                              # only if LLM_PR
 Use `./change.sh` (or `.\change.ps1`) any time to update these without re-running the
 full wizard.
 
+## Why VulnVerse?
+
+Most AI security resources are either purely theoretical (research papers, blog posts) or too narrow (a single CTF-style challenge). VulnVerse bridges that gap with a full academy structure — designed for security professionals, bug bounty hunters, and AppSec engineers who want to extend their existing pentesting skillset into AI/LLM systems.
+
+Built and maintained as an independent project — feedback, issues, and contributions welcome.
 
 
 ## License
