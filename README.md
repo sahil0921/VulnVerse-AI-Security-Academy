@@ -33,6 +33,22 @@ sudo apt-get install docker-compose
 git clone https://github.com/sahil0921/VulnVerse-AI-Security-Academy.git
 cd VulnVerse-AI-Security-Academy
 ./setup.sh
+
+#if you have low end system or not have that much space you can also build and run lab individually
+cd VulnVerse-AI-Security-Academy
+cd apps
+#there you will find all the labs and folders
+#just run this to run aonly theory and frount end
+docker compose build lab-hub
+docker compose up -d lab-hub
+
+# and then you if you want to run lab of any section just type the name or the lab extact folder name
+docker compose build url-summarizer
+docker compose up -d url-summarizer
+
+docker compose build rag-lab
+docker compose up -d rag-lab
+
 ```
 
 `setup.sh` will interactively ask for your Ollama host / LLM provider / API key / model,
