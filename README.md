@@ -123,9 +123,8 @@ Then run scripts normally, e.g. `.\setup.ps1`.
 ```bash
 ./setup.sh      # once - interactive wizard
 ./stop.sh       # done for the day, stop the lab
-./resume.sh     # next day, back up
+./resume.sh     # next day, back up (no rebuild Just run this it Will launch the Lab)
 ./change.sh     # switch model, update API key, etc.
-./resume.sh     # apply the change (recreates containers)
 ./clean.sh      # when you want to remove it for good
 
 # Note - same goes for Windows .ps1 versions
