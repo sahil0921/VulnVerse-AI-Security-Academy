@@ -61,7 +61,7 @@ or Hyper-V backend, and PowerShell 5.1+ (built into Windows) or PowerShell 7+.
 If Windows blocks the scripts from running, open PowerShell as Administrator once and run:
 
 ```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
 ```
 
 Then run scripts normally, e.g. `.\setup.ps1`.
