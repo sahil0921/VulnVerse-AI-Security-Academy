@@ -51,7 +51,6 @@ then build and start everything. Once done, open: **http://localhost:8080**
 | `./change.sh` | Change Ollama host / LLM provider / model / API key later, without redoing full setup |
 | `./status.sh` | Shows running containers + disk usage |
 
-Note - same goes for Windows .ps1 versions
 
 ### Windows (PowerShell)
 
@@ -84,6 +83,8 @@ Then run scripts normally, e.g. `.\setup.ps1`.
 ./change.sh     # switch model, update API key, etc.
 ./resume.sh     # apply the change (recreates containers)
 ./clean.sh      # when you want to remove it for good
+
+# Note - same goes for Windows .ps1 versions
 ```
 
 ## Configuration
