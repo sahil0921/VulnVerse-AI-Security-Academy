@@ -34,41 +34,50 @@ git clone https://github.com/sahil0921/VulnVerse-AI-Security-Academy.git
 cd VulnVerse-AI-Security-Academy
 ./setup.sh
 
-#if you have low end system or not have that much space you can also build and run lab individually
-cd VulnVerse-AI-Security-Academy
-cd apps
-#there you will find all the labs and folders
-#just run this to run aonly theory and frount end
+## Running individual labs
+ 
+If you have a low-end system or limited disk space, you don't need to build everything at once — build and run only the labs you actually need, one at a time.
+ 
+Same two-command pattern works for everything, including the hub:
+
+docker compose build <name>
+docker compose up -d <name>
+
+ 
+**Example — run only theory + frontend (lab-hub):**
+
 docker compose build lab-hub
 docker compose up -d lab-hub
 
-# and then you if you want to run lab of any section just type the name or the lab extact folder name
-docker compose build url-summarizer
-docker compose up -d url-summarizer
+ 
+**Example — run a specific lab (e.g. RAG lab):**
 
 docker compose build rag-lab
 docker compose up -d rag-lab
-
 ```
+ 
+> Start `lab-hub` first — it's needed regardless of which other labs you run.
 
-Available labs
 
-Category	Lab folders
-Main Web App	nimbletech-web
-Prompt Injection Labs	support-chatbot, email-assistant, url-summarizer, order-bot, jailbreak-lab
-Agent Labs	agent-helpdesk, agent-docprocessor, agent-browser, agent-codereview, agent-memory, supply-chain-lab, idor
-Multi-Agent (A2A)	multiagent
-Recon Target	recon-target
-RAG Pipeline Lab	rag-lab
-LLM Output Attacks	output-xss-reflected, output-xss-stored, output-sqli, output-codeinj, output-funccall, output-exfil, llm-hallucination, llm-abuse, llm-safeguards
-AI Data Attacks Lab	data-attacks-lab
-MCP Attacks	mcp-recon, mcp-poisoning, mcp-apps-ui, mcp-permissions, mcp-chaining
-AI Evasion Attacks Labs	evasion-spam-wb, evasion-spam-bb, evasion-sentiment
-Embedding Attack Labs	embedding-recon, embedding-export, embedding-invert-zeroshot, embedding-invert-beam, embedding-invert-algen, embedding-invert-vec2text, embedding-membership
-AI Infrastructure	cloud-ssrf-lab
-Threat Modeling	threat-modeling
-Capstone Red Team Engagement	capstone-chatbot, capstone-rag-agent
-Hub Dashboard	lab-hub
+### Available labs
+ 
+| Category | Lab folders |
+|---|---|
+| Main Web App | `nimbletech-web` |
+| Prompt Injection Labs | `support-chatbot`, `email-assistant`, `url-summarizer`, `order-bot`, `jailbreak-lab` |
+| Agent Labs | `agent-helpdesk`, `agent-docprocessor`, `agent-browser`, `agent-codereview`, `agent-memory`, `supply-chain-lab`, `idor` |
+| Multi-Agent (A2A) | `multiagent` |
+| Recon Target | `recon-target` |
+| RAG Pipeline Lab | `rag-lab` |
+| LLM Output Attacks | `output-xss-reflected`, `output-xss-stored`, `output-sqli`, `output-codeinj`, `output-funccall`, `output-exfil` |
+| AI Data Attacks Lab | `data-attacks-lab`, `llm-hallucination`, `llm-abuse`, `llm-safeguards` |
+| MCP Attacks | `mcp-recon`, `mcp-poisoning`, `mcp-apps-ui`, `mcp-permissions`, `mcp-chaining` |
+| AI Evasion Attacks Labs | `evasion-spam-wb`, `evasion-spam-bb`, `evasion-sentiment` |
+| Embedding Attack Labs | `embedding-recon`, `embedding-export`, `embedding-invert-zeroshot`, `embedding-invert-beam`, `embedding-invert-algen`, `embedding-invert-vec2text`, `embedding-membership` |
+| AI Infrastructure | `cloud-ssrf-lab` |
+| Threat Modeling | `threat-modeling` |
+| Final Assisment | `capstone-chatbot`, `capstone-rag-agent` |
+| Hub Dashboard | `lab-hub` |
 
 `setup.sh` will interactively ask for your Ollama host / LLM provider / API key / model,
 then build and start everything. Once done, open: **http://localhost:8080**
